@@ -39,9 +39,6 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md md:max-w-2xl w-full space-y-8">
-        <div className="flex justify-end">
-          <LanguagePicker />
-        </div>
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             {t("auth.registerTitle")}
@@ -176,13 +173,16 @@ export default function Register() {
             </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-4">
             <Link
               to="/login"
               className="font-medium text-indigo-600 hover:text-indigo-500"
             >
               {t("auth.alreadyHaveAccount")} {t("auth.signInHere")}
             </Link>
+            <div className="flex justify-center">
+              <LanguagePicker />
+            </div>
           </div>
         </form>
       </div>
