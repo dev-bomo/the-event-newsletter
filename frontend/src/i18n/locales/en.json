@@ -1,0 +1,137 @@
+{
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "romanian": "Romanian",
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "optional": "optional",
+    "continue": "Continue",
+    "back": "Back",
+    "add": "Add",
+    "remove": "Remove",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "preferences": "Preferences",
+    "newsletters": "Newsletters"
+  },
+  "auth": {
+    "login": "Sign in",
+    "register": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "confirmPassword": "Confirm Password",
+    "loginTitle": "The Event Newsletter",
+    "registerTitle": "The Event Newsletter",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "signInHere": "Sign in here",
+    "createAccountHere": "Create account here"
+  },
+  "login": {
+    "title": "Stay Connected to Local Events, Not Social Media",
+    "description": "Get a curated weekly email with local events you'll actually want to attend—without the endless scrolling or needing to stay connected to social media.",
+    "whyExists": "Why this exists:",
+    "why1": "🚫 No social media browsing — avoid the dopamine trap of endless feeds",
+    "why2": "📧 Weekly email only — intentional, not addictive. You get events for the month ahead, so you have time to plan",
+    "why3": "✂️ Curated for you — we filter events so you don't waste time sifting through everything",
+    "failure": "How you'll know it's working:",
+    "failure1": "✅ You see events you genuinely want to attend",
+    "failure2": "✅ The list is short enough that you don't feel like you're \"discovering\" or browsing"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back!",
+    "stats": {
+      "preferences": "Preferences Set",
+      "newsletters": "Newsletters Sent"
+    },
+    "gettingStarted": {
+      "title": "Getting Started",
+      "step1": "Connect your social accounts (YouTube, Spotify, etc.) in Preferences to automatically extract your preferences.",
+      "step2": "Or manually add your interests, genres, and event types in Preferences.",
+      "step3": "Generate your first newsletter to see what events we find for you!"
+    }
+  },
+  "preferences": {
+    "title": "Preferences",
+    "description": "Manage your preferences to get personalized event recommendations.",
+    "socialAccounts": {
+      "title": "1. Connect with Social Accounts",
+      "description": "Connect your accounts to automatically extract preferences from your activity.",
+      "youtube": "YouTube",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "checkingStatus": "Checking status...",
+      "connect": "Connect YouTube",
+      "disconnect": "Disconnect",
+      "syncNow": "Sync Now",
+      "syncing": "Syncing...",
+      "connectionSuccess": "YouTube account connected successfully! Preferences have been updated.",
+      "connectionFailed": "YouTube connection failed",
+      "disconnectConfirm": "Are you sure you want to disconnect your YouTube account?"
+    },
+    "preferencesSection": {
+      "title": "2. Enter or Fine-tune Preferences",
+      "description": "Add your interests, genres, and preferences. If you connected social accounts, these may already be populated.",
+      "city": "City",
+      "cityPlaceholder": "e.g., New York, NY",
+      "interests": "Interests",
+      "interestsPlaceholder": "e.g., jazz music, art galleries",
+      "genres": "Genres",
+      "genresPlaceholder": "e.g., rock, classical, indie",
+      "eventTypes": "Event Types",
+      "eventTypesPlaceholder": "e.g., concerts, theater, festivals",
+      "venues": "Venues",
+      "venuesPlaceholder": "e.g., Blue Note, Lincoln Center",
+      "artists": "Artists",
+      "artistsPlaceholder": "e.g., artist names, bands",
+      "noItems": "No items added yet",
+      "saved": "Preferences saved!"
+    },
+    "eventSources": {
+      "title": "3. Enter Links for Event Postings",
+      "description": "Add URLs to venues or event providers you normally follow. These will be checked for events in your newsletter.",
+      "urlPlaceholder": "https://example.com/events or https://theater.com/calendar",
+      "namePlaceholder": "Name (optional)",
+      "noSources": "No event sources added yet",
+      "added": "Event source added!",
+      "removed": "Event source removed!"
+    }
+  },
+  "onboarding": {
+    "intro": "Let's get you set up. You can connect your YouTube, Spotify, or Facebook accounts to automatically extract your preferences (followed channels, artists, creators). This is quicker and we won't share your data. Alternatively, you can manually add preferences below for more control. You can always edit preferences later, and you'll rarely need to update them—set it once and you're done.",
+    "step1": "Set Preferences",
+    "step2": "Preview Newsletter",
+    "step1Title": "Step 1: Set Your Preferences",
+    "step2Title": "Step 2: Preview Your Newsletter",
+    "step2Description": "Generate a sample newsletter to see what kind of events we'll find for you.",
+    "generatePreview": "Generate Newsletter Preview",
+    "generating": "Generating...",
+    "eventsFound": "Events Found",
+    "completeSetup": "Complete Setup",
+    "continueToPreview": "Continue to Preview →"
+  },
+  "newsletters": {
+    "title": "Newsletters",
+    "generate": "Generate Newsletter",
+    "send": "Send",
+    "resend": "Resend",
+    "sent": "Sent",
+    "subject": "Subject",
+    "events": "Events",
+    "noNewsletters": "No newsletters yet. Generate your first one!",
+    "generated": "Newsletter generated!",
+    "sentSuccess": "Newsletter sent successfully!"
+  }
+}

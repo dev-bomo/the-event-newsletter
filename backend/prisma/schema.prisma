@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // Change to "postgresql" for production
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  city          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profiles      Profile[]
+  preferences   Preference?
+  eventSources  EventSource[]
+  newsletters   Newsletter[]
+  oauthTokens   OAuthToken[]
+}
+
+model Profile {
+  id            String   @id @default(cuid())
+  userId        String
+  platform      String   // facebook, instagram, youtube, spotify, twitter, linkedin
+  profileUrl    String
+  username      String?
+  displayName   String?
+  profilePicture String?
+  isSelected    Boolean  @default(false)
+  lastCrawledAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Preference {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  interests     String   // JSON array stored as string for SQLite
+  genres        String   // JSON array stored as string for SQLite
+  eventTypes    String   // JSON array stored as string for SQLite
+  venues        String   // JSON array stored as string for SQLite
+  artists       String   // JSON array stored as string for SQLite
+  extractedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EventSource {
+  id            String   @id @default(cuid())
+  userId        String
+  url           String
+  name          String?   // Optional name/label for the source
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Event {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  date          DateTime
+  time          String?
+  location      String
+  category      String?
+  sourceUrl     String   @unique
+  imageUrl      String?
+  discoveredAt  DateTime @default(now())
+
+  newsletterEvents NewsletterEvent[]
+
+  @@index([date])
+  @@index([category])
+}
+
+model Newsletter {
+  id            String   @id @default(cuid())
+  userId        String
+  subject       String
+  htmlContent   String
+  sentAt        DateTime?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events        NewsletterEvent[]
+
+  @@index([userId])
+  @@index([sentAt])
+}
+
+model NewsletterEvent {
+  id            String   @id @default(cuid())
+  newsletterId  String
+  eventId       String
+  order         Int      @default(0)
+
+  newsletter    Newsletter @relation(fields: [newsletterId], references: [id], onDelete: Cascade)
+  event         Event      @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([newsletterId, eventId])
+  @@index([newsletterId])
+}
+
+model OAuthToken {
+  id            String   @id @default(cuid())
+  userId        String
+  platform      String   // youtube, spotify, facebook, instagram
+  accessToken   String   // Encrypted
+  refreshToken  String?  // Encrypted, optional
+  expiresAt     DateTime?
+  scope         String?  // OAuth scopes granted
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@index([userId])
+  @@index([platform])
+}
+

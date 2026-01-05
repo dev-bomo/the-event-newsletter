@@ -1,0 +1,137 @@
+{
+  "common": {
+    "language": "Limbă",
+    "english": "Engleză",
+    "romanian": "Română",
+    "signOut": "Deconectare",
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "optional": "opțional",
+    "continue": "Continuă",
+    "back": "Înapoi",
+    "add": "Adaugă",
+    "remove": "Elimină",
+    "delete": "Șterge",
+    "edit": "Editează",
+    "loading": "Se încarcă...",
+    "error": "Eroare",
+    "success": "Succes"
+  },
+  "nav": {
+    "dashboard": "Panou de control",
+    "preferences": "Preferințe",
+    "newsletters": "Buletine"
+  },
+  "auth": {
+    "login": "Conectare",
+    "register": "Creează cont",
+    "email": "Email",
+    "password": "Parolă",
+    "name": "Nume",
+    "confirmPassword": "Confirmă parola",
+    "loginTitle": "Buletinul de Evenimente",
+    "registerTitle": "Buletinul de Evenimente",
+    "loginFailed": "Conectarea a eșuat",
+    "registerFailed": "Înregistrarea a eșuat",
+    "alreadyHaveAccount": "Ai deja un cont?",
+    "dontHaveAccount": "Nu ai cont?",
+    "signInHere": "Conectează-te aici",
+    "createAccountHere": "Creează cont aici"
+  },
+  "login": {
+    "title": "Rămâi Conectat la Evenimente Locale, Nu la Rețele Sociale",
+    "description": "Primește un email săptămânal cu evenimente locale la care chiar vrei să participi—fără scroll-ul nesfârșit sau nevoia de a rămâne conectat la rețelele sociale.",
+    "whyExists": "De ce există acest lucru:",
+    "why1": "🚫 Fără navigare pe rețele sociale — evită capcana dopaminei din feed-urile nesfârșite",
+    "why2": "📧 Doar email săptămânal — intenționat, nu adictiv. Primești evenimente pentru luna următoare, așa că ai timp să planifici",
+    "why3": "✂️ Curat pentru tine — filtrăm evenimentele astfel încât să nu pierzi timp să le parcurgi pe toate",
+    "failure": "Cum vei ști că funcționează:",
+    "failure1": "✅ Vezi evenimente la care chiar vrei să participi",
+    "failure2": "✅ Lista este suficient de scurtă încât să nu simți că \"descoperi\" sau navighezi"
+  },
+  "dashboard": {
+    "title": "Panou de control",
+    "welcome": "Bun venit înapoi!",
+    "stats": {
+      "preferences": "Preferințe Setate",
+      "newsletters": "Buletine Trimise"
+    },
+    "gettingStarted": {
+      "title": "Începe",
+      "step1": "Conectează-ți conturile sociale (YouTube, Spotify, etc.) în Preferințe pentru a extrage automat preferințele tale.",
+      "step2": "Sau adaugă manual interesele, genurile și tipurile de evenimente în Preferințe.",
+      "step3": "Generează primul tău buletin pentru a vedea ce evenimente găsim pentru tine!"
+    }
+  },
+  "preferences": {
+    "title": "Preferințe",
+    "description": "Gestionează preferințele tale pentru a primi recomandări personalizate de evenimente.",
+    "socialAccounts": {
+      "title": "1. Conectează-te cu Conturi Sociale",
+      "description": "Conectează-ți conturile pentru a extrage automat preferințe din activitatea ta.",
+      "youtube": "YouTube",
+      "connected": "Conectat",
+      "notConnected": "Neconectat",
+      "checkingStatus": "Se verifică statusul...",
+      "connect": "Conectează YouTube",
+      "disconnect": "Deconectează",
+      "syncNow": "Sincronizează Acum",
+      "syncing": "Se sincronizează...",
+      "connectionSuccess": "Contul YouTube a fost conectat cu succes! Preferințele au fost actualizate.",
+      "connectionFailed": "Conexiunea YouTube a eșuat",
+      "disconnectConfirm": "Ești sigur că vrei să deconectezi contul tău YouTube?"
+    },
+    "preferencesSection": {
+      "title": "2. Introdu sau Ajustează Preferințe",
+      "description": "Adaugă interesele, genurile și preferințele tale. Dacă ai conectat conturi sociale, acestea pot fi deja populate.",
+      "city": "Oraș",
+      "cityPlaceholder": "ex., București",
+      "interests": "Interese",
+      "interestsPlaceholder": "ex., muzică jazz, galerii de artă",
+      "genres": "Genuri",
+      "genresPlaceholder": "ex., rock, clasic, indie",
+      "eventTypes": "Tipuri de Evenimente",
+      "eventTypesPlaceholder": "ex., concerte, teatru, festivaluri",
+      "venues": "Locuri",
+      "venuesPlaceholder": "ex., Sala Palatului, Teatrul Național",
+      "artists": "Artiști",
+      "artistsPlaceholder": "ex., nume de artiști, trupe",
+      "noItems": "Nu au fost adăugate elemente încă",
+      "saved": "Preferințele au fost salvate!"
+    },
+    "eventSources": {
+      "title": "3. Introdu Link-uri pentru Anunțuri de Evenimente",
+      "description": "Adaugă URL-uri către locuri sau furnizori de evenimente pe care îi urmărești de obicei. Acestea vor fi verificate pentru evenimente în buletinul tău.",
+      "urlPlaceholder": "https://exemplu.com/evenimente sau https://teatru.com/calendar",
+      "namePlaceholder": "Nume (opțional)",
+      "noSources": "Nu au fost adăugate surse de evenimente încă",
+      "added": "Sursa de evenimente a fost adăugată!",
+      "removed": "Sursa de evenimente a fost eliminată!"
+    }
+  },
+  "onboarding": {
+    "intro": "Hai să te configurăm. Poți conecta conturile tale YouTube, Spotify sau Facebook pentru a extrage automat preferințele tale (canale urmărite, artiști, creatori). Acest lucru este mai rapid și nu vom partaja datele tale. Alternativ, poți adăuga manual preferințele mai jos pentru mai mult control. Poți edita preferințele mai târziu oricând și vei avea nevoie foarte rar să le actualizezi—configurează-le o dată și gata.",
+    "step1": "Setează Preferințe",
+    "step2": "Previzualizează Buletinul",
+    "step1Title": "Pasul 1: Setează Preferințele Tale",
+    "step2Title": "Pasul 2: Previzualizează Buletinul Tău",
+    "step2Description": "Generează un buletin de probă pentru a vedea ce fel de evenimente vom găsi pentru tine.",
+    "generatePreview": "Generează Previzualizare Buletin",
+    "generating": "Se generează...",
+    "eventsFound": "Evenimente Găsite",
+    "completeSetup": "Finalizează Configurarea",
+    "continueToPreview": "Continuă la Previzualizare →"
+  },
+  "newsletters": {
+    "title": "Buletine",
+    "generate": "Generează Buletin",
+    "send": "Trimite",
+    "resend": "Retrimite",
+    "sent": "Trimis",
+    "subject": "Subiect",
+    "events": "Evenimente",
+    "noNewsletters": "Niciun buletin încă. Generează primul!",
+    "generated": "Buletinul a fost generat!",
+    "sentSuccess": "Buletinul a fost trimis cu succes!"
+  }
+}
