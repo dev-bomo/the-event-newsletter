@@ -11,13 +11,16 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  name          String?
-  city          String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  name              String?
+  city              String?
+  profile           String?   // AI-generated profile for event discovery
+  resetCode         String?
+  resetCodeExpiresAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   profiles      Profile[]
   preferences   Preference?
@@ -83,12 +86,14 @@ model Event {
   category      String?
   sourceUrl     String   @unique
   imageUrl      String?
+  score         Int?     // Relevance score (0-100) indicating how well the event matches user preferences
   discoveredAt  DateTime @default(now())
 
   newsletterEvents NewsletterEvent[]
 
   @@index([date])
   @@index([category])
+  @@index([score])
 }
 
 model Newsletter {

@@ -5,10 +5,9 @@ import { discoverEventsFromSource } from "../services/eventSources.js";
 export async function discoverEventsForUser(userId: string) {
   console.log("discoverEventsForUser called for userId:", userId);
 
-  // Get user and preferences
+  // Get user with profile
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: { preferences: true },
   });
 
   if (!user) {
@@ -19,40 +18,17 @@ export async function discoverEventsForUser(userId: string) {
     throw new Error("User city not set. Please set your city in preferences.");
   }
 
-  if (!user.preferences) {
+  if (!user.profile) {
     throw new Error(
-      "User preferences not set. Please crawl your profiles first to extract preferences."
+      "User profile not generated. Please update your preferences first to generate a profile."
     );
   }
 
-  // Parse preferences (they're stored as JSON strings in SQLite)
-  const parseArray = (str: string): string[] => {
-    try {
-      return JSON.parse(str || "[]");
-    } catch (error) {
-      console.error("Error parsing preference array:", error);
-      return [];
-    }
-  };
+  console.log("Using user profile for event discovery");
 
-  const preferences = {
-    interests: parseArray(user.preferences.interests),
-    genres: parseArray(user.preferences.genres),
-    eventTypes: parseArray(user.preferences.eventTypes),
-    venues: parseArray(user.preferences.venues),
-    artists: parseArray(user.preferences.artists),
-  };
-
-  console.log("User preferences:", {
-    city: user.city,
-    interestsCount: preferences.interests.length,
-    genresCount: preferences.genres.length,
-    eventTypesCount: preferences.eventTypes.length,
-  });
-
-  // Discover events using AI (general search)
-  console.log("Calling discoverEvents...");
-  const discoveredEvents = await discoverEvents(user.city, preferences);
+  // Discover events using AI with user profile
+  console.log("Calling discoverEvents with user profile...");
+  const discoveredEvents = await discoverEvents(user.city, user.profile);
   const generalSearchCount = discoveredEvents.length;
   console.log("Discovered", generalSearchCount, "events from general search");
 
@@ -68,7 +44,8 @@ export async function discoverEventsForUser(userId: string) {
       try {
         const sourceEvents = await discoverEventsFromSource(
           source.url,
-          source.name || undefined
+          source.name || undefined,
+          user.profile || undefined
         );
         console.log(
           `Discovered ${sourceEvents.length} events from ${source.url}`
@@ -105,8 +82,35 @@ export async function discoverEventsForUser(userId: string) {
     uniqueEvents.length
   );
 
+  // Ensure all events have scores (default to 50 if missing)
+  const eventsWithScores = uniqueEvents.map((event) => ({
+    ...event,
+    score: event.score !== undefined ? event.score : 50,
+  }));
+
+  // Sort events by score (highest first) and limit to 20
+  const sortedEvents = eventsWithScores
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 20);
+
+  // Ensure we have at least 12 events if possible, but don't exceed 20
+  const finalEvents =
+    sortedEvents.length >= 12 ? sortedEvents : eventsWithScores.slice(0, 12);
+
+  console.log(
+    `Selected ${finalEvents.length} events (sorted by score, range: ${
+      finalEvents.length >= 1
+        ? Math.min(...finalEvents.map((e) => e.score))
+        : "N/A"
+    }-${
+      finalEvents.length >= 1
+        ? Math.max(...finalEvents.map((e) => e.score))
+        : "N/A"
+    })`
+  );
+
   const events = await Promise.all(
-    uniqueEvents.map((event) =>
+    finalEvents.map((event) =>
       prisma.event.upsert({
         where: { sourceUrl: event.sourceUrl },
         create: {
@@ -118,6 +122,7 @@ export async function discoverEventsForUser(userId: string) {
           category: event.category,
           sourceUrl: event.sourceUrl,
           imageUrl: event.imageUrl,
+          score: Math.round(event.score), // Round to integer
         },
         update: {
           title: event.title,
@@ -127,6 +132,7 @@ export async function discoverEventsForUser(userId: string) {
           location: event.location,
           category: event.category,
           imageUrl: event.imageUrl,
+          score: Math.round(event.score), // Update score as well
         },
       })
     )

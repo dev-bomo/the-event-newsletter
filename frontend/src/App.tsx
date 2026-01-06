@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import Preferences from "./pages/Preferences";
 import Newsletters from "./pages/Newsletters";
@@ -21,6 +23,14 @@ function App() {
         <Route
           path="/register"
           element={token ? <Navigate to="/dashboard" /> : <Register />}
+        />
+        <Route
+          path="/forgot-password"
+          element={token ? <Navigate to="/dashboard" /> : <ForgotPassword />}
+        />
+        <Route
+          path="/reset-password"
+          element={token ? <Navigate to="/dashboard" /> : <ResetPassword />}
         />
         <Route
           path="/dashboard"

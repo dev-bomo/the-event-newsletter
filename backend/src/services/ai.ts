@@ -29,6 +29,107 @@ export interface DiscoveredEvent {
   category?: string;
   sourceUrl: string;
   imageUrl?: string;
+  score: number; // Relevance score (0-100) indicating how well the event matches user preferences
+}
+
+/**
+ * Generate a user profile for event discovery based on their preferences
+ */
+export async function generateUserProfile(data: {
+  city: string;
+  interests: string[];
+  genres: string[];
+  eventTypes: string[];
+  venues: string[];
+  artists: string[];
+  eventSources: Array<{ url: string; name?: string }>;
+}): Promise<string> {
+  if (
+    !PERPLEXITY_API_KEY ||
+    PERPLEXITY_API_KEY === "your-perplexity-api-key-here" ||
+    PERPLEXITY_API_KEY.trim() === ""
+  ) {
+    throw new Error(
+      "PERPLEXITY_API_KEY not configured. Please add your Perplexity API key to the .env file."
+    );
+  }
+
+  // Build the prompt
+  const interestsText =
+    data.interests.length > 0 ? data.interests.join(", ") : "none specified";
+  const genresAndEventTypes = [...data.genres, ...data.eventTypes];
+  const genresText =
+    genresAndEventTypes.length > 0
+      ? genresAndEventTypes.join(", ")
+      : "none specified";
+  const artistsText =
+    data.artists.length > 0 ? data.artists.join(", ") : "none specified";
+  const venuesText =
+    data.venues.length > 0 ? data.venues.join(", ") : "none specified";
+  const eventSourcesText =
+    data.eventSources.length > 0
+      ? data.eventSources.map((s) => s.url).join(", ")
+      : "none specified";
+
+  const prompt = `I live in ${data.city}.
+I like ${interestsText}. Specifically ${genresText}.
+Here are some artists that I like:
+${artistsText}
+Here are some venues from ${data.city} where I like to go:
+${venuesText}
+And here are some direct links to event pages that I like to browse to get my events:
+${eventSourcesText}`;
+
+  const systemPrompt = `You are an assistant that creates detailed user profiles for event discovery. Based on the user's preferences, create a comprehensive profile that describes their interests, preferences, and event discovery patterns. The profile should be written in natural language and be suitable for use as a prompt to find relevant events. Make it detailed and specific, capturing the user's taste and preferences.`;
+
+  try {
+    const response = await axios.post(
+      PERPLEXITY_API_URL,
+      {
+        model: "sonar",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const content = response.data.choices[0].message.content;
+
+    // Extract text from markdown code blocks if present
+    let profileText = content.trim();
+    if (profileText.startsWith("```")) {
+      const lines = profileText.split("\n");
+      lines.shift(); // Remove first line (```)
+      lines.pop(); // Remove last line (```)
+      profileText = lines.join("\n").trim();
+    }
+
+    return profileText;
+  } catch (error: any) {
+    console.error(
+      "Error generating user profile:",
+      error.response?.data || error.message
+    );
+    throw new Error(
+      `Failed to generate user profile: ${
+        error.response?.data?.message || error.message
+      }`
+    );
+  }
 }
 
 /**
@@ -189,6 +290,7 @@ Return a JSON object with:
 
 If information is not available, return empty arrays.`;
 
+  let content: string | undefined;
   try {
     const response = await axios.post(
       PERPLEXITY_API_URL,
@@ -215,7 +317,11 @@ If information is not available, return empty arrays.`;
       }
     );
 
-    const content = response.data.choices[0].message.content;
+    content = response.data.choices[0].message.content;
+    if (!content) {
+      throw new Error("Empty response from Perplexity API");
+    }
+
     console.log(
       "Preference extraction response content:",
       content.substring(0, 500)
@@ -261,27 +367,22 @@ If information is not available, return empty arrays.`;
 }
 
 /**
- * Discover local events based on user preferences
+ * Discover local events based on user profile
  */
 export async function discoverEvents(
   city: string,
-  preferences: ExtractedPreferences
+  userProfile: string
 ): Promise<DiscoveredEvent[]> {
   if (!PERPLEXITY_API_KEY) {
     throw new Error("PERPLEXITY_API_KEY not configured");
   }
 
-  const interests = preferences.interests.join(", ");
-  const genres = preferences.genres.join(", ");
-  const eventTypes = preferences.eventTypes.join(", ");
-  const artists = preferences.artists.slice(0, 10).join(", "); // Limit artists
-
   const query = `Find upcoming local events in ${city} for the next 30 days (one month in advance).
 
-User interests: ${interests || "general entertainment"}
-Preferred genres: ${genres || "various"}
-Event types: ${eventTypes || "concerts, theater, community gatherings"}
-Followed artists: ${artists || "none"}
+User profile:
+${userProfile}
+
+Based on this user profile, find events that match their interests, preferences, and taste. Return between 12 and 20 events that are most relevant to this user.
 
 Please return a JSON object with an "events" array. Each event should have:
 - title
@@ -292,13 +393,15 @@ Please return a JSON object with an "events" array. Each event should have:
 - category (optional)
 - sourceUrl (link to event page)
 - imageUrl (optional, link to event image)
+- score (number from 0-100 indicating how well this event matches the user's profile, where 100 is a perfect match)
 
-Focus on: concerts, theater, community gatherings, art shows, local festivals, and similar local events.
+Focus on: concerts, theater, community gatherings, art shows, local festivals, and similar local events that align with the user's profile.
 Include events happening from today up to 30 days in the future.
 Exclude: corporate events, private parties, online-only events, events more than 30 days away.
 
-Return up to 20 events (prioritize events happening in the next 2 weeks, but include events up to 30 days out).`;
+Return between 12 and 20 events, prioritized by relevance to the user's profile. Events with higher scores should be more closely aligned with the user's interests, preferred genres, artists, and venues.`;
 
+  let content: string | undefined;
   try {
     const response = await axios.post(
       PERPLEXITY_API_URL,
@@ -325,7 +428,11 @@ Return up to 20 events (prioritize events happening in the next 2 weeks, but inc
       }
     );
 
-    const content = response.data.choices[0].message.content;
+    content = response.data.choices[0].message.content;
+    if (!content) {
+      throw new Error("Empty response from Perplexity API");
+    }
+
     console.log("Event discovery response content:", content.substring(0, 500)); // Log first 500 chars
 
     // Try to extract JSON from the response (might be wrapped in markdown code blocks)

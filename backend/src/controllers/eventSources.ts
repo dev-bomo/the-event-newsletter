@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import { updateUserProfile } from "./preferences.js";
 
 export async function getUserEventSources(userId: string) {
   return prisma.eventSource.findMany({
@@ -24,13 +25,18 @@ export async function addEventSource(
     throw new Error("This event source is already added");
   }
 
-  return prisma.eventSource.create({
+  const eventSource = await prisma.eventSource.create({
     data: {
       userId,
       url,
       name: name || null,
     },
   });
+
+  // Regenerate profile when event source is added
+  await updateUserProfile(userId);
+
+  return eventSource;
 }
 
 export async function deleteEventSource(userId: string, sourceId: string) {
@@ -49,4 +55,7 @@ export async function deleteEventSource(userId: string, sourceId: string) {
   await prisma.eventSource.delete({
     where: { id: sourceId },
   });
+
+  // Regenerate profile when event source is deleted
+  await updateUserProfile(userId);
 }

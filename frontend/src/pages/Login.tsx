@@ -119,12 +119,23 @@ export default function Login() {
           </div>
 
           <div className="text-center space-y-4">
-            <Link
-              to="/register"
-              className="font-medium text-indigo-600 hover:text-indigo-500"
-            >
-              {t("auth.dontHaveAccount")} {t("auth.createAccountHere")}
-            </Link>
+            <div className="space-y-2">
+              <Link
+                to="/register"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                {t("auth.dontHaveAccount")} {t("auth.createAccountHere")}
+              </Link>
+              <div>
+                <Link
+                  to="/forgot-password"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  {t("auth.forgotPasswordQuestion")}{" "}
+                  {t("auth.resetPasswordHere")}
+                </Link>
+              </div>
+            </div>
             <div className="flex justify-center">
               <LanguagePicker />
             </div>
