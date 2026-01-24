@@ -37,27 +37,10 @@ export default function Preferences() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [youtubeConnected, setYoutubeConnected] = useState(false);
-  const [checkingYoutube, setCheckingYoutube] = useState(true);
-  const [syncingYoutube, setSyncingYoutube] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     loadPreferences();
-    checkYouTubeStatus();
-
-    // Check for OAuth callback parameters
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("youtube_connected") === "true") {
-      setSuccess(
-        "YouTube account connected successfully! Preferences have been updated."
-      );
-      // Clean up URL
-      window.history.replaceState({}, "", "/preferences");
-    }
-    if (params.get("error")) {
-      setError(`YouTube connection failed: ${params.get("error")}`);
-      window.history.replaceState({}, "", "/preferences");
-    }
   }, []);
 
   const loadPreferences = async () => {
@@ -83,9 +66,17 @@ export default function Preferences() {
     const value = newItem[category]?.trim();
     if (!value) return;
 
+    // Split by comma and process each item
+    const items = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+    if (items.length === 0) return;
+
     setPreferences((prev) => ({
       ...prev,
-      [category]: [...prev[category], value],
+      [category]: [...prev[category], ...items],
     }));
     setNewItem({ ...newItem, [category]: "" });
   };
@@ -112,6 +103,30 @@ export default function Preferences() {
       setError(err.response?.data?.error || "Failed to save preferences");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleReset = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to reset all preferences? This will clear all your interests, genres, event types, venues, and artists. This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError("");
+    setResetting(true);
+    setSuccess("");
+
+    try {
+      const response = await api.delete("/preferences/reset");
+      setPreferences(response.data);
+      setSuccess("All preferences have been reset.");
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to reset preferences");
+    } finally {
+      setResetting(false);
     }
   };
 
@@ -147,65 +162,6 @@ export default function Preferences() {
     }
   };
 
-  const checkYouTubeStatus = async () => {
-    try {
-      const response = await api.get("/auth/youtube/status");
-      setYoutubeConnected(response.data.connected);
-    } catch (error) {
-      console.error("Error checking YouTube status:", error);
-    } finally {
-      setCheckingYoutube(false);
-    }
-  };
-
-  const handleConnectYouTube = async () => {
-    setError("");
-    try {
-      const response = await api.get("/auth/youtube/connect");
-      // Redirect to YouTube OAuth
-      window.location.href = response.data.authUrl;
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to initiate YouTube connection"
-      );
-    }
-  };
-
-  const handleDisconnectYouTube = async () => {
-    setError("");
-    if (!confirm("Are you sure you want to disconnect your YouTube account?")) {
-      return;
-    }
-    try {
-      await api.delete("/auth/youtube/disconnect");
-      setYoutubeConnected(false);
-      setSuccess("YouTube account disconnected successfully");
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to disconnect YouTube account"
-      );
-    }
-  };
-
-  const handleSyncYouTube = async () => {
-    setError("");
-    setSyncingYoutube(true);
-    try {
-      const response = await api.post("/auth/youtube/sync");
-      setSuccess(
-        `YouTube preferences synced! Found ${response.data.youtubeData.channelsCount} channels and ${response.data.youtubeData.playlistsCount} playlists.`
-      );
-      // Reload preferences to show updated data
-      await loadPreferences();
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to sync YouTube preferences"
-      );
-    } finally {
-      setSyncingYoutube(false);
-    }
-  };
-
   const categories: Array<{
     key: keyof Preferences;
     label: string;
@@ -214,22 +170,26 @@ export default function Preferences() {
     {
       key: "interests",
       label: "Interests",
-      placeholder: "e.g., jazz music, art galleries",
+      placeholder:
+        "e.g., music, movies, theater, philosophy, programming, art, sports, food, literature, science",
     },
     {
       key: "genres",
       label: "Genres",
-      placeholder: "e.g., rock, classical, indie",
+      placeholder:
+        "e.g., rock, drama, comedy, existentialism, web development, contemporary, basketball, fine dining, poetry, physics",
     },
     {
       key: "eventTypes",
       label: "Event Types",
-      placeholder: "e.g., concerts, theater, festivals",
+      placeholder:
+        "e.g., concerts, film screenings, plays, lectures, hackathons, exhibitions, games, food festivals, book readings, talks",
     },
     {
       key: "venues",
       label: "Venues",
-      placeholder: "e.g., Blue Note, Lincoln Center",
+      placeholder:
+        "e.g., Blue Note, Lincoln Center, The Met, Madison Square Garden, local theaters, art galleries, concert halls",
     },
     {
       key: "artists",
@@ -268,71 +228,14 @@ export default function Preferences() {
           </div>
         )}
 
-        {/* Section 1: Connect with Social Accounts */}
+        {/* Section 1: Enter or Fine-tune Preferences */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            1. Connect with Social Accounts
+            1. Enter Your Preferences
           </h2>
           <p className="text-sm text-gray-600 mb-4">
-            Connect your accounts to automatically extract preferences from your
-            activity.
-          </p>
-
-          <div className="border rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-red-600 rounded flex items-center justify-center text-white font-bold mr-3">
-                  YT
-                </div>
-                <div>
-                  <div className="font-medium text-gray-900">YouTube</div>
-                  <div className="text-sm text-gray-500">
-                    {checkingYoutube
-                      ? "Checking status..."
-                      : youtubeConnected
-                      ? "Connected"
-                      : "Not connected"}
-                  </div>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {youtubeConnected ? (
-                  <>
-                    <button
-                      onClick={handleSyncYouTube}
-                      disabled={syncingYoutube}
-                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      {syncingYoutube ? "Syncing..." : "Sync Now"}
-                    </button>
-                    <button
-                      onClick={handleDisconnectYouTube}
-                      className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50"
-                    >
-                      Disconnect
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleConnectYouTube}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-                  >
-                    Connect YouTube
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Enter or Fine-tune Preferences */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">
-            2. Enter or Fine-tune Preferences
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            Add your interests, genres, and preferences. If you connected social
-            accounts, these may already be populated.
+            Add your interests, genres, venues, artists, and other preferences
+            to get personalized event recommendations.
           </p>
 
           <div className="mb-6">
@@ -403,10 +306,10 @@ export default function Preferences() {
           ))}
         </div>
 
-        {/* Section 3: Enter Links for Event Postings */}
+        {/* Section 2: Enter Links for Event Postings */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">
-            3. Enter Links for Event Postings
+            2. Enter Links for Event Postings
           </h2>
           <p className="text-sm text-gray-600 mb-4">
             Add URLs to venues or event providers you normally follow. These
@@ -476,7 +379,14 @@ export default function Preferences() {
           )}
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex justify-between">
+          <button
+            onClick={handleReset}
+            disabled={resetting}
+            className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+          >
+            {resetting ? "Resetting..." : "Reset All Preferences"}
+          </button>
           <button
             onClick={handleSave}
             disabled={saving}

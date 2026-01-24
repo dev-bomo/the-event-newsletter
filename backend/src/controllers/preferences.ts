@@ -46,6 +46,17 @@ export async function updateUserProfile(userId: string) {
       artists: parseArray(user.preferences.artists),
     };
 
+    // Log preferences being used for profile generation
+    console.log("Generating profile with preferences:", {
+      city: user.city,
+      interests: preferences.interests,
+      genres: preferences.genres,
+      eventTypes: preferences.eventTypes,
+      venues: preferences.venues,
+      artists: preferences.artists.length,
+      eventSources: user.eventSources.length,
+    });
+
     const eventSources = user.eventSources.map((source) => ({
       url: source.url,
       name: source.name || undefined,
@@ -109,6 +120,9 @@ export async function updateUserPreferences(
     where: { userId },
   });
 
+  // Limit artists to 100 total
+  const limitedArtists = data.artists ? data.artists.slice(0, 100) : undefined;
+
   let result;
   if (existing) {
     const updated = await prisma.preference.update({
@@ -131,8 +145,8 @@ export async function updateUserPreferences(
             ? stringifyArray(data.venues)
             : existing.venues,
         artists:
-          data.artists !== undefined
-            ? stringifyArray(data.artists)
+          limitedArtists !== undefined
+            ? stringifyArray(limitedArtists)
             : existing.artists,
       },
     });
@@ -152,7 +166,7 @@ export async function updateUserPreferences(
         genres: stringifyArray(data.genres ?? []),
         eventTypes: stringifyArray(data.eventTypes ?? []),
         venues: stringifyArray(data.venues ?? []),
-        artists: stringifyArray(data.artists ?? []),
+        artists: stringifyArray(limitedArtists ?? []),
       },
     });
 
@@ -179,4 +193,53 @@ export async function updateUserCity(userId: string, city: string) {
 
   // Regenerate profile when city changes
   await updateUserProfile(userId);
+}
+
+/**
+ * Reset all preferences to empty arrays
+ */
+export async function resetPreferences(userId: string) {
+  const existing = await prisma.preference.findUnique({
+    where: { userId },
+  });
+
+  if (existing) {
+    // Update to empty arrays
+    await prisma.preference.update({
+      where: { userId },
+      data: {
+        interests: stringifyArray([]),
+        genres: stringifyArray([]),
+        eventTypes: stringifyArray([]),
+        venues: stringifyArray([]),
+        artists: stringifyArray([]),
+      },
+    });
+  } else {
+    // Create empty preferences if they don't exist
+    await prisma.preference.create({
+      data: {
+        userId,
+        interests: stringifyArray([]),
+        genres: stringifyArray([]),
+        eventTypes: stringifyArray([]),
+        venues: stringifyArray([]),
+        artists: stringifyArray([]),
+      },
+    });
+  }
+
+  // Clear user profile since preferences are empty
+  await prisma.user.update({
+    where: { id: userId },
+    data: { profile: null },
+  });
+
+  return {
+    interests: [],
+    genres: [],
+    eventTypes: [],
+    venues: [],
+    artists: [],
+  };
 }

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
 import LanguagePicker from "../components/LanguagePicker";
+import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -34,9 +35,13 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md md:max-w-2xl w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {t("auth.loginTitle")}
-          </h2>
+          <div className="flex justify-center mb-6">
+            <img
+              src={logo}
+              alt="The Newsletter"
+              className="h-16 w-auto"
+            />
+          </div>
           <div className="mt-6 bg-indigo-50 border border-indigo-200 rounded-lg p-6 text-sm text-gray-700">
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">

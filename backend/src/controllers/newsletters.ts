@@ -21,7 +21,16 @@ export async function getUserNewsletters(userId: string) {
 
 export async function generateNewsletter(userId: string) {
   // Discover events for user
-  const events = await discoverEventsForUser(userId);
+  const { events, rawResponses } = await discoverEventsForUser(userId);
+
+  console.log(
+    `generateNewsletter: received ${events.length} events from discoverEventsForUser`
+  );
+  events.forEach((e, i) => {
+    console.log(
+      `  ${i + 1}. "${e.title}" (id: ${e.id}, sourceUrl: ${e.sourceUrl})`
+    );
+  });
 
   if (events.length === 0) {
     throw new Error("No events found for user");
@@ -41,18 +50,30 @@ export async function generateNewsletter(userId: string) {
 
   // Deduplicate events by eventId within this newsletter to avoid unique constraint violations
   // But allow the same event to appear in different newsletters (events can be duplicated across weeks)
-  const uniqueEvents = events.slice(0, 20).reduce((acc, event, index) => {
+  const eventsToProcess = events.slice(0, 20);
+  console.log(
+    `Processing ${eventsToProcess.length} events for newsletter (from ${events.length} total)`
+  );
+
+  const uniqueEvents = eventsToProcess.reduce((acc, event, index) => {
     // Check if we've already added this event to THIS newsletter
-    if (!acc.find((e: any) => e.eventId === event.id)) {
+    const existing = acc.find((e: any) => e.eventId === event.id);
+    if (!existing) {
       acc.push({
         eventId: event.id,
         order: index,
       });
+    } else {
+      console.log(
+        `Skipping duplicate eventId in newsletter: "${event.title}" (id: ${event.id}, already at order ${existing.order})`
+      );
     }
     return acc;
   }, [] as Array<{ eventId: string; order: number }>);
 
-  console.log("Creating newsletter with", uniqueEvents.length, "unique events");
+  console.log(
+    `Creating newsletter with ${uniqueEvents.length} unique events (from ${eventsToProcess.length} processed)`
+  );
 
   // Create newsletter
   const newsletter = await prisma.newsletter.create({
@@ -76,7 +97,7 @@ export async function generateNewsletter(userId: string) {
     },
   });
 
-  return newsletter;
+  return { newsletter, rawResponses };
 }
 
 export async function sendNewsletter(userId: string, newsletterId: string) {
@@ -137,10 +158,32 @@ export async function sendNewsletter(userId: string, newsletterId: string) {
 function generateNewsletterHTML(userName: string, events: any[]): string {
   const eventsHTML = events
     .slice(0, 20)
-    .map(
-      (event, index) => `
+    .map((event, index) => {
+      const score =
+        event.score !== null && event.score !== undefined ? event.score : null;
+      const scoreColor =
+        score !== null
+          ? score >= 80
+            ? "#28a745"
+            : score >= 60
+            ? "#ffc107"
+            : "#dc3545"
+          : "#6c757d";
+
+      return `
     <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-      <h3 style="margin-top: 0; color: #333;">${index + 1}. ${event.title}</h3>
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+        <h3 style="margin-top: 0; color: #333; flex: 1;">${index + 1}. ${
+        event.title
+      }</h3>
+        ${
+          score !== null
+            ? `<div style="background-color: ${scoreColor}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 14px; white-space: nowrap; margin-left: 10px;">
+                 ${score}/100
+               </div>`
+            : ""
+        }
+      </div>
       ${
         event.description
           ? `<p style="color: #666;">${event.description}</p>`
@@ -160,13 +203,27 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
             ? `<p style="margin: 5px 0; color: #555;"><strong>Category:</strong> ${event.category}</p>`
             : ""
         }
+        ${
+          score !== null
+            ? `<p style="margin: 5px 0; color: #555; font-size: 12px;">
+                 <strong>Relevance Score:</strong> ${score}/100 
+                 ${
+                   score >= 80
+                     ? "(Excellent match)"
+                     : score >= 60
+                     ? "(Good match)"
+                     : "(Fair match)"
+                 }
+               </p>`
+            : ""
+        }
         <a href="${
           event.sourceUrl
         }" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
       </div>
     </div>
-  `
-    )
+  `;
+    })
     .join("");
 
   return `

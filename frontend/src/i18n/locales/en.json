@@ -77,32 +77,17 @@
     },
     "gettingStarted": {
       "title": "Getting Started",
-      "step1": "Connect your social accounts (YouTube, Spotify, etc.) in Preferences to automatically extract your preferences.",
-      "step2": "Or manually add your interests, genres, and event types in Preferences.",
+      "step1": "Set your preferences (interests, genres, venues, artists) in Preferences.",
+      "step2": "Set your city location.",
       "step3": "Generate your first newsletter to see what events we find for you!"
     }
   },
   "preferences": {
     "title": "Preferences",
     "description": "Manage your preferences to get personalized event recommendations.",
-    "socialAccounts": {
-      "title": "1. Connect with Social Accounts",
-      "description": "Connect your accounts to automatically extract preferences from your activity.",
-      "youtube": "YouTube",
-      "connected": "Connected",
-      "notConnected": "Not connected",
-      "checkingStatus": "Checking status...",
-      "connect": "Connect YouTube",
-      "disconnect": "Disconnect",
-      "syncNow": "Sync Now",
-      "syncing": "Syncing...",
-      "connectionSuccess": "YouTube account connected successfully! Preferences have been updated.",
-      "connectionFailed": "YouTube connection failed",
-      "disconnectConfirm": "Are you sure you want to disconnect your YouTube account?"
-    },
     "preferencesSection": {
-      "title": "2. Enter or Fine-tune Preferences",
-      "description": "Add your interests, genres, and preferences. If you connected social accounts, these may already be populated.",
+      "title": "1. Enter Your Preferences",
+      "description": "Add your interests, genres, venues, artists, and other preferences to get personalized event recommendations.",
       "city": "City",
       "cityPlaceholder": "e.g., New York, NY",
       "interests": "Interests",
@@ -119,7 +104,7 @@
       "saved": "Preferences saved!"
     },
     "eventSources": {
-      "title": "3. Enter Links for Event Postings",
+      "title": "2. Enter Links for Event Postings",
       "description": "Add URLs to venues or event providers you normally follow. These will be checked for events in your newsletter.",
       "urlPlaceholder": "https://example.com/events or https://theater.com/calendar",
       "namePlaceholder": "Name (optional)",
@@ -129,7 +114,7 @@
     }
   },
   "onboarding": {
-    "intro": "Let's get you set up. You can connect your YouTube, Spotify, or Facebook accounts to automatically extract your preferences (followed channels, artists, creators). This is quicker and we won't share your data. Alternatively, you can manually add preferences below for more control. You can always edit preferences later, and you'll rarely need to update them—set it once and you're done.",
+    "intro": "Let's get you set up. Add your interests, genres, venues, artists, and other preferences below. You can always edit preferences later, and you'll rarely need to update them—set it once and you're done.",
     "step1": "Set Preferences",
     "step2": "Preview Newsletter",
     "step1Title": "Step 1: Set Your Preferences",

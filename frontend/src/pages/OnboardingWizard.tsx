@@ -56,35 +56,17 @@ export default function OnboardingWizard() {
   const [newEventSourceName, setNewEventSourceName] = useState("");
   const [addingSource, setAddingSource] = useState(false);
 
-  // YouTube connection
-  const [youtubeConnected, setYoutubeConnected] = useState(false);
-  const [checkingYoutube, setCheckingYoutube] = useState(true);
-
   // Step 2: Newsletter Preview
   const [newsletter, setNewsletter] = useState<Newsletter | null>(null);
   const [generating, setGenerating] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     loadPreferences();
-    checkYouTubeStatus();
     loadEventSources();
-
-    // Check for OAuth callback parameters
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("youtube_connected") === "true") {
-      setSuccess(
-        "YouTube account connected successfully! Preferences have been updated."
-      );
-      window.history.replaceState({}, "", "/onboarding");
-      loadPreferences(); // Reload to get updated preferences
-    }
-    if (params.get("error")) {
-      setError(`YouTube connection failed: ${params.get("error")}`);
-      window.history.replaceState({}, "", "/onboarding");
-    }
   }, []);
 
   // Step 1: Load and manage preferences
@@ -110,31 +92,6 @@ export default function OnboardingWizard() {
       setEventSources(response.data);
     } catch (error) {
       console.error("Error loading event sources:", error);
-    }
-  };
-
-  const checkYouTubeStatus = async () => {
-    try {
-      const response = await api.get("/auth/youtube/status");
-      setYoutubeConnected(response.data.connected);
-    } catch (error) {
-      console.error("Error checking YouTube status:", error);
-    } finally {
-      setCheckingYoutube(false);
-    }
-  };
-
-  const handleConnectYouTube = async () => {
-    setError("");
-    try {
-      const response = await api.get("/auth/youtube/connect", {
-        params: { returnUrl: "/onboarding" },
-      });
-      window.location.href = response.data.authUrl;
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to initiate YouTube connection"
-      );
     }
   };
 
@@ -174,9 +131,17 @@ export default function OnboardingWizard() {
     const value = newItem[category]?.trim();
     if (!value) return;
 
+    // Split by comma and process each item
+    const items = value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+    if (items.length === 0) return;
+
     setPreferences((prev) => ({
       ...prev,
-      [category]: [...prev[category], value],
+      [category]: [...prev[category], ...items],
     }));
     setNewItem({ ...newItem, [category]: "" });
   };
@@ -216,6 +181,30 @@ export default function OnboardingWizard() {
     }
   };
 
+  const handleReset = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to reset all preferences? This will clear all your interests, genres, event types, venues, and artists. This action cannot be undone."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setError("");
+    setResetting(true);
+    setSuccess("");
+
+    try {
+      const response = await api.delete("/preferences/reset");
+      setPreferences(response.data);
+      setSuccess("All preferences have been reset.");
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to reset preferences");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   // Step 2: Generate newsletter
   const handleGenerateNewsletter = async () => {
     setError("");
@@ -245,22 +234,26 @@ export default function OnboardingWizard() {
     {
       key: "interests",
       label: "Interests",
-      placeholder: "e.g., jazz music, art galleries",
+      placeholder:
+        "e.g., music, movies, theater, philosophy, programming, art, sports, food, literature, science",
     },
     {
       key: "genres",
       label: "Genres",
-      placeholder: "e.g., rock, classical, indie",
+      placeholder:
+        "e.g., rock, drama, comedy, existentialism, web development, contemporary, basketball, fine dining, poetry, physics",
     },
     {
       key: "eventTypes",
       label: "Event Types",
-      placeholder: "e.g., concerts, theater, festivals",
+      placeholder:
+        "e.g., concerts, film screenings, plays, lectures, hackathons, exhibitions, games, food festivals, book readings, talks",
     },
     {
       key: "venues",
       label: "Venues",
-      placeholder: "e.g., Blue Note, Lincoln Center",
+      placeholder:
+        "e.g., Blue Note, Lincoln Center, The Met, Madison Square Garden, local theaters, art galleries, concert halls",
     },
     {
       key: "artists",
@@ -331,13 +324,10 @@ export default function OnboardingWizard() {
         {currentStep === 1 && (
           <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6 mb-6">
             <p className="text-sm text-gray-700">
-              <strong>Let's get you set up.</strong> You can connect your
-              YouTube, Spotify, or Facebook accounts to automatically extract
-              your preferences (followed channels, artists, creators). This is
-              quicker and we won't share your data. Alternatively, you can
-              manually add preferences below for more control. You can always
-              edit preferences later, and you'll rarely need to update them—set
-              it once and you're done.
+              <strong>Let's get you set up.</strong> Add your interests, genres,
+              venues, artists, and other preferences below. You can always edit
+              preferences later, and you'll rarely need to update them—set it
+              once and you're done.
             </p>
           </div>
         )}
@@ -345,59 +335,14 @@ export default function OnboardingWizard() {
         {/* Step 1: Preferences */}
         {currentStep === 1 && (
           <div className="space-y-6">
-            {/* Section 1: Connect with Social Accounts */}
+            {/* Section 1: Enter Your Preferences */}
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">
-                1. Connect with Social Accounts
-              </h2>
-              <p className="text-sm text-gray-600 mb-4">
-                Connect your accounts to automatically extract preferences from
-                your activity.
-              </p>
-
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-red-600 rounded flex items-center justify-center text-white font-bold mr-3">
-                      YT
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900">YouTube</div>
-                      <div className="text-sm text-gray-500">
-                        {checkingYoutube
-                          ? "Checking status..."
-                          : youtubeConnected
-                          ? "Connected"
-                          : "Not connected"}
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    {youtubeConnected ? (
-                      <span className="text-sm text-green-600 font-medium">
-                        ✓ Connected
-                      </span>
-                    ) : (
-                      <button
-                        onClick={handleConnectYouTube}
-                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700"
-                      >
-                        Connect YouTube
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 2: Enter or Fine-tune Preferences */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                2. Enter or Fine-tune Preferences
+                1. Enter Your Preferences
               </h2>
               <p className="text-sm text-gray-600 mb-6">
-                Add your interests, genres, and preferences. If you connected
-                social accounts, these may already be populated.
+                Add your interests, genres, venues, artists, and other
+                preferences to get personalized event recommendations.
               </p>
 
               {loadingPreferences ? (
@@ -480,10 +425,10 @@ export default function OnboardingWizard() {
               )}
             </div>
 
-            {/* Section 3: Enter Links for Event Postings */}
+            {/* Section 2: Enter Links for Event Postings */}
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">
-                3. Enter Links for Event Postings
+                2. Enter Links for Event Postings
               </h2>
               <p className="text-sm text-gray-600 mb-4">
                 Add URLs to venues or event providers you normally follow. These
@@ -556,7 +501,14 @@ export default function OnboardingWizard() {
             </div>
 
             {/* Continue Button */}
-            <div className="flex justify-end">
+            <div className="flex justify-between">
+              <button
+                onClick={handleReset}
+                disabled={resetting}
+                className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+              >
+                {resetting ? "Resetting..." : "Reset All Preferences"}
+              </button>
               <button
                 onClick={handleSavePreferencesAndContinue}
                 disabled={!city}

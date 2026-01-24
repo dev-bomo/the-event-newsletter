@@ -77,32 +77,17 @@
     },
     "gettingStarted": {
       "title": "Începe",
-      "step1": "Conectează-ți conturile sociale (YouTube, Spotify, etc.) în Preferințe pentru a extrage automat preferințele tale.",
-      "step2": "Sau adaugă manual interesele, genurile și tipurile de evenimente în Preferințe.",
+      "step1": "Setează preferințele tale (interese, genuri, locuri, artiști) în Preferințe.",
+      "step2": "Setează locația orașului tău.",
       "step3": "Generează primul tău buletin pentru a vedea ce evenimente găsim pentru tine!"
     }
   },
   "preferences": {
     "title": "Preferințe",
     "description": "Gestionează preferințele tale pentru a primi recomandări personalizate de evenimente.",
-    "socialAccounts": {
-      "title": "1. Conectează-te cu Conturi Sociale",
-      "description": "Conectează-ți conturile pentru a extrage automat preferințe din activitatea ta.",
-      "youtube": "YouTube",
-      "connected": "Conectat",
-      "notConnected": "Neconectat",
-      "checkingStatus": "Se verifică statusul...",
-      "connect": "Conectează YouTube",
-      "disconnect": "Deconectează",
-      "syncNow": "Sincronizează Acum",
-      "syncing": "Se sincronizează...",
-      "connectionSuccess": "Contul YouTube a fost conectat cu succes! Preferințele au fost actualizate.",
-      "connectionFailed": "Conexiunea YouTube a eșuat",
-      "disconnectConfirm": "Ești sigur că vrei să deconectezi contul tău YouTube?"
-    },
     "preferencesSection": {
-      "title": "2. Introdu sau Ajustează Preferințe",
-      "description": "Adaugă interesele, genurile și preferințele tale. Dacă ai conectat conturi sociale, acestea pot fi deja populate.",
+      "title": "1. Introdu Preferințele Tale",
+      "description": "Adaugă interesele, genurile, locurile, artiștii și alte preferințe pentru a primi recomandări personalizate de evenimente.",
       "city": "Oraș",
       "cityPlaceholder": "ex., București",
       "interests": "Interese",
@@ -119,7 +104,7 @@
       "saved": "Preferințele au fost salvate!"
     },
     "eventSources": {
-      "title": "3. Introdu Link-uri pentru Anunțuri de Evenimente",
+      "title": "2. Introdu Link-uri pentru Anunțuri de Evenimente",
       "description": "Adaugă URL-uri către locuri sau furnizori de evenimente pe care îi urmărești de obicei. Acestea vor fi verificate pentru evenimente în buletinul tău.",
       "urlPlaceholder": "https://exemplu.com/evenimente sau https://teatru.com/calendar",
       "namePlaceholder": "Nume (opțional)",
@@ -129,7 +114,7 @@
     }
   },
   "onboarding": {
-    "intro": "Hai să te configurăm. Poți conecta conturile tale YouTube, Spotify sau Facebook pentru a extrage automat preferințele tale (canale urmărite, artiști, creatori). Acest lucru este mai rapid și nu vom partaja datele tale. Alternativ, poți adăuga manual preferințele mai jos pentru mai mult control. Poți edita preferințele mai târziu oricând și vei avea nevoie foarte rar să le actualizezi—configurează-le o dată și gata.",
+    "intro": "Hai să te configurăm. Adaugă interesele, genurile, locurile, artiștii și alte preferințe mai jos. Poți edita preferințele mai târziu oricând și vei avea nevoie foarte rar să le actualizezi—configurează-le o dată și gata.",
     "step1": "Setează Preferințe",
     "step2": "Previzualizează Buletinul",
     "step1Title": "Pasul 1: Setează Preferințele Tale",

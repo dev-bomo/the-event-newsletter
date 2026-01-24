@@ -1,11 +1,12 @@
-import { Router } from 'express';
-import { z } from 'zod';
-import { AuthRequest } from '../middleware/auth.js';
+import { Router } from "express";
+import { z } from "zod";
+import { AuthRequest } from "../middleware/auth.js";
 import {
   getUserPreferences,
   updateUserPreferences,
   updateUserCity,
-} from '../controllers/preferences.js';
+  resetPreferences,
+} from "../controllers/preferences.js";
 
 const router = Router();
 
@@ -21,16 +22,16 @@ const updateCitySchema = z.object({
   city: z.string().min(1),
 });
 
-router.get('/', async (req: AuthRequest, res) => {
+router.get("/", async (req: AuthRequest, res) => {
   try {
     const preferences = await getUserPreferences(req.userId!);
     res.json(preferences);
   } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.put('/', async (req: AuthRequest, res) => {
+router.put("/", async (req: AuthRequest, res) => {
   try {
     const data = updatePreferencesSchema.parse(req.body);
     const preferences = await updateUserPreferences(req.userId!, data);
@@ -39,11 +40,11 @@ router.put('/', async (req: AuthRequest, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
-router.put('/city', async (req: AuthRequest, res) => {
+router.put("/city", async (req: AuthRequest, res) => {
   try {
     const data = updateCitySchema.parse(req.body);
     await updateUserCity(req.userId!, data.city);
@@ -52,9 +53,17 @@ router.put('/city', async (req: AuthRequest, res) => {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: error.errors });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.delete("/reset", async (req: AuthRequest, res) => {
+  try {
+    const preferences = await resetPreferences(req.userId!);
+    res.json(preferences);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 export { router as preferenceRoutes };
-

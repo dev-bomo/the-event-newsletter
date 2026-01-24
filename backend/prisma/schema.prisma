@@ -84,7 +84,7 @@ model Event {
   time          String?
   location      String
   category      String?
-  sourceUrl     String   @unique
+  sourceUrl     String
   imageUrl      String?
   score         Int?     // Relevance score (0-100) indicating how well the event matches user preferences
   discoveredAt  DateTime @default(now())
@@ -94,6 +94,7 @@ model Event {
   @@index([date])
   @@index([category])
   @@index([score])
+  @@index([sourceUrl])
 }
 
 model Newsletter {

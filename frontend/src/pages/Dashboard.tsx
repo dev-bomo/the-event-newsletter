@@ -133,18 +133,9 @@ export default function Dashboard() {
                   to="/preferences"
                   className="text-indigo-600 hover:text-indigo-500"
                 >
-                  Connect your social media accounts
+                  Set your preferences
                 </Link>{" "}
-                (YouTube, Spotify, Facebook, Instagram) to automatically extract
-                preferences
-              </li>
-              <li>
-                <Link
-                  to="/preferences"
-                  className="text-indigo-600 hover:text-indigo-500"
-                >
-                  Review and edit your preferences
-                </Link>
+                (interests, genres, venues, artists)
               </li>
               <li>Set your city location</li>
               <li>Start receiving weekly newsletters with local events!</li>

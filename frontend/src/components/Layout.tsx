@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import LanguagePicker from "./LanguagePicker";
+import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,9 +26,13 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <h1 className="text-xl font-bold text-indigo-600">
-                  The Newsletter
-                </h1>
+                <Link to="/dashboard">
+                  <img
+                    src={logo}
+                    alt="The Newsletter"
+                    className="h-10 w-auto"
+                  />
+                </Link>
               </div>
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 {navigation.map((item) => {

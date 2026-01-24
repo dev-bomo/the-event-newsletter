@@ -3,23 +3,6 @@ import axios from "axios";
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 const PERPLEXITY_API_URL = "https://api.perplexity.ai/chat/completions";
 
-export interface DiscoveredProfile {
-  platform: string;
-  profileUrl: string;
-  username?: string;
-  displayName?: string;
-  profilePicture?: string;
-  confidence: "high" | "medium" | "low";
-}
-
-export interface ExtractedPreferences {
-  interests: string[];
-  genres: string[];
-  eventTypes: string[];
-  venues: string[];
-  artists: string[];
-}
-
 export interface DiscoveredEvent {
   title: string;
   description?: string;
@@ -54,39 +37,68 @@ export async function generateUserProfile(data: {
     );
   }
 
-  // Build the prompt
+  // Build the prompt with limits to avoid exceeding Perplexity token limits (~8,000 tokens = ~20,000 chars)
+  // Limit lists to reasonable sizes to keep prompts manageable
+  const MAX_INTERESTS = 20;
+  const MAX_GENRES_EVENTTYPES = 30;
+  const MAX_ARTISTS = 20; // Limit for profile generation (will be used in event discovery)
+  const MAX_VENUES = 15;
+  const MAX_EVENT_SOURCES = 10;
+
+  const limitedInterests = data.interests.slice(0, MAX_INTERESTS);
+  const limitedGenres = data.genres.slice(0, MAX_GENRES_EVENTTYPES);
+  const limitedEventTypes = data.eventTypes.slice(0, MAX_GENRES_EVENTTYPES);
+  const limitedArtists = data.artists.slice(0, MAX_ARTISTS);
+  const limitedVenues = data.venues.slice(0, MAX_VENUES);
+  const limitedEventSources = data.eventSources.slice(0, MAX_EVENT_SOURCES);
+
   const interestsText =
-    data.interests.length > 0 ? data.interests.join(", ") : "none specified";
-  const genresAndEventTypes = [...data.genres, ...data.eventTypes];
+    limitedInterests.length > 0
+      ? limitedInterests.join(", ")
+      : "none specified";
+  const genresAndEventTypes = [...limitedGenres, ...limitedEventTypes];
   const genresText =
     genresAndEventTypes.length > 0
       ? genresAndEventTypes.join(", ")
       : "none specified";
   const artistsText =
-    data.artists.length > 0 ? data.artists.join(", ") : "none specified";
+    limitedArtists.length > 0 ? limitedArtists.join(", ") : "none specified";
   const venuesText =
-    data.venues.length > 0 ? data.venues.join(", ") : "none specified";
+    limitedVenues.length > 0 ? limitedVenues.join(", ") : "none specified";
   const eventSourcesText =
-    data.eventSources.length > 0
-      ? data.eventSources.map((s) => s.url).join(", ")
+    limitedEventSources.length > 0
+      ? limitedEventSources.map((s) => s.url).join(", ")
       : "none specified";
 
   const prompt = `I live in ${data.city}.
-I like ${interestsText}. Specifically ${genresText}.
-Here are some artists that I like:
+
+My interests: ${interestsText}
+
+My preferred genres and event types: ${genresText}
+
+Artists I like:
 ${artistsText}
-Here are some venues from ${data.city} where I like to go:
+
+Venues in ${data.city} where I like to go:
 ${venuesText}
-And here are some direct links to event pages that I like to browse to get my events:
+
+Direct links to event pages I follow:
 ${eventSourcesText}`;
 
-  const systemPrompt = `You are an assistant that creates detailed user profiles for event discovery. Based on the user's preferences, create a comprehensive profile that describes their interests, preferences, and event discovery patterns. The profile should be written in natural language and be suitable for use as a prompt to find relevant events. Make it detailed and specific, capturing the user's taste and preferences.`;
+  // Log the prompt being sent for debugging
+  console.log("Generating user profile with prompt:", prompt);
+
+  const systemPrompt = `You are an assistant that creates concise user profiles for event discovery. Based on the user's preferences provided below, create a brief, clear profile that describes their interests and preferences. Keep it simple and direct - avoid wordy descriptions or unnecessary elaboration. Focus on the key information: their interests, genres, event types, artists, and venues.
+
+The profile should be written in natural language and be suitable for use as a prompt to find relevant events. Be concise and to the point.
+
+IMPORTANT: Return plain text only. Do not use markdown formatting (no **, no *, no code blocks, etc.). Just write natural, flowing text.`;
 
   try {
     const response = await axios.post(
       PERPLEXITY_API_URL,
       {
-        model: "sonar",
+        model: "sonar-pro",
         messages: [
           {
             role: "system",
@@ -118,6 +130,14 @@ ${eventSourcesText}`;
       profileText = lines.join("\n").trim();
     }
 
+    // Remove markdown bold formatting (**text** -> text)
+    // This removes all instances of ** that are used for bold formatting
+    profileText = profileText.replace(/\*\*([^*]+)\*\*/g, "$1");
+
+    // Remove citation markers like [1], [2], [3], etc.
+    // These are Perplexity's citation references and aren't needed in plain text
+    profileText = profileText.replace(/\[\d+\]/g, "");
+
     return profileText;
   } catch (error: any) {
     console.error(
@@ -133,338 +153,595 @@ ${eventSourcesText}`;
 }
 
 /**
- * Discover social media profiles by email address
+ * Helper function to make a Perplexity API call
  */
-export async function discoverProfilesByEmail(
-  email: string
-): Promise<DiscoveredProfile[]> {
-  console.log("discoverProfilesByEmail called with email:", email);
-  console.log("PERPLEXITY_API_KEY exists:", !!PERPLEXITY_API_KEY);
-  console.log("PERPLEXITY_API_KEY length:", PERPLEXITY_API_KEY?.length || 0);
-
-  if (
-    !PERPLEXITY_API_KEY ||
-    PERPLEXITY_API_KEY === "your-perplexity-api-key-here" ||
-    PERPLEXITY_API_KEY.trim() === ""
-  ) {
-    throw new Error(
-      "PERPLEXITY_API_KEY not configured. Please add your Perplexity API key to the .env file. Get one at https://www.perplexity.ai/"
-    );
-  }
-
-  const query = `Find public social media profiles associated with email ${email} on:
-- Facebook (facebook.com)
-- Instagram (instagram.com)
-- YouTube (youtube.com)
-- Spotify (open.spotify.com)
-- Twitter/X (x.com, twitter.com)
-- LinkedIn (linkedin.com)
-
-Return a JSON object with a "profiles" array. Each profile should have:
-- platform (facebook, instagram, youtube, spotify, twitter, linkedin)
-- profileUrl
-- username (optional)
-- displayName (optional)
-- profilePicture (optional, URL)
-- confidence (high/medium/low based on email match)
-
-Only include profiles that are publicly accessible. If no profiles are found, return an empty array.`;
-
-  try {
-    const response = await axios.post(
-      PERPLEXITY_API_URL,
-      {
-        model: "sonar",
-        messages: [
-          {
-            role: "system",
-            content:
-              'You are a profile discovery assistant. Return only valid JSON objects with a "profiles" array.',
-          },
-          {
-            role: "user",
-            content: query,
-          },
-        ],
-        temperature: 0.2,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
-          "Content-Type": "application/json",
+async function callPerplexity(
+  model: string,
+  systemPrompt: string,
+  userPrompt: string,
+  temperature: number = 0.7
+): Promise<string> {
+  const response = await axios.post(
+    PERPLEXITY_API_URL,
+    {
+      model,
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt,
         },
-      }
-    );
-
-    const content = response.data.choices[0].message.content;
-
-    // Try to extract JSON from the response (might be wrapped in markdown code blocks)
-    let jsonContent = content;
-    const jsonMatch =
-      content.match(/```json\s*([\s\S]*?)\s*```/) ||
-      content.match(/```\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      jsonContent = jsonMatch[1];
+        {
+          role: "user",
+          content: userPrompt,
+        },
+      ],
+      temperature,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
+        "Content-Type": "application/json",
+      },
     }
+  );
 
-    const parsed = JSON.parse(jsonContent);
-
-    if (!Array.isArray(parsed.profiles)) {
-      console.warn("Unexpected response format:", parsed);
-      return [];
-    }
-
-    return parsed.profiles || [];
-  } catch (error: any) {
-    console.error("Error discovering profiles - full error:", error);
-    console.error("Error response data:", error.response?.data);
-    console.error("Error response status:", error.response?.status);
-
-    // Provide more specific error messages
-    if (error.response) {
-      // API returned an error
-      const status = error.response.status;
-      const data = error.response.data;
-      const message =
-        data?.error?.message ||
-        data?.message ||
-        JSON.stringify(data) ||
-        "API error";
-
-      console.error(`Perplexity API returned ${status}:`, message);
-
-      if (status === 401 || status === 403) {
-        throw new Error(
-          `Invalid Perplexity API key (${status}). Please check your PERPLEXITY_API_KEY in .env`
-        );
-      }
-
-      throw new Error(`Perplexity API error (${status}): ${message}`);
-    } else if (error.request) {
-      // Request was made but no response received
-      console.error("No response received from Perplexity API");
-      throw new Error(
-        "No response from Perplexity API. Check your internet connection."
-      );
-    } else if (error instanceof SyntaxError) {
-      // JSON parsing error
-      console.error("JSON parsing error:", error.message);
-      throw new Error(`Failed to parse AI response: ${error.message}`);
-    } else {
-      console.error("Unknown error:", error);
-      throw new Error(
-        `Failed to discover profiles: ${error.message || "Unknown error"}`
-      );
-    }
+  const content = response.data.choices[0].message.content;
+  if (!content) {
+    throw new Error("Empty response from Perplexity API");
   }
+
+  return content;
 }
 
 /**
- * Extract preferences from public profile URL using AI (no scraping needed)
+ * Step 1: Planning call to get search tasks
  */
-export async function extractPreferencesFromProfileUrl(
-  platform: string,
-  profileUrl: string
-): Promise<ExtractedPreferences> {
-  if (!PERPLEXITY_API_KEY) {
-    throw new Error("PERPLEXITY_API_KEY not configured");
-  }
-
-  const query = `Analyze this public ${platform} profile and extract the user's interests:
-
-Profile URL: ${profileUrl}
-
-Visit the profile and analyze:
-- Music genres they like
-- Event types they attend (concerts, theater, sports, etc.)
-- Venues they frequent
-- Artists/creators they follow
-- General interests related to local events and entertainment
-
-Return a JSON object with:
-- interests: array of interest keywords
-- genres: array of music/entertainment genres
-- eventTypes: array of event categories
-- venues: array of venue names (if identifiable)
-- artists: array of artist/creator names
-
-If information is not available, return empty arrays.`;
-
-  let content: string | undefined;
-  try {
-    const response = await axios.post(
-      PERPLEXITY_API_URL,
-      {
-        model: "sonar",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a preference extraction assistant. Return only valid JSON objects.",
-          },
-          {
-            role: "user",
-            content: query,
-          },
-        ],
-        temperature: 0.3,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    content = response.data.choices[0].message.content;
-    if (!content) {
-      throw new Error("Empty response from Perplexity API");
-    }
-
-    console.log(
-      "Preference extraction response content:",
-      content.substring(0, 500)
-    );
-
-    // Try to extract JSON from the response (might be wrapped in markdown code blocks)
-    let jsonContent = content;
-    const jsonMatch =
-      content.match(/```json\s*([\s\S]*?)\s*```/) ||
-      content.match(/```\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      jsonContent = jsonMatch[1];
-      console.log("Extracted JSON from code block");
-    }
-
-    const parsed = JSON.parse(jsonContent);
-
-    return {
-      interests: parsed.interests || [],
-      genres: parsed.genres || [],
-      eventTypes: parsed.eventTypes || [],
-      venues: parsed.venues || [],
-      artists: parsed.artists || [],
-    };
-  } catch (error: any) {
-    console.error("Error extracting preferences - full error:", error);
-    if (error instanceof SyntaxError) {
-      console.error("JSON parsing error:", error.message);
-      console.error(
-        "Content that failed to parse:",
-        content?.substring(0, 1000)
-      );
-    }
-    // Return empty preferences on error
-    return {
-      interests: [],
-      genres: [],
-      eventTypes: [],
-      venues: [],
-      artists: [],
-    };
-  }
-}
-
-/**
- * Discover local events based on user profile
- */
-export async function discoverEvents(
+async function planEventSearch(
   city: string,
-  userProfile: string
-): Promise<DiscoveredEvent[]> {
-  if (!PERPLEXITY_API_KEY) {
-    throw new Error("PERPLEXITY_API_KEY not configured");
+  userProfile: string,
+  eventSources?: string[]
+): Promise<{ tasks: string[]; rawResponse: string }> {
+  const eventSourcesText =
+    eventSources && eventSources.length > 0
+      ? `\n\nPages they normally access to find events are:\n${eventSources.join(
+          "\n"
+        )}`
+      : "";
+
+  const prompt = `You will be given a user profile for event discovery:
+
+User profile:
+${userProfile}${eventSourcesText}
+
+City: ${city}
+Date window: Next 30 days
+
+Your task is to create a plan for finding events. Break down the search into 5-6 specific tasks or sites to query. Each task should be a specific search query or website/source to check.
+
+Return a JSON object with a "tasks" array. Each task should be a string describing what to search for or which site to query. Examples:
+- "Search Bandsintown for rock/metal concerts in ${city}"
+- "Check iabilet.ro for events at Casa Tineretului"
+- "Find stand-up comedy shows in ${city} on Eventbrite"
+- "Search for philosophy talks and meetups in ${city}"
+
+Return exactly 5-6 tasks, no more, no less.`;
+
+  const systemPrompt = `You are a planning assistant for event discovery. Return only valid JSON with a "tasks" array containing 5-6 search tasks.`;
+
+  console.log("Step 1: Planning event search...");
+  const rawResponse = await callPerplexity(
+    "sonar-pro",
+    systemPrompt,
+    prompt,
+    0.7
+  );
+
+  console.log("Planning response:", rawResponse.substring(0, 500));
+
+  // Parse tasks from response
+  let jsonContent = rawResponse;
+  const jsonMatch =
+    rawResponse.match(/```json\s*([\s\S]*?)\s*```/) ||
+    rawResponse.match(/```\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    jsonContent = jsonMatch[1];
   }
 
-  const query = `Find upcoming local events in ${city} for the next 30 days (one month in advance).
+  try {
+    const parsed = JSON.parse(jsonContent);
+    const tasks = parsed.tasks || parsed.task || [];
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      throw new Error("Invalid tasks format in planning response");
+    }
+    console.log(`Planning returned ${tasks.length} tasks`);
+    return { tasks: tasks.slice(0, 6), rawResponse }; // Limit to 6 max
+  } catch (error) {
+    console.error("Failed to parse planning response:", error);
+    // Fallback: create default tasks
+    const defaultTasks = [
+      `Search for concerts and music events in ${city}`,
+      `Find theater and performing arts events in ${city}`,
+      `Search for meetups and talks in ${city}`,
+      `Find comedy shows in ${city}`,
+      `Search for sports and running events in ${city}`,
+    ];
+    return { tasks: defaultTasks, rawResponse };
+  }
+}
+
+/**
+ * Step 2: Parallel search calls for each task
+ */
+async function searchEventsForTask(
+  task: string,
+  userProfile: string,
+  eventSources?: string[]
+): Promise<{ events: any[]; rawResponse: string }> {
+  const eventSourcesText =
+    eventSources && eventSources.length > 0
+      ? `\n\nIMPORTANT: The user follows these event sources. If this task relates to any of these sources, prioritize checking them:\n${eventSources.join("\n")}`
+      : "";
+
+  const today = new Date();
+  const thirtyDaysLater = new Date(today);
+  thirtyDaysLater.setDate(today.getDate() + 30);
+  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days).`;
+
+  const prompt = `From this site/search: "${task}"
+
+Extract raw event candidates as simple objects. Do NOT score, deduplicate, or filter. Just extract all relevant events you can find.
+
+${dateWindow}
+${eventSourcesText}
+
+For each event, return:
+- title
+- description (optional)
+- date (ISO format: YYYY-MM-DD) - MUST be within the next 30 days
+- time (optional, HH:MM format)
+- location (full address)
+- category (optional)
+- sourceUrl (URL to the event page or source)
+- imageUrl (optional)
+
+Return a JSON object with a "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events within the next 30 days.`;
+
+  const systemPrompt = `You are extracting raw event data. Return only valid JSON with an "events" array. Do not score or deduplicate.`;
+
+  console.log(`Step 2: Searching for task: "${task.substring(0, 50)}..."`);
+  // sonar-pro model automatically enables web search
+  const rawResponse = await callPerplexity(
+    "sonar-pro",
+    systemPrompt,
+    prompt,
+    0.7
+  );
+
+  // Parse events from response
+  let jsonContent = rawResponse;
+  const jsonMatch =
+    rawResponse.match(/```json\s*([\s\S]*?)\s*```/) ||
+    rawResponse.match(/```\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    jsonContent = jsonMatch[1];
+  }
+
+  try {
+    const parsed = JSON.parse(jsonContent);
+    const events = parsed.events || [];
+    if (!Array.isArray(events)) {
+      return { events: [], rawResponse };
+    }
+    console.log(`Task returned ${events.length} raw events`);
+    return { events, rawResponse };
+  } catch (error) {
+    console.error(`Failed to parse events from task "${task}":`, error);
+    return { events: [], rawResponse };
+  }
+}
+
+/**
+ * Step 3: Merge and score all events
+ */
+async function mergeAndScoreEvents(
+  allRawEvents: any[],
+  userProfile: string,
+  city: string
+): Promise<{ events: DiscoveredEvent[]; rawResponse: string }> {
+  const eventsJson = JSON.stringify(allRawEvents.slice(0, 100)); // Limit to 100 events max for prompt
+
+  const today = new Date();
+  const thirtyDaysLater = new Date(today);
+  thirtyDaysLater.setDate(today.getDate() + 30);
+  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days only).`;
+
+  const prompt = `You have been given ${allRawEvents.length} raw event candidates. Your task is to:
+
+1. Filter events to ONLY include those within the next 30 days (${dateWindow})
+2. Filter to keep ONLY events in ${city} - the location field MUST contain "${city}" or a clear reference to ${city}. Exclude festivals, events, or venues in other cities.
+3. Deduplicate by artist/band (if multiple events feature the same performer, keep only the most relevant one)
+4. Limit to maximum 4 events per sourceUrl (if multiple events share the same sourceUrl, keep only the top 4 by relevance)
+5. Validate all URLs - only keep events with real, verifiable sourceUrl
+6. Score each event (0-100) based on how well it matches this user profile:
+${userProfile}
+7. Return between 20-30 events maximum, prioritized by score
+8. Ensure all events are real and verifiable - do not include hallucinated events
+
+Return a JSON object with an "events" array. Each event must have:
+- title
+- description (optional)
+- date (ISO format: YYYY-MM-DD) - MUST be within next 30 days
+- time (optional, HH:MM format)
+- location (full address)
+- category (optional)
+- sourceUrl (valid, verifiable URL)
+- imageUrl (optional)
+- score (0-100)
+
+Raw events to process:
+${eventsJson}`;
+
+  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events.`;
+
+  console.log(`Step 3: Merging and scoring ${allRawEvents.length} events...`);
+  const rawResponse = await callPerplexity(
+    "sonar-pro",
+    systemPrompt,
+    prompt,
+    0.5 // Lower temperature for more consistent scoring
+  );
+
+  // Parse final events
+  let jsonContent = rawResponse;
+  const jsonMatch =
+    rawResponse.match(/```json\s*([\s\S]*?)\s*```/) ||
+    rawResponse.match(/```\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    jsonContent = jsonMatch[1];
+  }
+
+  try {
+    const parsed = JSON.parse(jsonContent);
+    const events = parsed.events || [];
+    if (!Array.isArray(events)) {
+      return { events: [], rawResponse };
+    }
+    console.log(`Merged to ${events.length} final events`);
+    return { events, rawResponse };
+  } catch (error) {
+    console.error("Failed to parse merged events:", error);
+    return { events: [], rawResponse };
+  }
+}
+
+/**
+ * Step 4: Repair call if needed
+ */
+async function repairOrExpandEvents(
+  currentEvents: DiscoveredEvent[],
+  userProfile: string,
+  city: string,
+  issue: "too_few" | "broken_json",
+  eventSources?: string[]
+): Promise<{ events: DiscoveredEvent[]; rawResponse: string }> {
+  const instruction =
+    issue === "too_few"
+      ? currentEvents.length > 0
+        ? `You currently have ${currentEvents.length} events, but need 20-30. Add more event candidates that match the user profile.`
+        : `No events were found. Please search for events matching the user profile.`
+      : `The previous response had invalid JSON. Please fix it and return valid JSON.`;
+
+  const currentEventsText =
+    currentEvents.length > 0
+      ? `\n\nCurrent events (${currentEvents.length}):\n${JSON.stringify(currentEvents.slice(0, 10), null, 2)}`
+      : "";
+
+  const eventSourcesText =
+    eventSources && eventSources.length > 0
+      ? `\n\nIMPORTANT: The user follows these event sources. Prioritize checking them:\n${eventSources.join("\n")}`
+      : "";
+
+  const today = new Date();
+  const thirtyDaysLater = new Date(today);
+  thirtyDaysLater.setDate(today.getDate() + 30);
+  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days only).`;
+
+  const prompt = `${instruction}
 
 User profile:
 ${userProfile}
 
-Based on this user profile, find events that match their interests, preferences, and taste. Return between 12 and 20 events that are most relevant to this user.
+City: ${city}
+${dateWindow}
+IMPORTANT: Only include events in ${city}. The location field MUST contain "${city}" or a clear reference to ${city}. Exclude festivals, events, or venues in other cities.
+${eventSourcesText}${currentEventsText}
 
-Please return a JSON object with an "events" array. Each event should have:
+Return a JSON object with an "events" array containing 20-30 events. Each event must have:
 - title
 - description (optional)
-- date (ISO format: YYYY-MM-DD)
+- date (ISO format: YYYY-MM-DD) - MUST be within next 30 days
 - time (optional, HH:MM format)
-- location (full address)
+- location (full address) - MUST be in ${city}
 - category (optional)
-- sourceUrl (link to event page)
-- imageUrl (optional, link to event image)
-- score (number from 0-100 indicating how well this event matches the user's profile, where 100 is a perfect match)
+- sourceUrl (valid, verifiable URL)
+- imageUrl (optional)
+- score (0-100)
 
-Focus on: concerts, theater, community gatherings, art shows, local festivals, and similar local events that align with the user's profile.
-Include events happening from today up to 30 days in the future.
-Exclude: corporate events, private parties, online-only events, events more than 30 days away.
+Only include real, verifiable events. Deduplicate by artist/band. Limit to maximum 4 events per sourceUrl.`;
 
-Return between 12 and 20 events, prioritized by relevance to the user's profile. Events with higher scores should be more closely aligned with the user's interests, preferred genres, artists, and venues.`;
+  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array.`;
 
-  let content: string | undefined;
+  console.log(`Step 4: Repairing/expanding events (issue: ${issue})...`);
+  // sonar-pro model automatically enables web search
+  const rawResponse = await callPerplexity(
+    "sonar-pro",
+    systemPrompt,
+    prompt,
+    0.7
+  );
+
+  // Parse repaired events
+  let jsonContent = rawResponse;
+  const jsonMatch =
+    rawResponse.match(/```json\s*([\s\S]*?)\s*```/) ||
+    rawResponse.match(/```\s*([\s\S]*?)\s*```/);
+  if (jsonMatch) {
+    jsonContent = jsonMatch[1];
+  }
+
   try {
-    const response = await axios.post(
-      PERPLEXITY_API_URL,
-      {
-        model: "sonar",
-        messages: [
-          {
-            role: "system",
-            content:
-              'You are an event discovery assistant. Return only valid JSON objects with an "events" array.',
-          },
-          {
-            role: "user",
-            content: query,
-          },
-        ],
-        temperature: 0.4,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${PERPLEXITY_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-      }
+    const parsed = JSON.parse(jsonContent);
+    const events = parsed.events || [];
+    if (!Array.isArray(events)) {
+      return { events: currentEvents, rawResponse }; // Return original if repair fails
+    }
+    console.log(`Repair returned ${events.length} events`);
+    return { events, rawResponse };
+  } catch (error) {
+    console.error("Failed to parse repaired events:", error);
+    return { events: currentEvents, rawResponse }; // Return original if repair fails
+  }
+}
+
+/**
+ * Discover local events based on user profile using multi-step process
+ * Returns both parsed events and raw AI responses from all steps
+ */
+export async function discoverEvents(
+  city: string,
+  userProfile: string,
+  eventSources?: string[]
+): Promise<{ events: DiscoveredEvent[]; rawResponse: string }> {
+  if (!PERPLEXITY_API_KEY) {
+    throw new Error("PERPLEXITY_API_KEY not configured");
+  }
+
+  // Truncate profile if it's too long
+  const MAX_PROFILE_LENGTH = 15000;
+  const truncatedProfile =
+    userProfile.length > MAX_PROFILE_LENGTH
+      ? userProfile.substring(0, MAX_PROFILE_LENGTH) +
+        "\n\n[Profile truncated for length...]"
+      : userProfile;
+
+  const allRawResponses: string[] = [];
+
+  try {
+    // Step 1: Planning
+    const { tasks, rawResponse: planningResponse } = await planEventSearch(
+      city,
+      truncatedProfile,
+      eventSources
+    );
+    allRawResponses.push(`=== PLANNING ===\n${planningResponse}`);
+
+    // Step 2: Parallel searches
+    console.log(`Step 2: Executing ${tasks.length} parallel searches...`);
+    const searchResults = await Promise.all(
+      tasks.map((task) =>
+        searchEventsForTask(task, truncatedProfile, eventSources)
+      )
     );
 
-    content = response.data.choices[0].message.content;
-    if (!content) {
-      throw new Error("Empty response from Perplexity API");
+    const allRawEvents: any[] = [];
+    searchResults.forEach((result, index) => {
+      allRawResponses.push(`=== SEARCH TASK ${index + 1}: ${tasks[index]} ===\n${result.rawResponse}`);
+      allRawEvents.push(...result.events);
+    });
+
+    console.log(`Collected ${allRawEvents.length} raw events from all searches`);
+
+    if (allRawEvents.length === 0) {
+      console.warn("No events found in search phase");
+      return { events: [], rawResponse: allRawResponses.join("\n\n") };
     }
 
-    console.log("Event discovery response content:", content.substring(0, 500)); // Log first 500 chars
+    // Step 3: Merge and score
+    let finalEvents: DiscoveredEvent[] = [];
+    let mergeResponse: string = "";
+    let mergeFailed = false;
 
-    // Try to extract JSON from the response (might be wrapped in markdown code blocks)
-    let jsonContent = content;
-    const jsonMatch =
-      content.match(/```json\s*([\s\S]*?)\s*```/) ||
-      content.match(/```\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      jsonContent = jsonMatch[1];
-      console.log("Extracted JSON from code block");
+    try {
+      const result = await mergeAndScoreEvents(
+        allRawEvents,
+        truncatedProfile,
+        city
+      );
+      finalEvents = result.events;
+      mergeResponse = result.rawResponse;
+    } catch (error) {
+      console.error("Merge step failed:", error);
+      mergeFailed = true;
+      mergeResponse = `Merge failed: ${error}`;
     }
 
-    const parsed = JSON.parse(jsonContent);
+    allRawResponses.push(`=== MERGE & SCORE ===\n${mergeResponse}`);
 
-    if (!parsed.events || !Array.isArray(parsed.events)) {
-      console.warn("Unexpected response format:", parsed);
-      // Try to handle if events are at root level
-      if (Array.isArray(parsed)) {
-        return parsed;
+    // Step 4: Repair if needed
+    let events = finalEvents;
+    if (mergeFailed || finalEvents.length === 0) {
+      console.log("Merge failed or returned no events, attempting repair...");
+      const { events: repairedEvents, rawResponse: repairResponse } =
+        await repairOrExpandEvents(
+          finalEvents,
+          truncatedProfile,
+          city,
+          mergeFailed ? "broken_json" : "too_few",
+          eventSources
+        );
+      allRawResponses.push(
+        `=== REPAIR (${mergeFailed ? "broken_json" : "too_few"}) ===\n${repairResponse}`
+      );
+      events = repairedEvents;
+    } else if (finalEvents.length < 15) {
+      console.log("Too few events, attempting repair/expansion...");
+      const { events: repairedEvents, rawResponse: repairResponse } =
+        await repairOrExpandEvents(
+          finalEvents,
+          truncatedProfile,
+          city,
+          "too_few",
+          eventSources
+        );
+      allRawResponses.push(`=== REPAIR (too_few) ===\n${repairResponse}`);
+      events = repairedEvents;
+    }
+
+    // Helper function to normalize URLs for grouping
+    const normalizeSourceUrl = (url: string): string => {
+      try {
+        const urlObj = new URL(url);
+        // Normalize: remove www, trailing slash, and use https
+        const hostname = urlObj.hostname.replace(/^www\./, "");
+        const pathname = urlObj.pathname.replace(/\/$/, "") || "/";
+        // Group by domain + first path segment (e.g., teatrulgerman.ro/program and teatrulgerman.ro/ro/program are different sources)
+        // But teatrulgerman.ro/ and teatrulgerman.ro are the same
+        const basePath = pathname.split("/").slice(0, 2).join("/"); // Take first 2 path segments
+        return `https://${hostname}${basePath}`;
+      } catch {
+        // If URL parsing fails, try simple normalization
+        return url
+          .toLowerCase()
+          .replace(/^https?:\/\//, "")
+          .replace(/^www\./, "")
+          .replace(/\/$/, "");
       }
-      return [];
-    }
+    };
 
-    return parsed.events || [];
+    // Post-processing: Filter by date, location, and limit per source
+    const today = new Date();
+    const thirtyDaysLater = new Date(today);
+    thirtyDaysLater.setDate(today.getDate() + 30);
+
+    // Filter events to next 30 days
+    const eventsInDateRange = events.filter((e) => {
+      if (!e.date) return false;
+      const eventDate = new Date(e.date);
+      return eventDate >= today && eventDate <= thirtyDaysLater;
+    });
+
+    console.log(
+      `Filtered ${events.length} events to ${eventsInDateRange.length} events within 30 days`
+    );
+
+    // Filter events by location - must be in the specified city
+    const cityLower = city.toLowerCase().trim();
+    const eventsInCity = eventsInDateRange.filter((e) => {
+      if (!e.location) return false;
+      const locationLower = e.location.toLowerCase();
+      // Check if location contains the city name
+      // Also handle common variations (e.g., "Timisoara" vs "Timișoara")
+      const cityVariations = [
+        cityLower,
+        cityLower.replace(/ș/g, "s").replace(/ț/g, "t"), // Remove diacritics
+        cityLower.replace(/s/g, "ș").replace(/t/g, "ț"), // Add diacritics
+      ];
+      return cityVariations.some((variation) => locationLower.includes(variation));
+    });
+
+    console.log(
+      `Filtered ${eventsInDateRange.length} events to ${eventsInCity.length} events in ${city}`
+    );
+
+    // Sort by score (descending) to prioritize higher-scored events
+    const sortedEvents = [...eventsInCity].sort((a, b) => {
+      const scoreA = a.score || 0;
+      const scoreB = b.score || 0;
+      return scoreB - scoreA; // Descending order
+    });
+
+    // Filter out events with score below 50
+    const eventsAboveThreshold = sortedEvents.filter((e) => {
+      const score = e.score || 0;
+      if (score < 50) {
+        console.log(
+          `Filtering out event with score below 50: "${e.title}" (score: ${score})`
+        );
+        return false;
+      }
+      return true;
+    });
+
+    console.log(
+      `Filtered ${sortedEvents.length} events to ${eventsAboveThreshold.length} events with score >= 50`
+    );
+
+    // Limit to 4 events per normalized sourceUrl, keeping the top 4 by score
+    const sourceUrlCounts = new Map<string, number>();
+    const limitedBySource = eventsAboveThreshold.filter((e) => {
+      if (!e.sourceUrl) return false;
+      const normalizedUrl = normalizeSourceUrl(e.sourceUrl);
+      const count = sourceUrlCounts.get(normalizedUrl) || 0;
+      if (count >= 4) {
+        console.log(
+          `Limiting events from source: ${normalizedUrl} (original: ${e.sourceUrl}, already have ${count} events, score: ${e.score})`
+        );
+        return false;
+      }
+      sourceUrlCounts.set(normalizedUrl, count + 1);
+      return true;
+    });
+
+    console.log(
+      `Limited to ${limitedBySource.length} events (max 4 per source, sorted by score)`
+    );
+
+    // Limit to 4-5 events per location, keeping the top 4-5 by score
+    const locationCounts = new Map<string, number>();
+    const limitedEvents = limitedBySource.filter((e) => {
+      if (!e.location) return false;
+      const locationNormalized = e.location.toLowerCase().trim();
+      const count = locationCounts.get(locationNormalized) || 0;
+      const maxPerLocation = 5; // Allow up to 5 events per location
+      if (count >= maxPerLocation) {
+        console.log(
+          `Limiting events at location: ${e.location} (already have ${count} events, score: ${e.score})`
+        );
+        return false;
+      }
+      locationCounts.set(locationNormalized, count + 1);
+      return true;
+    });
+
+    console.log(
+      `Limited to ${limitedEvents.length} events (max 5 per location, sorted by score)`
+    );
+
+    // Validate events have required fields
+    const validEvents = limitedEvents.filter(
+      (e) => e.title && e.sourceUrl && e.location && e.date
+    );
+
+    console.log(`Final result: ${validEvents.length} valid events`);
+    return {
+      events: validEvents,
+      rawResponse: allRawResponses.join("\n\n"),
+    };
   } catch (error: any) {
-    console.error("Error discovering events - full error:", error);
-    console.error("Error response data:", error.response?.data);
-    console.error("Error response status:", error.response?.status);
+    console.error("Error in multi-step event discovery:", error);
 
-    // Provide more specific error messages
+    // Provide specific error messages
     if (error.response) {
-      // API returned an error
       const status = error.response.status;
       const data = error.response.data;
       const message =
@@ -472,8 +749,6 @@ Return between 12 and 20 events, prioritized by relevance to the user's profile.
         data?.message ||
         JSON.stringify(data) ||
         "API error";
-
-      console.error(`Perplexity API returned ${status}:`, message);
 
       if (status === 401 || status === 403) {
         throw new Error(
@@ -483,25 +758,10 @@ Return between 12 and 20 events, prioritized by relevance to the user's profile.
 
       throw new Error(`Perplexity API error (${status}): ${message}`);
     } else if (error.request) {
-      // Request was made but no response received
-      console.error("No response received from Perplexity API");
       throw new Error(
         "No response from Perplexity API. Check your internet connection."
       );
-    } else if (error instanceof SyntaxError) {
-      // JSON parsing error
-      console.error("JSON parsing error:", error.message);
-      console.error(
-        "Content that failed to parse:",
-        error.message.includes("JSON")
-          ? "See above"
-          : content?.substring(0, 1000)
-      );
-      throw new Error(
-        `Failed to parse AI response: ${error.message}. The API might have returned invalid JSON.`
-      );
     } else {
-      console.error("Unknown error:", error);
       throw new Error(
         `Failed to discover events: ${error.message || "Unknown error"}`
       );
