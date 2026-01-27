@@ -82,31 +82,61 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-md w-full mx-4">
-        {/* Animated spinner */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-16 h-16">
-            <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+      <div className="bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] p-4 max-w-md w-full mx-4">
+        {/* Windows 98 Title Bar */}
+        <div className="bg-[#000080] text-white px-2 py-1 flex items-center justify-between mb-4">
+          <span className="text-xs font-bold">Generating Newsletter</span>
+        </div>
+
+        {/* Windows 98 Style Spinner/Progress */}
+        <div className="flex justify-center mb-4">
+          <div className="relative w-32 h-8 bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-1">
+            <div className="h-full bg-[#000080] relative overflow-hidden">
+              {/* Animated progress bar effect */}
+              <div 
+                className="absolute inset-0 opacity-30"
+                style={{ 
+                  animation: 'shimmer 1.5s ease-in-out infinite',
+                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+                  backgroundSize: '200% 100%'
+                }}
+              ></div>
+              {/* Progress indicator blocks */}
+              <div className="h-full flex items-center justify-center">
+                <div className="flex gap-1">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className={`w-1 h-4 bg-white ${
+                        Math.floor((currentStepIndex / steps.length) * 5) > i ? 'opacity-100' : 'opacity-50'
+                      }`}
+                      style={{
+                        animation: `pulse 1s ease-in-out infinite ${i * 0.1}s`
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Step indicator with fade animation */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
             <h3
-              className={`text-lg font-semibold text-gray-900 transition-opacity duration-300 ${
+              className={`text-xs font-bold text-black transition-opacity duration-300 ${
                 isFading ? "opacity-0" : "opacity-100"
               }`}
             >
               {currentStep.label}
             </h3>
-            <span className="text-sm text-gray-500">
+            <span className="text-xs font-bold text-black">
               {currentStepIndex + 1} / {steps.length}
             </span>
           </div>
           <p
-            className={`text-sm text-gray-600 transition-opacity duration-300 ${
+            className={`text-xs text-black transition-opacity duration-300 ${
               isFading ? "opacity-0" : "opacity-100"
             }`}
           >
@@ -114,21 +144,32 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
           </p>
         </div>
 
-        {/* Progress dots */}
-        <div className="flex justify-center space-x-2">
+        {/* Progress indicator blocks (Windows 98 style) */}
+        <div className="flex justify-center gap-1">
           {steps.map((step, index) => (
             <div
               key={step.id}
-              className={`h-2 w-2 rounded-full transition-all duration-300 ${
+              className={`h-4 w-4 transition-all duration-300 ${
                 index === currentStepIndex
-                  ? "bg-indigo-600 w-8"
+                  ? "bg-[#000080] border-2 border-[#000080]"
                   : index < currentStepIndex
-                  ? "bg-indigo-300"
-                  : "bg-gray-300"
+                  ? "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff]"
+                  : "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] opacity-50"
               }`}
             />
           ))}
         </div>
+
+        <style>{`
+          @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+          }
+        `}</style>
       </div>
     </div>
   );

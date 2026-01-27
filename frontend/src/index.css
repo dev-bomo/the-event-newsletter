@@ -2,12 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Windows 98 Font */
+@font-face {
+  font-family: 'MS Sans Serif';
+  src: url('https://fonts.cdnfonts.com/s/16094/MS-Sans-Serif-8pt.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'MS Sans Serif', 'MS Sans Serif 8pt', 'MS Sans Serif', sans-serif;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  /* Background is set dynamically via wallpaper picker */
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Windows 98 Button Styles */
+.win98-button {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  padding: 2px 8px;
+  font-family: 'MS Sans Serif', 'MS Sans Serif 8pt', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  box-shadow: 1px 1px 0 0 #000000;
+}
+
+.win98-button:hover {
+  background: #d4d0c8;
+}
+
+.win98-button:active {
+  border-color: #808080 #ffffff #ffffff #808080;
+  box-shadow: inset 1px 1px 0 0 #000000;
+}
+
+.win98-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Windows 98 Input Styles */
+.win98-input {
+  background: #ffffff;
+  border: 2px inset #c0c0c0;
+  padding: 2px 4px;
+  font-family: 'MS Sans Serif', 'MS Sans Serif 8pt', sans-serif;
+  font-size: 11px;
+}
+
+.win98-input:focus {
+  outline: 1px dotted #000000;
+  outline-offset: -3px;
 }
 

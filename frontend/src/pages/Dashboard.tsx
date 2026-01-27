@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
+import Windows98Window from "../components/Windows98Window";
+import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
 export default function Dashboard() {
   const { user } = useAuthStore();
@@ -49,99 +51,90 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="px-4 py-6 sm:px-0">
-        <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Welcome{user?.name ? `, ${user.name}` : ""}!
-          </h1>
-          <p className="text-gray-600 mb-8">
-            Get started by connecting your social accounts and setting up your
-            preferences.
-          </p>
+      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
+        <Windows98Window title="Dashboard">
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-xl font-bold text-black mb-2">
+                Welcome{user?.name ? `, ${user.name}` : ""}!
+              </h1>
+              <p className="text-xs text-black mb-6">
+                Get started by connecting your social accounts and setting up your
+                preferences.
+              </p>
+            </div>
 
-          {loading ? (
-            <div className="text-gray-500">Loading...</div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
+            {loading ? (
+              <div className="text-black text-xs">Loading...</div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
+                <Windows98ReadingPane>
+                  <div className="flex items-center mb-3">
                     <div className="flex-shrink-0">
-                      <span className="text-2xl">🎯</span>
+                      <span className="text-xl">🎯</span>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">
-                          Preferences
-                        </dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {stats.hasPreferences ? "Set" : "Not set"}
-                        </dd>
-                      </dl>
+                    <div className="ml-3 flex-1">
+                      <div className="text-xs font-bold text-black">
+                        Preferences
+                      </div>
+                      <div className="text-sm font-bold text-black">
+                        {stats.hasPreferences ? "Set" : "Not set"}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="bg-gray-50 px-5 py-3">
-                  <div className="text-sm">
+                  <div className="mt-3 pt-3 border-t border-[#808080]">
                     <Link
                       to="/preferences"
-                      className="font-medium text-indigo-600 hover:text-indigo-500"
+                      className="text-xs font-bold text-[#000080] hover:underline"
                     >
                       Manage preferences →
                     </Link>
                   </div>
-                </div>
-              </div>
+                </Windows98ReadingPane>
 
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
+                <Windows98ReadingPane>
+                  <div className="flex items-center mb-3">
                     <div className="flex-shrink-0">
-                      <span className="text-2xl">📧</span>
+                      <span className="text-xl">📧</span>
                     </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">
-                          Newsletters
-                        </dt>
-                        <dd className="text-lg font-medium text-gray-900">
-                          {stats.newsletters}
-                        </dd>
-                      </dl>
+                    <div className="ml-3 flex-1">
+                      <div className="text-xs font-bold text-black">
+                        Newsletters
+                      </div>
+                      <div className="text-sm font-bold text-black">
+                        {stats.newsletters}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="bg-gray-50 px-5 py-3">
-                  <div className="text-sm">
+                  <div className="mt-3 pt-3 border-t border-[#808080]">
                     <Link
                       to="/newsletters"
-                      className="font-medium text-indigo-600 hover:text-indigo-500"
+                      className="text-xs font-bold text-[#000080] hover:underline"
                     >
                       View newsletters →
                     </Link>
                   </div>
-                </div>
+                </Windows98ReadingPane>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Getting Started</h2>
-            <ol className="list-decimal list-inside space-y-2 text-gray-600">
-              <li>
-                <Link
-                  to="/preferences"
-                  className="text-indigo-600 hover:text-indigo-500"
-                >
-                  Set your preferences
-                </Link>{" "}
-                (interests, genres, venues, artists)
-              </li>
-              <li>Set your city location</li>
-              <li>Start receiving weekly newsletters with local events!</li>
-            </ol>
+            <Windows98ReadingPane>
+              <ol className="list-decimal list-inside space-y-2 text-xs text-black">
+                <li>
+                  <Link
+                    to="/preferences"
+                    className="text-[#000080] hover:underline font-bold"
+                  >
+                    Set your preferences
+                  </Link>{" "}
+                  (interests, genres, venues, artists)
+                </li>
+                <li>Set your city location</li>
+                <li>Start receiving weekly newsletters with local events!</li>
+              </ol>
+            </Windows98ReadingPane>
           </div>
-        </div>
+        </Windows98Window>
       </div>
     </Layout>
   );

@@ -21,7 +21,7 @@ export async function sendEmail(data: {
   }
 
   if (!FROM_EMAIL || FROM_EMAIL === 'noreply@example.com') {
-    const error = 'FROM_EMAIL not configured or using placeholder. Please set a valid FROM_EMAIL in .env. The domain must be verified in Resend.';
+    const error = 'FROM_EMAIL not configured or using placeholder. Please set FROM_EMAIL=the-newsletter@attendtion.eu (or your verified domain) in .env. The domain must be verified in Resend.';
     console.error(error);
     throw new Error(error);
   }

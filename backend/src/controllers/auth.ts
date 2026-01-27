@@ -74,6 +74,11 @@ export async function login(data: { email: string; password: string }) {
     throw new Error("Invalid email or password");
   }
 
+  // Check if user is verified (alpha testing requirement)
+  if (!user.verified) {
+    throw new Error("Your account is pending verification. Please contact support to activate your account.");
+  }
+
   // Generate token
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
     expiresIn: "30d",

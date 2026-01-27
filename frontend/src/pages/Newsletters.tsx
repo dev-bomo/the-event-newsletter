@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import LoadingOverlay from "../components/LoadingOverlay";
 import api from "../lib/api";
+import Windows98Window from "../components/Windows98Window";
+import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
 interface Event {
   id: string;
@@ -95,198 +97,179 @@ export default function Newsletters() {
   return (
     <Layout>
       <LoadingOverlay isVisible={generating} />
-      <div className="px-4 py-6 sm:px-0">
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Newsletters
-            </h1>
-            <p className="text-gray-600">
-              Generate and send personalized event newsletters.
-            </p>
-          </div>
-          <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            {generating ? "Generating..." : "Generate Newsletter"}
-          </button>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {success}
-          </div>
-        )}
-
-        {newsletters.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-8 text-center">
-            <p className="text-gray-500">
-              No newsletters yet. Generate one to get started!
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {newsletters.map((newsletter) => (
-              <div
-                key={newsletter.id}
-                className="bg-white shadow rounded-lg p-6"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-xl font-semibold">
-                      {newsletter.subject}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      Created: {new Date(newsletter.createdAt).toLocaleString()}
-                      {newsletter.sentAt && (
-                        <>
-                          {" "}
-                          • Sent: {new Date(newsletter.sentAt).toLocaleString()}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleSend(newsletter.id)}
-                    disabled={sending === newsletter.id}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
-                  >
-                    {sending === newsletter.id
-                      ? "Sending..."
-                      : newsletter.sentAt
-                      ? "Resend"
-                      : "Send"}
-                  </button>
-                </div>
-
-                <div className="mt-4">
-                  <h3 className="font-medium mb-2">
-                    Events ({newsletter.events.length}):
-                  </h3>
-                  <div className="space-y-3">
-                    {newsletter.events.map(({ event }) => {
-                      const score =
-                        event.score !== null && event.score !== undefined
-                          ? event.score
-                          : null;
-                      const scoreColor =
-                        score !== null
-                          ? score >= 80
-                            ? "bg-green-500"
-                            : score >= 60
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                          : "bg-gray-500";
-                      const scoreLabel =
-                        score !== null
-                          ? score >= 80
-                            ? "(Excellent match)"
-                            : score >= 60
-                            ? "(Good match)"
-                            : "(Fair match)"
-                          : "";
-
-                      return (
-                        <div
-                          key={event.id}
-                          className="border-l-4 border-indigo-500 pl-4 py-2 bg-gray-50 rounded"
-                        >
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className="font-medium text-gray-900 flex-1">
-                              {event.title}
-                            </h4>
-                            {score !== null && (
-                              <span
-                                className={`${scoreColor} text-white text-xs font-bold px-2 py-1 rounded-full ml-2 whitespace-nowrap`}
-                              >
-                                {score}/100
-                              </span>
-                            )}
-                          </div>
-                          {event.description && (
-                            <p className="text-sm text-gray-600 mt-1">
-                              {event.description}
-                            </p>
-                          )}
-                          <div className="mt-2 text-sm text-gray-500">
-                            <span>
-                              📅 {new Date(event.date).toLocaleDateString()}
-                            </span>
-                            {event.time && (
-                              <span className="ml-4">🕐 {event.time}</span>
-                            )}
-                            <span className="ml-4">📍 {event.location}</span>
-                            {event.category && (
-                              <span className="ml-4">🏷️ {event.category}</span>
-                            )}
-                            {score !== null && (
-                              <span className="ml-4 text-xs">
-                                ⭐ Relevance: {score}/100 {scoreLabel}
-                              </span>
-                            )}
-                          </div>
-                          <a
-                            href={event.sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-indigo-600 hover:text-indigo-500 mt-2 inline-block"
-                          >
-                            Learn more →
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
+        <Windows98Window title="Newsletters">
+          <div className="space-y-4">
+            <div className="mb-4 flex justify-between items-center">
+              <div>
+                <p className="text-xs text-black">
+                  Generate and send personalized event newsletters.
+                </p>
               </div>
-            ))}
+              <button
+                onClick={handleGenerate}
+                disabled={generating}
+                className="win98-button disabled:opacity-50"
+              >
+                {generating ? "Generating..." : "Generate Newsletter"}
+              </button>
+            </div>
+
+            {error && (
+              <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-black mb-3">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-black mb-3">
+                {success}
+              </div>
+            )}
+
+            {newsletters.length === 0 ? (
+              <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-6 text-center">
+                <p className="text-xs text-black">
+                  No newsletters yet. Generate one to get started!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {newsletters.map((newsletter) => (
+                  <Windows98ReadingPane key={newsletter.id}>
+                    <div className="space-y-3">
+                      <h3 className="text-xs font-bold text-black">{newsletter.subject}</h3>
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="text-xs text-black">
+                            Created: {new Date(newsletter.createdAt).toLocaleString()}
+                            {newsletter.sentAt && (
+                              <>
+                                {" "}
+                                • Sent: {new Date(newsletter.sentAt).toLocaleString()}
+                              </>
+                            )}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleSend(newsletter.id)}
+                          disabled={sending === newsletter.id}
+                          className="win98-button disabled:opacity-50"
+                        >
+                          {sending === newsletter.id
+                            ? "Sending..."
+                            : newsletter.sentAt
+                            ? "Resend"
+                            : "Send"}
+                        </button>
+                      </div>
+
+                      <div>
+                        <h3 className="text-xs font-bold text-black mb-2">
+                          Events ({newsletter.events.length}):
+                        </h3>
+                        <div className="space-y-2">
+                          {newsletter.events.map(({ event }) => {
+                            const score =
+                              event.score !== null && event.score !== undefined
+                                ? event.score
+                                : null;
+                            const scoreColor =
+                              score !== null
+                                ? score >= 80
+                                  ? "bg-[#00ff00]"
+                                  : score >= 60
+                                  ? "bg-[#ffff00]"
+                                  : "bg-[#ff0000]"
+                                : "bg-[#808080]";
+                            const scoreLabel =
+                              score !== null
+                                ? score >= 80
+                                  ? "(Excellent match)"
+                                  : score >= 60
+                                  ? "(Good match)"
+                                  : "(Fair match)"
+                                : "";
+
+                            return (
+                              <div
+                                key={event.id}
+                                className="border-l-2 border-[#000080] pl-2 py-2 bg-[#c0c0c0] border border-[#808080]"
+                              >
+                                <div className="flex justify-between items-start mb-1">
+                                  <h4 className="text-xs font-bold text-black flex-1">
+                                    {event.title}
+                                  </h4>
+                                  {score !== null && (
+                                    <span
+                                      className={`${scoreColor} text-black text-xs font-bold px-2 py-0.5 ml-2 whitespace-nowrap border border-black`}
+                                    >
+                                      {score}/100
+                                    </span>
+                                  )}
+                                </div>
+                                {event.description && (
+                                  <p className="text-xs text-black mt-1">
+                                    {event.description}
+                                  </p>
+                                )}
+                                <div className="mt-1 text-xs text-black">
+                                  <span>
+                                    📅 {new Date(event.date).toLocaleDateString()}
+                                  </span>
+                                  {event.time && (
+                                    <span className="ml-3">🕐 {event.time}</span>
+                                  )}
+                                  <span className="ml-3">📍 {event.location}</span>
+                                  {event.category && (
+                                    <span className="ml-3">🏷️ {event.category}</span>
+                                  )}
+                                  {score !== null && (
+                                    <span className="ml-3">
+                                      ⭐ Relevance: {score}/100 {scoreLabel}
+                                    </span>
+                                  )}
+                                </div>
+                                <a
+                                  href={event.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-[#000080] hover:underline mt-2 inline-block font-bold"
+                                >
+                                  Learn more →
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </Windows98ReadingPane>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </Windows98Window>
       </div>
 
       {/* Raw AI Response Modal */}
       {showDumpModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-bold text-gray-900">
-                Raw AI Response
-              </h2>
-              <button
-                onClick={() => setShowDumpModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
-              >
-                ×
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4">
-              {rawResponses.map((response, index) => (
-                <div key={index} className="mb-4">
-                  <h3 className="font-semibold text-sm text-gray-700 mb-2">
-                    Response {index + 1}:
-                  </h3>
-                  <pre className="bg-gray-100 p-4 rounded text-xs overflow-x-auto whitespace-pre-wrap break-words">
-                    {response}
-                  </pre>
-                </div>
-              ))}
-            </div>
-            <div className="p-4 border-t flex justify-end">
-              <button
-                onClick={() => setShowDumpModal(false)}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-              >
-                Close
-              </button>
-            </div>
+          <div className="max-w-4xl w-full max-h-[90vh]">
+            <Windows98Window title="Raw AI Response" onClose={() => setShowDumpModal(false)}>
+              <div className="space-y-3 max-h-[80vh] overflow-y-auto">
+                {rawResponses.map((response, index) => (
+                  <div key={index} className="mb-3">
+                    <h3 className="text-xs font-bold text-black mb-2">
+                      Response {index + 1}:
+                    </h3>
+                    <pre className="bg-[#ffffff] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-3 text-xs overflow-x-auto whitespace-pre-wrap break-words text-black">
+                      {response}
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            </Windows98Window>
           </div>
         </div>
       )}

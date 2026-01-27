@@ -17,6 +17,7 @@ model User {
   name              String?
   city              String?
   profile           String?   // AI-generated profile for event discovery
+  verified          Boolean   @default(false) // Alpha testing: users must be verified to log in
   resetCode         String?
   resetCodeExpiresAt DateTime?
   createdAt         DateTime  @default(now())

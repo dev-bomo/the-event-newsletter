@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { prisma } from '../lib/prisma.js';
 
 export interface AuthRequest extends Request {
   userId?: string;
 }
 
-export function authenticateToken(
+export async function authenticateToken(
   req: AuthRequest,
   res: Response,
   next: NextFunction
@@ -24,6 +25,19 @@ export function authenticateToken(
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
+    
+    // Check if user is verified (alpha testing requirement)
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { verified: true },
+    });
+
+    if (!user || !user.verified) {
+      return res.status(403).json({ 
+        error: 'Your account is pending verification. Please contact support to activate your account.' 
+      });
+    }
+
     req.userId = decoded.userId;
     next();
   } catch (error) {

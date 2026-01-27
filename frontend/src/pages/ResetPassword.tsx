@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import LanguagePicker from "../components/LanguagePicker";
 import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
+import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -51,33 +52,37 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <div className="flex justify-center mb-6">
-            <img
-              src={logo}
-              alt="The Newsletter"
-              className="h-16 w-auto"
-            />
+          <div className="flex justify-center mb-8">
+            <Windows98ReadingPane className="w-64">
+              <div className="flex items-center justify-center px-4 py-2">
+                <img
+                  src={logo}
+                  alt="The Newsletter"
+                  className="h-12 w-auto"
+                />
+              </div>
+            </Windows98ReadingPane>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-2xl font-bold text-black">
             {t("auth.resetPassword")}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-xs text-black">
             {t("auth.enterResetCodeAndPassword")}
           </p>
         </div>
 
         {success ? (
-          <div className="bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded">
-            <p className="font-medium">{t("auth.passwordResetSuccess")}</p>
-            <p className="text-sm mt-1">{t("auth.redirectingToLogin")}</p>
+          <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
+            <p className="font-bold">{t("auth.passwordResetSuccess")}</p>
+            <p className="text-xs mt-1">{t("auth.redirectingToLogin")}</p>
           </div>
         ) : (
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
                 {error}
               </div>
             )}
@@ -85,7 +90,7 @@ export default function ResetPassword() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-xs font-bold text-black mb-1"
               >
                 {t("auth.email")}
               </label>
@@ -95,7 +100,7 @@ export default function ResetPassword() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="win98-input w-full"
                 placeholder={t("auth.email")}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -105,7 +110,7 @@ export default function ResetPassword() {
             <div>
               <label
                 htmlFor="code"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-xs font-bold text-black mb-1"
               >
                 {t("auth.resetCode")}
               </label>
@@ -115,7 +120,7 @@ export default function ResetPassword() {
                 type="text"
                 required
                 maxLength={6}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-center text-2xl tracking-widest"
+                className="win98-input w-full text-center text-xl tracking-widest"
                 placeholder="000000"
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
@@ -125,7 +130,7 @@ export default function ResetPassword() {
             <div>
               <label
                 htmlFor="newPassword"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-xs font-bold text-black mb-1"
               >
                 {t("auth.newPassword")}
               </label>
@@ -136,7 +141,7 @@ export default function ResetPassword() {
                 autoComplete="new-password"
                 required
                 minLength={8}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="win98-input w-full"
                 placeholder={t("auth.newPassword")}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -146,7 +151,7 @@ export default function ResetPassword() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
+                className="block text-xs font-bold text-black mb-1"
               >
                 {t("auth.confirmPassword")}
               </label>
@@ -157,7 +162,7 @@ export default function ResetPassword() {
                 autoComplete="new-password"
                 required
                 minLength={8}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="win98-input w-full"
                 placeholder={t("auth.confirmPassword")}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -168,7 +173,7 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="win98-button w-full disabled:opacity-50"
               >
                 {loading ? t("common.loading") : t("auth.resetPassword")}
               </button>
@@ -179,7 +184,7 @@ export default function ResetPassword() {
                 <div>
                   <Link
                     to="/login"
-                    className="font-medium text-indigo-600 hover:text-indigo-500"
+                    className="font-bold text-[#000080] hover:underline text-xs"
                   >
                     {t("auth.rememberPassword")} {t("auth.signInHere")}
                   </Link>
@@ -187,7 +192,7 @@ export default function ResetPassword() {
                 <div>
                   <Link
                     to="/forgot-password"
-                    className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                    className="text-xs font-bold text-[#000080] hover:underline"
                   >
                     {t("auth.requestNewCode")}
                   </Link>
