@@ -41,5 +41,6 @@ yarn-error.log*
 Thumbs.db
 
 # Prisma
-backend/prisma/migrations/
+# Note: migrations/ should be committed for production deployments
+# backend/prisma/migrations/
 
