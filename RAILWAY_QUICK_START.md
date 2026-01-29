@@ -16,7 +16,6 @@
 - **Settings** → **Root Directory**: Set to `backend`
 - **Variables** → Add:
   ```
-  DATABASE_PROVIDER=postgresql
   JWT_SECRET=<generate-random-string>
   PERPLEXITY_API_KEY=<your-key>
   RESEND_API_KEY=<your-key>
@@ -58,16 +57,14 @@
 ## Troubleshooting
 
 **Backend won't start?**
-- Check `DATABASE_PROVIDER=postgresql` is set
-- Verify `DATABASE_URL` is set (auto-set by Railway)
+- Verify `DATABASE_URL` is set (auto-set by Railway when you add PostgreSQL)
 
 **Frontend can't connect to backend?**
 - Check `VITE_API_URL` points to correct backend URL
 - Verify backend `ALLOWED_ORIGINS` includes frontend URL
 
 **Database connection errors?**
-- Ensure PostgreSQL service is running
-- Check `DATABASE_PROVIDER=postgresql` is set
+- Ensure PostgreSQL service is running and linked to backend
 
 ## Next Steps
 

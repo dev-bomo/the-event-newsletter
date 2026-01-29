@@ -34,7 +34,6 @@ This guide will help you deploy both the frontend and backend to Railway.
 
 4. Set environment variables in Railway dashboard:
    - `DATABASE_URL` - Automatically set by Railway (from PostgreSQL service)
-   - `DATABASE_PROVIDER=postgresql` - Set this to use PostgreSQL
    - `JWT_SECRET` - Your JWT secret (generate a strong random string)
    - `PERPLEXITY_API_KEY` - Your Perplexity API key
    - `RESEND_API_KEY` - Your Resend API key
@@ -118,7 +117,6 @@ After deploying the frontend, update the backend's `FRONTEND_URL` environment va
 ### Backend
 ```
 DATABASE_URL=<auto-set-by-railway>
-DATABASE_PROVIDER=postgresql
 JWT_SECRET=<your-secret>
 PERPLEXITY_API_KEY=<your-key>
 RESEND_API_KEY=<your-key>
@@ -146,7 +144,6 @@ railway run --service backend npm run prisma:migrate:deploy
 ## Troubleshooting
 
 ### Database Connection Issues
-- Ensure `DATABASE_PROVIDER=postgresql` is set
 - Check that `DATABASE_URL` is correctly set by Railway
 - Verify the database service is running
 
