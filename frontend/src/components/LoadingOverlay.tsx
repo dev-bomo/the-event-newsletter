@@ -48,7 +48,7 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
     // Planning: 6s, Searching: 16s, Merging: 8s
     // Finalizing stays until work is done (isVisible becomes false)
     const stepDurations = [6000, 16000, 8000];
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const advanceStep = (stepIndex: number) => {
       // Fade out
