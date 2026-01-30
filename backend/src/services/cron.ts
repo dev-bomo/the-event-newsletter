@@ -31,7 +31,7 @@ export function setupCronJobs() {
       for (const user of users) {
         try {
           // Generate newsletter
-          const newsletter = await generateNewsletter(user.id);
+          const { newsletter } = await generateNewsletter(user.id);
 
           // Send newsletter
           await sendNewsletter(user.id, newsletter.id);

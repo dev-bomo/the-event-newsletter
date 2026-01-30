@@ -9,7 +9,7 @@ export async function sendEmail(data: {
   to: string;
   subject: string;
   html: string;
-}) {
+}): Promise<{ data?: { id: string } | null; error?: unknown }> {
   console.log('sendEmail called:', { to: data.to, subject: data.subject });
   console.log('RESEND_API_KEY exists:', !!RESEND_API_KEY);
   console.log('FROM_EMAIL:', FROM_EMAIL);
@@ -40,7 +40,7 @@ export async function sendEmail(data: {
     });
     
     console.log('Email sent successfully:', result);
-    return result;
+    return result as { data?: { id: string } | null; error?: unknown };
   } catch (error: any) {
     console.error('Error sending email - full error:', error);
     console.error('Error response:', error.response?.data);
