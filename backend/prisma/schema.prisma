@@ -5,6 +5,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// PostgreSQL only (required for Railway; Prisma does not support dynamic provider)
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
