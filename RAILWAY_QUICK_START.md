@@ -38,6 +38,13 @@
 - Add `FRONTEND_URL=https://<your-frontend-service>.railway.app`
 - Add `ALLOWED_ORIGINS=https://<your-frontend-service>.railway.app`
 
+### 5b. Watch Paths (optional but recommended)
+So only the service that changed redeploys when you push:
+- **Backend service** → Settings → **Watch Paths** → add: `backend/**`
+- **Frontend service** → Settings → **Watch Paths** → add: `frontend/**`
+
+Then pushes that only touch `frontend/` redeploy the frontend; pushes that only touch `backend/` redeploy the backend.
+
 ### 6. Database Access
 - Go to PostgreSQL service → Query tab (for web SQL editor)
 - Or use `DATABASE_URL` with any PostgreSQL client
@@ -50,6 +57,7 @@
 ## Important Notes
 
 - **Root Directory**: Must be set for each service (`backend` and `frontend`)
+- **Watch Paths**: Set `backend/**` and `frontend/**` so only the changed service redeploys
 - **Migrations**: Run automatically on backend deploy via `railway:start` script
 - **CORS**: Make sure `ALLOWED_ORIGINS` includes your frontend URL
 - **Environment Variables**: Set in Railway dashboard, not in `.env` files
