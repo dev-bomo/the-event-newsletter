@@ -13,12 +13,10 @@
 body {
   margin: 0;
   font-family: 'MS Sans Serif', 'MS Sans Serif 8pt', 'MS Sans Serif', sans-serif;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: unset;
+  /* Smooth text and images on modern/hi-DPI displays; retro look comes from font and UI, not jagged rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   /* Background is set dynamically via wallpaper picker */
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
 }
 
 /* Windows 98 Button Styles */
