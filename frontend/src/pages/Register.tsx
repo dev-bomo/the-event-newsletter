@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
 import LanguagePicker from "../components/LanguagePicker";
+import WallpaperPicker from "../components/WallpaperPicker";
 import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 import Windows98Window from "../components/Windows98Window";
@@ -16,6 +17,7 @@ export default function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [messageExpanded, setMessageExpanded] = useState(false);
+  const [wallpaperPickerOpen, setWallpaperPickerOpen] = useState(false);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
@@ -83,7 +85,7 @@ export default function Register() {
                       onClick={() => setMessageExpanded(false)}
                       className="text-xs font-bold text-[#000080] hover:underline"
                     >
-                      Hide details
+                      {t("login.hideDetails")}
                     </button>
                   </div>
                 )}
@@ -91,9 +93,10 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setMessageExpanded(true)}
-                    className="text-xs font-bold text-[#000080] hover:underline"
+                    title={t("login.expandHint")}
+                    className="text-sm font-bold text-black text-left hover:text-[#000080] transition-colors"
                   >
-                    {t("login.title")} →
+                    {t("login.description")} ▼
                   </button>
                 )}
               </div>
@@ -184,12 +187,17 @@ export default function Register() {
                   {t("auth.alreadyHaveAccount")} {t("auth.signInHere")}
                 </Link>
                 <div className="flex justify-center">
-                  <LanguagePicker />
+                  <LanguagePicker onWallpaperClick={() => setWallpaperPickerOpen(true)} />
                 </div>
               </div>
             </form>
           </div>
         </Windows98Window>
+
+        <WallpaperPicker
+          isOpen={wallpaperPickerOpen}
+          onClose={() => setWallpaperPickerOpen(false)}
+        />
       </div>
     </div>
   );

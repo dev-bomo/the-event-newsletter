@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import api from "../lib/api";
@@ -7,6 +8,7 @@ import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
@@ -16,6 +18,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Allow testing wizard via ?testWizard=1 (works even when preferences are already set)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("testWizard") === "1") {
+      navigate("/onboarding?testWizard=1");
+      return;
+    }
+
     const fetchStats = async () => {
       try {
         // Check if user has completed onboarding (has city set)
@@ -52,20 +61,17 @@ export default function Dashboard() {
   return (
     <Layout>
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-        <Windows98Window title="Dashboard">
+        <Windows98Window title={t("dashboard.title")}>
           <div className="space-y-6">
-            <div>
-              <h1 className="text-xl font-bold text-black mb-2">
-                Welcome{user?.name ? `, ${user.name}` : ""}!
+            <div className="mb-6">
+              <h1 className="text-xl font-bold text-black">
+                {t("dashboard.welcome")}
+                {user?.name ? `, ${user.name}` : ""}!
               </h1>
-              <p className="text-xs text-black mb-6">
-                Get started by connecting your social accounts and setting up your
-                preferences.
-              </p>
             </div>
 
             {loading ? (
-              <div className="text-black text-xs">Loading...</div>
+              <div className="text-black text-xs">{t("common.loading")}</div>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
                 <Windows98ReadingPane>
@@ -75,10 +81,10 @@ export default function Dashboard() {
                     </div>
                     <div className="ml-3 flex-1">
                       <div className="text-xs font-bold text-black">
-                        Preferences
+                        {t("dashboard.stats.preferences")}
                       </div>
                       <div className="text-sm font-bold text-black">
-                        {stats.hasPreferences ? "Set" : "Not set"}
+                        {stats.hasPreferences ? t("dashboard.stats.set") : t("dashboard.stats.notSet")}
                       </div>
                     </div>
                   </div>
@@ -87,7 +93,7 @@ export default function Dashboard() {
                       to="/preferences"
                       className="text-xs font-bold text-[#000080] hover:underline"
                     >
-                      Manage preferences →
+                      {t("dashboard.managePreferences")} →
                     </Link>
                   </div>
                 </Windows98ReadingPane>
@@ -99,7 +105,7 @@ export default function Dashboard() {
                     </div>
                     <div className="ml-3 flex-1">
                       <div className="text-xs font-bold text-black">
-                        Newsletters
+                        {t("dashboard.stats.newsletters")}
                       </div>
                       <div className="text-sm font-bold text-black">
                         {stats.newsletters}
@@ -111,7 +117,7 @@ export default function Dashboard() {
                       to="/newsletters"
                       className="text-xs font-bold text-[#000080] hover:underline"
                     >
-                      View newsletters →
+                      {t("dashboard.viewNewsletters")} →
                     </Link>
                   </div>
                 </Windows98ReadingPane>
@@ -119,19 +125,34 @@ export default function Dashboard() {
             )}
 
             <Windows98ReadingPane>
+              <h3 className="text-xs font-bold text-black mb-2">
+                {t("dashboard.howItWorks.title")}
+              </h3>
               <ol className="list-decimal list-inside space-y-2 text-xs text-black">
                 <li>
                   <Link
                     to="/preferences"
                     className="text-[#000080] hover:underline font-bold"
                   >
-                    Set your preferences
-                  </Link>{" "}
-                  (interests, genres, venues, artists)
+                    {t("dashboard.howItWorks.step1")}
+                  </Link>
                 </li>
-                <li>Set your city location</li>
-                <li>Start receiving weekly newsletters with local events!</li>
+                <li>{t("dashboard.howItWorks.step2")}</li>
+                <li>{t("dashboard.howItWorks.step3")}</li>
+                <li>{t("dashboard.howItWorks.step4")}</li>
+                <li>{t("dashboard.howItWorks.step5")}</li>
               </ol>
+            </Windows98ReadingPane>
+
+            <Windows98ReadingPane>
+              <h3 className="text-xs font-bold text-black mb-2">
+                {t("dashboard.limits.title")}
+              </h3>
+              <ul className="list-disc list-inside space-y-1 text-xs text-black">
+                <li>{t("dashboard.limits.preferences")}</li>
+                <li>{t("dashboard.limits.newsletters")}</li>
+                <li>{t("dashboard.limits.autoNewsletter")}</li>
+              </ul>
             </Windows98ReadingPane>
           </div>
         </Windows98Window>

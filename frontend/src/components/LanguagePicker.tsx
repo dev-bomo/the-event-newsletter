@@ -5,7 +5,9 @@ interface LanguagePickerProps {
   onWallpaperClick?: () => void;
 }
 
-export default function LanguagePicker({ onWallpaperClick }: LanguagePickerProps) {
+export default function LanguagePicker({
+  onWallpaperClick,
+}: LanguagePickerProps) {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -26,7 +28,10 @@ export default function LanguagePicker({ onWallpaperClick }: LanguagePickerProps
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -43,6 +48,7 @@ export default function LanguagePicker({ onWallpaperClick }: LanguagePickerProps
   return (
     <div className="relative inline-block w-12" ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="appearance-none bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] pl-7 pr-6 py-1 text-xs font-bold w-full hover:bg-[#d4d0c8] focus:outline-none h-8"
       >
@@ -73,9 +79,12 @@ export default function LanguagePicker({ onWallpaperClick }: LanguagePickerProps
               {languages.map((lang) => (
                 <button
                   key={lang.code}
+                  type="button"
                   onClick={() => handleLanguageChange(lang.code)}
                   className={`w-full text-left px-3 py-2 text-xs font-bold text-black hover:bg-[#000080] hover:text-white ${
-                    currentLanguage.code === lang.code ? "bg-[#000080] text-white" : ""
+                    currentLanguage.code === lang.code
+                      ? "bg-[#000080] text-white"
+                      : ""
                   }`}
                 >
                   <span className="mr-2">{lang.flag}</span>
@@ -86,6 +95,7 @@ export default function LanguagePicker({ onWallpaperClick }: LanguagePickerProps
                 <>
                   <div className="border-t border-[#808080] my-1" />
                   <button
+                    type="button"
                     onClick={() => {
                       onWallpaperClick();
                       setIsOpen(false);
@@ -93,7 +103,7 @@ export default function LanguagePicker({ onWallpaperClick }: LanguagePickerProps
                     className="w-full text-left px-3 py-2 text-xs font-bold text-black hover:bg-[#000080] hover:text-white"
                   >
                     <span className="mr-2">🖼️</span>
-                    Change Wallpaper
+                    Wallpaper
                   </button>
                 </>
               )}

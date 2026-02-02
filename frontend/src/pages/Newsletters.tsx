@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import LoadingOverlay from "../components/LoadingOverlay";
 import api from "../lib/api";
@@ -28,6 +29,7 @@ interface Newsletter {
 }
 
 export default function Newsletters() {
+  const { t } = useTranslation();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export default function Newsletters() {
         `/newsletters/generate${showDump ? "?showDump=true" : ""}`
       );
       
-      setSuccess("Newsletter generated!");
+      setSuccess(t("newsletters.generated"));
       await loadNewsletters();
       
       // If showDump is enabled and we have raw responses, show modal
@@ -72,7 +74,7 @@ export default function Newsletters() {
         setShowDumpModal(true);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to generate newsletter");
+      setError(err.response?.data?.error || t("common.generateNewsletterFailed"));
     } finally {
       setGenerating(false);
     }
@@ -85,10 +87,10 @@ export default function Newsletters() {
 
     try {
       await api.post(`/newsletters/${newsletterId}/send`);
-      setSuccess("Newsletter sent!");
+      setSuccess(t("newsletters.sentSuccess"));
       await loadNewsletters();
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to send newsletter");
+      setError(err.response?.data?.error || t("common.sendNewsletterFailed"));
     } finally {
       setSending(null);
     }
@@ -98,22 +100,26 @@ export default function Newsletters() {
     <Layout>
       <LoadingOverlay isVisible={generating} />
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-        <Windows98Window title="Newsletters">
+        <Windows98Window title={t("newsletters.title")}>
           <div className="space-y-4">
-            <div className="mb-4 flex justify-between items-center">
-              <div>
-                <p className="text-xs text-black">
-                  Generate and send personalized event newsletters.
-                </p>
-              </div>
+            <p className="text-xs text-black mb-2">
+              {t("newsletters.autoNewsletterInfo")}
+            </p>
+            <div className="mb-4 flex justify-between items-center flex-wrap gap-2">
+              <div className="flex-1 min-w-0" />
               <button
                 onClick={handleGenerate}
-                disabled={generating}
+                disabled={generating || newsletters.length >= 5}
                 className="win98-button disabled:opacity-50"
               >
-                {generating ? "Generating..." : "Generate Newsletter"}
+                {generating ? t("newsletters.generating") : t("newsletters.generate")}
               </button>
             </div>
+            {newsletters.length >= 5 && (
+              <p className="text-xs text-[#800000] mb-2">
+                {t("newsletters.limitReached")}
+              </p>
+            )}
 
             {error && (
               <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-black mb-3">
@@ -130,7 +136,7 @@ export default function Newsletters() {
             {newsletters.length === 0 ? (
               <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-6 text-center">
                 <p className="text-xs text-black">
-                  No newsletters yet. Generate one to get started!
+                  {t("newsletters.noNewsletters")}
                 </p>
               </div>
             ) : (
@@ -142,31 +148,31 @@ export default function Newsletters() {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="text-xs text-black">
-                            Created: {new Date(newsletter.createdAt).toLocaleString()}
+                            {t("newsletters.created")}: {new Date(newsletter.createdAt).toLocaleString()}
                             {newsletter.sentAt && (
                               <>
                                 {" "}
-                                • Sent: {new Date(newsletter.sentAt).toLocaleString()}
+                                • {t("newsletters.sent")}: {new Date(newsletter.sentAt).toLocaleString()}
                               </>
                             )}
                           </p>
                         </div>
                         <button
                           onClick={() => handleSend(newsletter.id)}
-                          disabled={sending === newsletter.id}
+                          disabled={sending === newsletter.id || !!newsletter.sentAt}
                           className="win98-button disabled:opacity-50"
                         >
                           {sending === newsletter.id
-                            ? "Sending..."
+                            ? t("newsletters.sending")
                             : newsletter.sentAt
-                            ? "Resend"
-                            : "Send"}
+                            ? t("newsletters.sent")
+                            : t("newsletters.send")}
                         </button>
                       </div>
 
                       <div>
                         <h3 className="text-xs font-bold text-black mb-2">
-                          Events ({newsletter.events.length}):
+                          {t("newsletters.events")} ({newsletter.events.length}):
                         </h3>
                         <div className="space-y-2">
                           {newsletter.events.map(({ event }) => {
@@ -185,10 +191,10 @@ export default function Newsletters() {
                             const scoreLabel =
                               score !== null
                                 ? score >= 80
-                                  ? "(Excellent match)"
+                                  ? `(${t("newsletters.excellentMatch")})`
                                   : score >= 60
-                                  ? "(Good match)"
-                                  : "(Fair match)"
+                                  ? `(${t("newsletters.goodMatch")})`
+                                  : `(${t("newsletters.fairMatch")})`
                                 : "";
 
                             return (
@@ -226,7 +232,7 @@ export default function Newsletters() {
                                   )}
                                   {score !== null && (
                                     <span className="ml-3">
-                                      ⭐ Relevance: {score}/100 {scoreLabel}
+                                      ⭐ {t("newsletters.relevance")}: {score}/100 {scoreLabel}
                                     </span>
                                   )}
                                 </div>
@@ -236,7 +242,7 @@ export default function Newsletters() {
                                   rel="noopener noreferrer"
                                   className="text-xs text-[#000080] hover:underline mt-2 inline-block font-bold"
                                 >
-                                  Learn more →
+                                  {t("newsletters.learnMore")} →
                                 </a>
                               </div>
                             );
@@ -256,12 +262,12 @@ export default function Newsletters() {
       {showDumpModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-4xl w-full max-h-[90vh]">
-            <Windows98Window title="Raw AI Response" onClose={() => setShowDumpModal(false)}>
+            <Windows98Window title={t("newsletters.rawAiResponse")} onClose={() => setShowDumpModal(false)}>
               <div className="space-y-3 max-h-[80vh] overflow-y-auto">
                 {rawResponses.map((response, index) => (
                   <div key={index} className="mb-3">
                     <h3 className="text-xs font-bold text-black mb-2">
-                      Response {index + 1}:
+                      {t("newsletters.response")} {index + 1}:
                     </h3>
                     <pre className="bg-[#ffffff] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-3 text-xs overflow-x-auto whitespace-pre-wrap break-words text-black">
                       {response}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
@@ -56,6 +57,7 @@ interface EventSource {
 }
 
 export default function Preferences() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const [preferences, setPreferences] = useState<Preferences>({
     interests: [],
@@ -75,6 +77,11 @@ export default function Preferences() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [resetting, setResetting] = useState(false);
+  const [preferenceLimits, setPreferenceLimits] = useState<{
+    canEdit: boolean;
+    remaining?: number;
+    nextAllowedAt?: string;
+  } | null>(null);
 
   useEffect(() => {
     loadPreferences();
@@ -86,8 +93,10 @@ export default function Preferences() {
         api.get("/preferences"),
         api.get("/event-sources"),
       ]);
-      setPreferences(prefsRes.data);
+      const { _limits, ...prefs } = prefsRes.data;
+      setPreferences(prefs);
       setEventSources(sourcesRes.data);
+      setPreferenceLimits(_limits || null);
       // Load city from user object if available
       if (user?.city) {
         setCity(user.city);
@@ -131,22 +140,20 @@ export default function Preferences() {
     setSuccess("");
 
     try {
-      await Promise.all([
-        api.put("/preferences", preferences),
-        api.put("/preferences/city", { city }),
-      ]);
-      setSuccess("Preferences saved!");
+      await api.put("/preferences", { ...preferences, city });
+      const prefsRes = await api.get("/preferences");
+      const { _limits } = prefsRes.data;
+      setPreferenceLimits(_limits || null);
+      setSuccess(t("preferences.preferencesSection.saved"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to save preferences");
+      setError(err.response?.data?.error || t("common.savePreferencesFailed"));
     } finally {
       setSaving(false);
     }
   };
 
   const handleReset = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to reset all preferences? This will clear all your interests, genres, event types, venues, and artists. This action cannot be undone."
-    );
+    const confirmed = window.confirm(t("preferences.resetConfirm"));
 
     if (!confirmed) {
       return;
@@ -159,9 +166,12 @@ export default function Preferences() {
     try {
       const response = await api.delete("/preferences/reset");
       setPreferences(response.data);
-      setSuccess("All preferences have been reset.");
+      const prefsRes = await api.get("/preferences");
+      const { _limits } = prefsRes.data;
+      setPreferenceLimits(_limits || null);
+      setSuccess(t("preferences.resetSuccess"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to reset preferences");
+      setError(err.response?.data?.error || t("common.resetPreferencesFailed"));
     } finally {
       setResetting(false);
     }
@@ -180,9 +190,12 @@ export default function Preferences() {
       setEventSources([...eventSources, response.data]);
       setNewEventSourceUrl("");
       setNewEventSourceName("");
-      setSuccess("Event source added!");
+      const prefsRes = await api.get("/preferences");
+      const { _limits } = prefsRes.data;
+      setPreferenceLimits(_limits || null);
+      setSuccess(t("preferences.eventSources.added"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to add event source");
+      setError(err.response?.data?.error || t("common.addEventSourceFailed"));
     } finally {
       setAddingSource(false);
     }
@@ -193,54 +206,33 @@ export default function Preferences() {
     try {
       await api.delete(`/event-sources/${id}`);
       setEventSources(eventSources.filter((s) => s.id !== id));
-      setSuccess("Event source removed!");
+      const prefsRes = await api.get("/preferences");
+      const { _limits } = prefsRes.data;
+      setPreferenceLimits(_limits || null);
+      setSuccess(t("preferences.eventSources.removed"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to remove event source");
+      setError(err.response?.data?.error || t("common.removeEventSourceFailed"));
     }
   };
 
   const categories: Array<{
     key: keyof Preferences;
-    label: string;
-    placeholder: string;
+    labelKey: string;
+    placeholderKey: string;
   }> = [
-    {
-      key: "interests",
-      label: "Interests",
-      placeholder:
-        "e.g., music, movies, theater, philosophy, programming, art, sports, food, literature, science",
-    },
-    {
-      key: "genres",
-      label: "Genres",
-      placeholder:
-        "e.g., rock, drama, comedy, existentialism, web development, contemporary, basketball, fine dining, poetry, physics",
-    },
-    {
-      key: "eventTypes",
-      label: "Event Types",
-      placeholder:
-        "e.g., concerts, film screenings, plays, lectures, hackathons, exhibitions, games, food festivals, book readings, talks",
-    },
-    {
-      key: "venues",
-      label: "Venues",
-      placeholder:
-        "e.g., Blue Note, Lincoln Center, The Met, Madison Square Garden, local theaters, art galleries, concert halls",
-    },
-    {
-      key: "artists",
-      label: "Artists",
-      placeholder: "e.g., artist names, bands",
-    },
+    { key: "interests", labelKey: "interests", placeholderKey: "interests" },
+    { key: "genres", labelKey: "genres", placeholderKey: "genres" },
+    { key: "eventTypes", labelKey: "eventTypes", placeholderKey: "eventTypes" },
+    { key: "venues", labelKey: "venues", placeholderKey: "venues" },
+    { key: "artists", labelKey: "artists", placeholderKey: "artists" },
   ];
 
   if (loading) {
     return (
       <Layout>
         <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-          <Windows98Window title="Preferences">
-            <div className="p-3 text-xs text-black">Loading...</div>
+          <Windows98Window title={t("preferences.title")}>
+            <div className="p-3 text-xs text-black">{t("common.loading")}</div>
           </Windows98Window>
         </div>
       </Layout>
@@ -250,12 +242,40 @@ export default function Preferences() {
   return (
     <Layout>
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-        <Windows98Window title="Preferences">
+        <Windows98Window title={t("preferences.title")}>
           <div className="space-y-4">
             <div className="mb-4">
-              <p className="text-xs text-black">
-                Manage your preferences to get personalized event recommendations.
+              <p className="text-xs text-black mb-2">
+                {t("preferences.description")}
               </p>
+              {preferenceLimits && (
+                <p className="text-xs text-black">
+                  {preferenceLimits.canEdit ? (
+                    preferenceLimits.remaining !== undefined &&
+                    preferenceLimits.remaining >= 0 ? (
+                      <span>
+                        {t("preferencesLimits.remaining", {
+                          remaining: preferenceLimits.remaining,
+                        })}
+                      </span>
+                    ) : null
+                  ) : preferenceLimits.nextAllowedAt ? (
+                    <span className="text-[#800000]">
+                      {t("preferencesLimits.limitReached", {
+                        days: Math.ceil(
+                          (new Date(preferenceLimits.nextAllowedAt).getTime() -
+                            Date.now()) /
+                            (1000 * 60 * 60 * 24)
+                        ),
+                      })}
+                    </span>
+                  ) : (
+                    <span className="text-[#800000]">
+                      {t("preferencesLimits.explanation")}
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
 
             {error && (
@@ -273,10 +293,11 @@ export default function Preferences() {
             {/* Section 1: Enter or Fine-tune Preferences */}
             <Windows98ReadingPane>
               <div className="space-y-4">
-                <h3 className="text-xs font-bold text-black mb-2">1. Enter Your Preferences</h3>
+                <h3 className="text-xs font-bold text-black mb-2">
+                  {t("preferences.preferencesSection.title")}
+                </h3>
                 <p className="text-xs text-black mb-3">
-                  Add your interests, genres, venues, artists, and other preferences
-                  to get personalized event recommendations.
+                  {t("preferences.preferencesSection.description")}
                 </p>
 
                 <div className="mb-4">
@@ -284,7 +305,7 @@ export default function Preferences() {
                     htmlFor="city"
                     className="block text-xs font-bold text-black mb-1"
                   >
-                    City
+                    {t("preferences.preferencesSection.city")}
                   </label>
                   <input
                     type="text"
@@ -292,13 +313,15 @@ export default function Preferences() {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className="win98-input block w-full"
-                    placeholder="e.g., New York, NY"
+                    placeholder={t("preferences.preferencesSection.cityPlaceholder")}
                   />
                 </div>
 
                 {categories.map((category) => (
                   <div key={category.key} className="mb-4">
-                    <h3 className="text-xs font-bold text-black mb-2">{category.label}</h3>
+                    <h3 className="text-xs font-bold text-black mb-2">
+                      {t(`preferences.categories.${category.labelKey}`)}
+                    </h3>
                     <div className="flex gap-2 mb-2">
                       <input
                         type="text"
@@ -313,13 +336,13 @@ export default function Preferences() {
                           }
                         }}
                         className="win98-input flex-1"
-                        placeholder={category.placeholder}
+                        placeholder={t(`preferences.placeholders.${category.placeholderKey}`)}
                       />
                       <button
                         onClick={() => addItem(category.key)}
                         className="win98-button"
                       >
-                        Add
+                        {t("common.add")}
                       </button>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -346,7 +369,7 @@ export default function Preferences() {
                       })}
                       {preferences[category.key].length === 0 && (
                         <span className="text-xs text-black">
-                          No items added yet
+                          {t("preferences.preferencesSection.noItems")}
                         </span>
                       )}
                     </div>
@@ -358,10 +381,11 @@ export default function Preferences() {
             {/* Section 2: Enter Links for Event Postings */}
             <Windows98ReadingPane>
               <div className="space-y-3">
-                <h3 className="text-xs font-bold text-black mb-2">2. Enter Links for Event Postings</h3>
+                <h3 className="text-xs font-bold text-black mb-2">
+                  {t("preferences.eventSources.title")}
+                </h3>
                 <p className="text-xs text-black mb-3">
-                  Add URLs to venues or event providers you normally follow. These
-                  will be checked for events in your newsletter.
+                  {t("preferences.eventSources.description")}
                 </p>
 
                 <form onSubmit={handleAddEventSource} className="mb-3">
@@ -371,7 +395,7 @@ export default function Preferences() {
                       value={newEventSourceUrl}
                       onChange={(e) => setNewEventSourceUrl(e.target.value)}
                       className="win98-input flex-1"
-                      placeholder="https://example.com/events or https://theater.com/calendar"
+                      placeholder={t("preferences.eventSources.urlPlaceholder")}
                       required
                     />
                     <input
@@ -379,14 +403,14 @@ export default function Preferences() {
                       value={newEventSourceName}
                       onChange={(e) => setNewEventSourceName(e.target.value)}
                       className="win98-input w-48"
-                      placeholder="Name (optional)"
+                      placeholder={t("preferences.eventSources.namePlaceholder")}
                     />
                     <button
                       type="submit"
-                      disabled={addingSource}
+                      disabled={addingSource || (preferenceLimits ? !preferenceLimits.canEdit : false)}
                       className="win98-button disabled:opacity-50"
                     >
-                      {addingSource ? "Adding..." : "Add"}
+                      {addingSource ? t("preferences.eventSources.adding") : t("common.add")}
                     </button>
                   </div>
                 </form>
@@ -424,16 +448,17 @@ export default function Preferences() {
                           </div>
                           <button
                             onClick={() => handleDeleteEventSource(source.id)}
-                            className="ml-4 win98-button text-xs"
+                            disabled={preferenceLimits ? !preferenceLimits.canEdit : false}
+                            className="ml-4 win98-button text-xs disabled:opacity-50"
                           >
-                            Remove
+                            {t("common.remove")}
                           </button>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs text-black">No event sources added yet</p>
+                  <p className="text-xs text-black">{t("preferences.eventSources.noSources")}</p>
                 )}
               </div>
             </Windows98ReadingPane>
@@ -441,17 +466,17 @@ export default function Preferences() {
             <div className="flex justify-between mt-4">
               <button
                 onClick={handleReset}
-                disabled={resetting}
+                disabled={resetting || (preferenceLimits ? !preferenceLimits.canEdit : false)}
                 className="win98-button disabled:opacity-50"
               >
-                {resetting ? "Resetting..." : "Reset All Preferences"}
+                {resetting ? t("preferences.resetting") : t("preferences.resetAll")}
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || (preferenceLimits ? !preferenceLimits.canEdit : false)}
                 className="win98-button disabled:opacity-50"
               >
-                {saving ? "Saving..." : "Save Preferences"}
+                {saving ? t("preferences.saving") : t("preferences.savePreferences")}
               </button>
             </div>
           </div>

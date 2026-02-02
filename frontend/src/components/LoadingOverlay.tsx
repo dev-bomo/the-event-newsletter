@@ -1,32 +1,17 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface LoadingStep {
   id: string;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
 }
 
-const steps: LoadingStep[] = [
-  {
-    id: "planning",
-    label: "Planning",
-    description: "Generating the list of sources to look through...",
-  },
-  {
-    id: "searching",
-    label: "Searching",
-    description: "Crawling sources and finding events...",
-  },
-  {
-    id: "merging",
-    label: "Merging",
-    description: "Scoring and deduplicating events...",
-  },
-  {
-    id: "finalizing",
-    label: "Finalizing",
-    description: "Preparing your personalized newsletter...",
-  },
+const STEPS: LoadingStep[] = [
+  { id: "planning", labelKey: "loading.planning", descriptionKey: "loading.planningDesc" },
+  { id: "searching", labelKey: "loading.searching", descriptionKey: "loading.searchingDesc" },
+  { id: "merging", labelKey: "loading.merging", descriptionKey: "loading.mergingDesc" },
+  { id: "finalizing", labelKey: "loading.finalizing", descriptionKey: "loading.finalizingDesc" },
 ];
 
 interface LoadingOverlayProps {
@@ -34,6 +19,7 @@ interface LoadingOverlayProps {
 }
 
 export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
+  const { t } = useTranslation();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
@@ -60,7 +46,7 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
       
       // If we've reached Finalizing (index 3), stop advancing
       // It will stay on Finalizing until isVisible becomes false
-      if (stepIndex < steps.length - 1) {
+      if (stepIndex < STEPS.length - 1) {
         timeoutId = setTimeout(
           () => advanceStep(stepIndex + 1),
           stepDurations[stepIndex] || 3000
@@ -78,14 +64,14 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
 
   if (!isVisible) return null;
 
-  const currentStep = steps[currentStepIndex];
+  const currentStep = STEPS[currentStepIndex];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] p-4 max-w-md w-full mx-4">
         {/* Windows 98 Title Bar */}
         <div className="bg-[#000080] text-white px-2 py-1 flex items-center justify-between mb-4">
-          <span className="text-xs font-bold">Generating Newsletter</span>
+          <span className="text-xs font-bold">{t("loading.newsletter")}</span>
         </div>
 
         {/* Windows 98 Style Spinner/Progress */}
@@ -108,7 +94,7 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
                     <div
                       key={i}
                       className={`w-1 h-4 bg-white ${
-                        Math.floor((currentStepIndex / steps.length) * 5) > i ? 'opacity-100' : 'opacity-50'
+                        Math.floor((currentStepIndex / STEPS.length) * 5) > i ? 'opacity-100' : 'opacity-50'
                       }`}
                       style={{
                         animation: `pulse 1s ease-in-out infinite ${i * 0.1}s`
@@ -129,10 +115,10 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
                 isFading ? "opacity-0" : "opacity-100"
               }`}
             >
-              {currentStep.label}
+              {t(currentStep.labelKey)}
             </h3>
             <span className="text-xs font-bold text-black">
-              {currentStepIndex + 1} / {steps.length}
+              {currentStepIndex + 1} / {STEPS.length}
             </span>
           </div>
           <p
@@ -140,13 +126,13 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
               isFading ? "opacity-0" : "opacity-100"
             }`}
           >
-            {currentStep.description}
+            {t(currentStep.descriptionKey)}
           </p>
         </div>
 
         {/* Progress indicator blocks (Windows 98 style) */}
         <div className="flex justify-center gap-1">
-          {steps.map((step, index) => (
+          {STEPS.map((step, index) => (
             <div
               key={step.id}
               className={`h-4 w-4 transition-all duration-300 ${

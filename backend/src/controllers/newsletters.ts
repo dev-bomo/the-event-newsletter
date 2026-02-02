@@ -19,7 +19,19 @@ export async function getUserNewsletters(userId: string) {
   });
 }
 
+const NEWSLETTER_LIMIT_PER_USER = 5;
+
 export async function generateNewsletter(userId: string) {
+  // Check newsletter limit
+  const count = await prisma.newsletter.count({
+    where: { userId },
+  });
+  if (count >= NEWSLETTER_LIMIT_PER_USER) {
+    throw new Error(
+      "You've reached the limit of 5 newsletters. Contact support to request more."
+    );
+  }
+
   // Discover events for user
   const { events, rawResponses } = await discoverEventsForUser(userId);
 
@@ -124,10 +136,9 @@ export async function sendNewsletter(userId: string, newsletterId: string) {
     throw new Error("Newsletter not found");
   }
 
-  // Allow resending for testing (comment out in production if needed)
-  // if (newsletter.sentAt) {
-  //   throw new Error('Newsletter already sent');
-  // }
+  if (newsletter.sentAt) {
+    throw new Error("This newsletter has already been sent.");
+  }
 
   // Send email
   console.log("Sending newsletter email to:", newsletter.user.email);

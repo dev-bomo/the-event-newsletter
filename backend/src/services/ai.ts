@@ -285,7 +285,7 @@ async function searchEventsForTask(
   const today = new Date();
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days).`;
+  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days). Do NOT include events that have already passed or are in the past.`;
 
   const prompt = `From this site/search: "${task}"
 
@@ -304,9 +304,9 @@ For each event, return:
 - sourceUrl (URL to the event page or source)
 - imageUrl (optional)
 
-Return a JSON object with a "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events within the next 30 days.`;
+Return a JSON object with a "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events within the next 30 days. Exclude any events that have already passed.`;
 
-  const systemPrompt = `You are extracting raw event data. Return only valid JSON with an "events" array. Do not score or deduplicate.`;
+  const systemPrompt = `You are extracting raw event data. Return only valid JSON with an "events" array. Do not score or deduplicate. Never include events from the past.`;
 
   console.log(`Step 2: Searching for task: "${task.substring(0, 50)}..."`);
   // sonar-pro model automatically enables web search
@@ -357,7 +357,7 @@ async function mergeAndScoreEvents(
 
   const prompt = `You have been given ${allRawEvents.length} raw event candidates. Your task is to:
 
-1. Filter events to ONLY include those within the next 30 days (${dateWindow})
+1. Filter events to ONLY include those within the next 30 days (${dateWindow}). Exclude ALL events that have already passed or are in the past.
 2. Filter to keep ONLY events in ${city} - the location field MUST contain "${city}" or a clear reference to ${city}. Exclude festivals, events, or venues in other cities.
 3. Deduplicate by artist/band (if multiple events feature the same performer, keep only the most relevant one)
 4. Limit to maximum 4 events per sourceUrl (if multiple events share the same sourceUrl, keep only the top 4 by relevance)
@@ -381,7 +381,7 @@ Return a JSON object with an "events" array. Each event must have:
 Raw events to process:
 ${eventsJson}`;
 
-  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events.`;
+  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events. Never include events from the past.`;
 
   console.log(`Step 3: Merging and scoring ${allRawEvents.length} events...`);
   const rawResponse = await callPerplexity(
@@ -444,7 +444,7 @@ async function repairOrExpandEvents(
   const today = new Date();
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days only).`;
+  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days only). Do NOT include events that have already passed.`;
 
   const prompt = `${instruction}
 
@@ -469,7 +469,7 @@ Return a JSON object with an "events" array containing 20-30 events. Each event 
 
 Only include real, verifiable events. Deduplicate by artist/band. Limit to maximum 4 events per sourceUrl.`;
 
-  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array.`;
+  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array. Never include events from the past.`;
 
   console.log(`Step 4: Repairing/expanding events (issue: ${issue})...`);
   // sonar-pro model automatically enables web search

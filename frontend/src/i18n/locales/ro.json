@@ -15,12 +15,18 @@
     "edit": "Editează",
     "loading": "Se încarcă...",
     "error": "Eroare",
-    "success": "Succes"
+    "success": "Succes",
+    "savePreferencesFailed": "Salvarea preferințelor a eșuat",
+    "addEventSourceFailed": "Adăugarea sursei de evenimente a eșuat",
+    "removeEventSourceFailed": "Eliminarea sursei de evenimente a eșuat",
+    "generateNewsletterFailed": "Generarea newsletterului a eșuat",
+    "sendNewsletterFailed": "Trimiterea newsletterului a eșuat",
+    "resetPreferencesFailed": "Resetarea preferințelor a eșuat"
   },
   "nav": {
     "dashboard": "Panou de control",
     "preferences": "Preferințe",
-    "newsletters": "Buletine"
+    "newsletters": "Newslettere"
   },
   "auth": {
     "login": "Conectare",
@@ -30,14 +36,14 @@
     "name": "Nume",
     "confirmPassword": "Confirmă parola",
     "newPassword": "Parolă Nouă",
-    "loginTitle": "Buletinul de Evenimente",
-    "registerTitle": "Buletinul de Evenimente",
+    "loginTitle": "Newsletterul de Evenimente",
+    "registerTitle": "Newsletterul de Evenimente",
     "loginFailed": "Conectarea a eșuat",
     "registerFailed": "Înregistrarea a eșuat",
     "alreadyHaveAccount": "Ai deja un cont?",
     "dontHaveAccount": "Nu ai cont?",
     "signInHere": "Conectează-te aici",
-    "createAccountHere": "Creează cont aici",
+    "createAccountHere": "Creează-ți cont aici",
     "forgotPassword": "Ai Uitat Parola",
     "forgotPasswordQuestion": "Ai uitat parola?",
     "resetPasswordHere": "Resetează-o aici",
@@ -55,31 +61,47 @@
     "rememberPassword": "Îți amintești parola?",
     "requestNewCode": "Solicită un cod nou",
     "passwordsDoNotMatch": "Parolele nu se potrivesc",
-    "passwordTooShort": "Parola trebuie să aibă cel puțin 8 caractere"
+    "passwordTooShort": "Parola trebuie să aibă cel puțin 8 caractere",
+    "resetPasswordFailed": "Resetarea parolei a eșuat"
   },
   "login": {
     "title": "Rămâi Conectat la Evenimente Locale, Nu la Rețele Sociale",
-    "description": "Buletin săptămânal de evenimente. Curat de tine.",
-    "whyExists": "De ce există acest lucru:",
-    "why1": "🚫 Fără navigare pe rețele sociale — evită capcana dopaminei din feed-urile nesfârșite",
-    "why2": "📧 Doar email săptămânal — intenționat, nu adictiv. Primești evenimente pentru luna următoare, așa că ai timp să planifici",
-    "why3": "✂️ Curat pentru tine — filtrăm evenimentele astfel încât să nu pierzi timp să le parcurgi pe toate",
+    "readMore": "Apasă pentru a citi mai multe despre acest serviciu",
+    "expandHint": "Apasă pentru explicația completă",
+    "hideDetails": "Ascunde detaliile",
+    "description": "Newsletter săptămânal de evenimente. Curat de tine.",
+    "whyExists": "De ce există attendtion:",
+    "why1": "🚫 Ca sa nu fie nevoie sa cauti pe rețele sociale — evită capcana dopaminei din feed-urile nesfârșite",
+    "why2": "📧 Sa reduca problema la un email săptămânal — intenționat, nu pasiv. Primești evenimente pentru luna următoare, așa că ai timp să planifici",
+    "why3": "✂️ Special pentru tine — uneori sunt multe evenimente. AI-ul te ajuta sa le elimini pe cele care nu te intereseaza",
     "failure": "Cum vei ști că funcționează:",
     "failure1": "✅ Vezi evenimente la care chiar vrei să participi",
     "failure2": "✅ Lista este suficient de scurtă încât să nu simți că \"descoperi\" sau navighezi"
   },
   "dashboard": {
     "title": "Panou de control",
-    "welcome": "Bun venit înapoi!",
+    "welcome": "Bun venit înapoi",
     "stats": {
-      "preferences": "Preferințe Setate",
-      "newsletters": "Buletine Trimise"
+      "preferences": "Preferințe",
+      "newsletters": "Newslettere",
+      "set": "Setate",
+      "notSet": "Nesetate"
     },
-    "gettingStarted": {
-      "title": "Începe",
-      "step1": "Setează preferințele tale (interese, genuri, locuri, artiști) în Preferințe.",
-      "step2": "Setează locația orașului tău.",
-      "step3": "Generează primul tău buletin pentru a vedea ce evenimente găsim pentru tine!"
+    "managePreferences": "Gestionează preferințele",
+    "viewNewsletters": "Vezi newsletterele",
+    "howItWorks": {
+      "title": "Cum funcționează",
+      "step1": "Setează preferințele tale (oraș, interese, etc.)",
+      "step2": "Un profil va fi generat și atașat contului tău.",
+      "step3": "Încearcă să generezi un newsletter. Sistemul va face crawling, își va face magia și va încerca să găsească evenimente pentru tine. Vezi dacă se potrivesc.",
+      "step4": "Dacă da, perfect! Ești gata și vei primi un newsletter nou în fiecare joi pe la ora 16.",
+      "step5": "Dacă nu, încearcă să ajustezi preferințele? Ține minte că nu e determinist—evenimentele găsite nu vor fi mereu aceleași. Dar cele importante ar trebui să fie acolo."
+    },
+    "limits": {
+      "title": "Limite de utilizare (pentru gestionarea costurilor AI)",
+      "preferences": "Preferințe: Poți edita de 5 ori în total, apoi o dată pe săptămână. Asta ține sub control costurile AI pentru profil.",
+      "newsletters": "Newslettere: Poți genera până la 5 newslettere. Aceleasi considerente legate de cost.",
+      "autoNewsletter": "Auto-newsletter: În fiecare joi la ora 16:00 generăm și trimitem prin email newsletterul tău personalizat automat."
     }
   },
   "preferences": {
@@ -105,37 +127,93 @@
     },
     "eventSources": {
       "title": "2. Introdu Link-uri pentru Anunțuri de Evenimente",
-      "description": "Adaugă URL-uri către locuri sau furnizori de evenimente pe care îi urmărești de obicei. Acestea vor fi verificate pentru evenimente în buletinul tău.",
+      "description": "Adaugă URL-uri către locuri sau furnizori de evenimente pe care îi urmărești de obicei. Acestea vor fi verificate pentru evenimente în newsletterul tău.",
       "urlPlaceholder": "https://exemplu.com/evenimente sau https://teatru.com/calendar",
       "namePlaceholder": "Nume (opțional)",
       "noSources": "Nu au fost adăugate surse de evenimente încă",
       "added": "Sursa de evenimente a fost adăugată!",
-      "removed": "Sursa de evenimente a fost eliminată!"
+      "removed": "Sursa de evenimente a fost eliminată!",
+      "adding": "Se adaugă..."
+    },
+    "resetAll": "Resetează Toate Preferințele",
+    "resetting": "Se resetează...",
+    "savePreferences": "Salvează Preferințele",
+    "saving": "Se salvează...",
+    "resetConfirm": "Ești sigur că vrei să resetezi toate preferințele? Se vor șterge toate interesele, genurile, tipurile de evenimente, locurile și artiștii. Această acțiune nu poate fi anulată.",
+    "resetSuccess": "Toate preferințele au fost resetate.",
+    "categories": {
+      "interests": "Interese",
+      "genres": "Genuri",
+      "eventTypes": "Tipuri de Evenimente",
+      "venues": "Locuri",
+      "artists": "Artiști"
+    },
+    "placeholders": {
+      "interests": "ex., muzică, filme, teatru, filozofie, programare",
+      "genres": "ex., rock, dramă, comedie, existențialism",
+      "eventTypes": "ex., concerte, proiecții de film, piese de teatru",
+      "venues": "ex., Sala Palatului, Teatrul Național",
+      "artists": "ex., nume de artiști, trupe"
     }
   },
   "onboarding": {
     "intro": "Hai să te configurăm. Adaugă interesele, genurile, locurile, artiștii și alte preferințe mai jos. Poți edita preferințele mai târziu oricând și vei avea nevoie foarte rar să le actualizezi—configurează-le o dată și gata.",
     "step1": "Setează Preferințe",
-    "step2": "Previzualizează Buletinul",
+    "step2": "Previzualizează Newsletterul",
     "step1Title": "Pasul 1: Setează Preferințele Tale",
-    "step2Title": "Pasul 2: Previzualizează Buletinul Tău",
-    "step2Description": "Generează un buletin de probă pentru a vedea ce fel de evenimente vom găsi pentru tine.",
-    "generatePreview": "Generează Previzualizare Buletin",
+    "step2Title": "Pasul 2: Previzualizează Newsletterul Tău",
+    "step2Description": "Generează un newsletter de probă pentru a vedea ce fel de evenimente vom găsi pentru tine.",
+    "generatePreview": "Generează Previzualizare Newsletter",
     "generating": "Se generează...",
     "eventsFound": "Evenimente Găsite",
     "completeSetup": "Finalizează Configurarea",
-    "continueToPreview": "Continuă la Previzualizare →"
+    "continueToPreview": "Continuă la Previzualizare →",
+    "setCityRequired": "Te rugăm să setezi orașul"
   },
   "newsletters": {
-    "title": "Buletine",
-    "generate": "Generează Buletin",
+    "title": "Newslettere",
+    "description": "Generează și trimite newslettere personalizate de evenimente.",
+    "generate": "Generează Newsletter",
+    "generating": "Se generează...",
     "send": "Trimite",
     "resend": "Retrimite",
+    "sending": "Se trimite...",
     "sent": "Trimis",
     "subject": "Subiect",
     "events": "Evenimente",
-    "noNewsletters": "Niciun buletin încă. Generează primul!",
-    "generated": "Buletinul a fost generat!",
-    "sentSuccess": "Buletinul a fost trimis cu succes!"
+    "noNewsletters": "Niciun newsletter încă. Generează unul pentru a începe!",
+    "generated": "Newsletterul a fost generat!",
+    "sentSuccess": "Newsletterul a fost trimis!",
+    "created": "Creat",
+    "learnMore": "Află mai multe",
+    "excellentMatch": "Potrivire excelentă",
+    "goodMatch": "Potrivire bună",
+    "fairMatch": "Potrivire acceptabilă",
+    "relevance": "Relevanță",
+    "autoNewsletterInfo": "Generăm și trimitem automat newsletterul tău în fiecare joi la ora 16:00. Poți și genera/trimite manual mai jos (maxim 5 newslettere per cont—contactează suportul pentru mai multe). Asta ne ajută să gestionăm costurile AI.",
+    "limitReached": "Ai atins limita de 5 newslettere. Contactează suportul pentru a solicita mai multe.",
+    "rawAiResponse": "Răspuns AI Brut",
+    "response": "Răspuns"
+  },
+  "preferencesLimits": {
+    "title": "Limită editări preferințe",
+    "limitReached": "Ai folosit cele 5 editări de preferințe. Poți edita din nou peste {{days}} zile (limită săptămânală pentru gestionarea costurilor AI).",
+    "remaining": "{{remaining}} editări de preferințe rămase (apoi o dată pe săptămână).",
+    "explanation": "Limităm editările preferințelor pentru a controla costurile de generare AI a profilului."
+  },
+  "wallpaper": {
+    "title": "Fundal Desktop",
+    "select": "Selectează un fundal pentru desktop:"
+  },
+  "loading": {
+    "newsletter": "Se generează Newsletterul",
+    "planning": "Planificare",
+    "planningDesc": "Se generează lista surselor de verificat...",
+    "searching": "Căutare",
+    "searchingDesc": "Se răscolesc sursele și se găsesc evenimente...",
+    "merging": "Combinare",
+    "mergingDesc": "Se calculează scoruri și se elimină duplicatele...",
+    "finalizing": "Finalizare",
+    "finalizingDesc": "Se pregătește newsletterul tău personalizat..."
   }
 }

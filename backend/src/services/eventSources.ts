@@ -47,7 +47,7 @@ Please return a JSON object with an "events" array. Each event should have:
 - imageUrl (optional, link to event image)
 - score (number from 0-100 indicating how well this event matches the user's profile, where 100 is a perfect match. If no profile is provided, use 75 as a default since the user has explicitly added this source)
 
-Only include events that are happening in the next 30 days.
+Only include events that are happening in the next 30 days. Do NOT include events that have already passed or are in the past.
 Focus on concerts, theater, community gatherings, art shows, and similar local events.
 If no events are found or the page doesn't contain events, return an empty array.
 

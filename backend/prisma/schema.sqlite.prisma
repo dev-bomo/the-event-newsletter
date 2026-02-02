@@ -1,13 +1,11 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// SQLite schema for local development (use schema.prisma for PostgreSQL/Railway)
 
 generator client {
   provider = "prisma-client-js"
 }
 
-// PostgreSQL only (required for Railway; Prisma does not support dynamic provider)
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -21,8 +19,8 @@ model User {
   verified               Boolean   @default(false) // Alpha testing: users must be verified to log in
   resetCode              String?
   resetCodeExpiresAt     DateTime?
-  preferenceEditCount    Int       @default(0)  // Count of preference edits (saves, add/remove event sources); limit 5 then 1/week
-  lastPreferenceEditAt   DateTime? // Last time preferences were edited (for weekly limit)
+  preferenceEditCount    Int       @default(0)
+  lastPreferenceEditAt   DateTime?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
@@ -146,4 +144,3 @@ model OAuthToken {
   @@index([userId])
   @@index([platform])
 }
-

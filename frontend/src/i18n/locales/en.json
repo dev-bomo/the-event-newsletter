@@ -15,7 +15,13 @@
     "edit": "Edit",
     "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "savePreferencesFailed": "Failed to save preferences",
+    "addEventSourceFailed": "Failed to add event source",
+    "removeEventSourceFailed": "Failed to remove event source",
+    "generateNewsletterFailed": "Failed to generate newsletter",
+    "sendNewsletterFailed": "Failed to send newsletter",
+    "resetPreferencesFailed": "Failed to reset preferences"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -55,10 +61,14 @@
     "rememberPassword": "Remember your password?",
     "requestNewCode": "Request a new code",
     "passwordsDoNotMatch": "Passwords do not match",
-    "passwordTooShort": "Password must be at least 8 characters"
+    "passwordTooShort": "Password must be at least 8 characters",
+    "resetPasswordFailed": "Failed to reset password"
   },
   "login": {
     "title": "Stay Connected to Local Events, Not Social Media",
+    "readMore": "Click to read more about this service",
+    "expandHint": "Click for full explanation",
+    "hideDetails": "Hide details",
     "description": "Weekly event newsletter. Curated by you.",
     "whyExists": "Why this exists:",
     "why1": "🚫 No social media browsing — avoid the dopamine trap of endless feeds",
@@ -70,16 +80,28 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "welcome": "Welcome back!",
+    "welcome": "Welcome back",
     "stats": {
-      "preferences": "Preferences Set",
-      "newsletters": "Newsletters Sent"
+      "preferences": "Preferences",
+      "newsletters": "Newsletters",
+      "set": "Set",
+      "notSet": "Not set"
     },
-    "gettingStarted": {
-      "title": "Getting Started",
-      "step1": "Set your preferences (interests, genres, venues, artists) in Preferences.",
-      "step2": "Set your city location.",
-      "step3": "Generate your first newsletter to see what events we find for you!"
+    "managePreferences": "Manage preferences",
+    "viewNewsletters": "View newsletters",
+    "howItWorks": {
+      "title": "How it works",
+      "step1": "Set your preferences (town, interests, etc.)",
+      "step2": "A profile will be generated and attached to your account.",
+      "step3": "Try generating a newsletter. The system will do some crawling, work its magic, and do its best. See if the events it finds fit you.",
+      "step4": "If they do, great! You're all set and you'll get a new newsletter every Thu around 4 PM.",
+      "step5": "If they don't, try fiddling with your preferences? Just remember this is not deterministic—the events it finds won't always be the same ones. But the important ones should be there."
+    },
+    "limits": {
+      "title": "Usage Limits (to manage AI costs)",
+      "preferences": "Preferences: You can edit 5 times total, then once per week. This keeps profile AI costs under control.",
+      "newsletters": "Newsletters: You can generate up to 5 newsletters. Need more? Contact support.",
+      "autoNewsletter": "Auto-newsletter: Every Thursday at 4 PM we generate and email your personalized newsletter automatically."
     }
   },
   "preferences": {
@@ -110,7 +132,28 @@
       "namePlaceholder": "Name (optional)",
       "noSources": "No event sources added yet",
       "added": "Event source added!",
-      "removed": "Event source removed!"
+      "removed": "Event source removed!",
+      "adding": "Adding..."
+    },
+    "resetAll": "Reset All Preferences",
+    "resetting": "Resetting...",
+    "savePreferences": "Save Preferences",
+    "saving": "Saving...",
+    "resetConfirm": "Are you sure you want to reset all preferences? This will clear all your interests, genres, event types, venues, and artists. This action cannot be undone.",
+    "resetSuccess": "All preferences have been reset.",
+    "categories": {
+      "interests": "Interests",
+      "genres": "Genres",
+      "eventTypes": "Event Types",
+      "venues": "Venues",
+      "artists": "Artists"
+    },
+    "placeholders": {
+      "interests": "e.g., music, movies, theater, philosophy, programming",
+      "genres": "e.g., rock, drama, comedy, existentialism",
+      "eventTypes": "e.g., concerts, film screenings, plays, lectures",
+      "venues": "e.g., Blue Note, Lincoln Center, local theaters",
+      "artists": "e.g., artist names, bands"
     }
   },
   "onboarding": {
@@ -124,18 +167,53 @@
     "generating": "Generating...",
     "eventsFound": "Events Found",
     "completeSetup": "Complete Setup",
-    "continueToPreview": "Continue to Preview →"
+    "continueToPreview": "Continue to Preview →",
+    "setCityRequired": "Please set your city"
   },
   "newsletters": {
     "title": "Newsletters",
+    "description": "Generate and send personalized event newsletters.",
     "generate": "Generate Newsletter",
+    "generating": "Generating...",
     "send": "Send",
     "resend": "Resend",
+    "sending": "Sending...",
     "sent": "Sent",
     "subject": "Subject",
     "events": "Events",
-    "noNewsletters": "No newsletters yet. Generate your first one!",
+    "noNewsletters": "No newsletters yet. Generate one to get started!",
     "generated": "Newsletter generated!",
-    "sentSuccess": "Newsletter sent successfully!"
+    "sentSuccess": "Newsletter sent!",
+    "created": "Created",
+    "learnMore": "Learn more",
+    "excellentMatch": "Excellent match",
+    "goodMatch": "Good match",
+    "fairMatch": "Fair match",
+    "relevance": "Relevance",
+    "autoNewsletterInfo": "We automatically generate and email your newsletter every Thursday at 4 PM. You can also generate and send manually below (up to 5 newsletters per account—contact support for more). This helps us manage AI costs.",
+    "limitReached": "You've reached the limit of 5 newsletters. Contact support to request more.",
+    "rawAiResponse": "Raw AI Response",
+    "response": "Response"
+  },
+  "preferencesLimits": {
+    "title": "Preference edit limit",
+    "limitReached": "You've used your 5 preference edits. You can edit again in {{days}} days (rolling weekly limit to manage AI costs).",
+    "remaining": "{{remaining}} preference edits remaining (then once per week).",
+    "explanation": "We limit preference edits to control AI profile generation costs."
+  },
+  "wallpaper": {
+    "title": "Desktop Wallpaper",
+    "select": "Select a wallpaper for your desktop:"
+  },
+  "loading": {
+    "newsletter": "Generating Newsletter",
+    "planning": "Planning",
+    "planningDesc": "Generating the list of sources to look through...",
+    "searching": "Searching",
+    "searchingDesc": "Crawling sources and finding events...",
+    "merging": "Merging",
+    "mergingDesc": "Scoring and deduplicating events...",
+    "finalizing": "Finalizing",
+    "finalizingDesc": "Preparing your personalized newsletter..."
   }
 }

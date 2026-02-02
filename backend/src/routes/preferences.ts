@@ -6,6 +6,7 @@ import {
   updateUserPreferences,
   updateUserCity,
   resetPreferences,
+  checkPreferenceEditLimit,
 } from "../controllers/preferences.js";
 
 const router = Router();
@@ -16,6 +17,7 @@ const updatePreferencesSchema = z.object({
   eventTypes: z.array(z.string()).optional(),
   venues: z.array(z.string()).optional(),
   artists: z.array(z.string()).optional(),
+  city: z.string().min(1).optional(), // Optional: when provided, updates city in same request (counts as 1 edit)
 });
 
 const updateCitySchema = z.object({
@@ -25,7 +27,15 @@ const updateCitySchema = z.object({
 router.get("/", async (req: AuthRequest, res) => {
   try {
     const preferences = await getUserPreferences(req.userId!);
-    res.json(preferences);
+    const limitStatus = await checkPreferenceEditLimit(req.userId!);
+    res.json({
+      ...preferences,
+      _limits: {
+        canEdit: limitStatus.allowed,
+        remaining: limitStatus.remaining,
+        nextAllowedAt: limitStatus.nextAllowedAt?.toISOString(),
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -34,7 +44,8 @@ router.get("/", async (req: AuthRequest, res) => {
 router.put("/", async (req: AuthRequest, res) => {
   try {
     const data = updatePreferencesSchema.parse(req.body);
-    const preferences = await updateUserPreferences(req.userId!, data);
+    const { city, ...prefsData } = data;
+    const preferences = await updateUserPreferences(req.userId!, prefsData, city);
     res.json(preferences);
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -36,10 +36,9 @@ NODE_ENV=development
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 
 # Database
-# For PostgreSQL:
-DATABASE_URL="postgresql://user:password@localhost:5432/newsletter?schema=public"
-# For SQLite (development):
-# DATABASE_URL="file:./dev.db"
+# Local dev (SQLite): use file:./dev.db and run npm run dev
+DATABASE_URL="file:./dev.db"
+# Production / Railway uses PostgreSQL (set in Railway dashboard)
 
 # AI Services
 PERPLEXITY_API_KEY=your-perplexity-api-key
@@ -62,17 +61,19 @@ ENCRYPTION_KEY=your-64-character-hex-encryption-key
 FRONTEND_URL=http://localhost:5173
 ```
 
-### 3. Set Up Database
+### 3. Set Up Database (local)
+
+For **local development** we use SQLite. From the repo root:
 
 ```bash
 cd backend
-
-# Generate Prisma client
-npm run prisma:generate
-
-# Run migrations
-npm run prisma:migrate
+# Ensure .env has DATABASE_URL=file:./dev.db
+npm run dev
 ```
+
+`npm run dev` will generate the Prisma client for SQLite, run `prisma db push` to create/update tables in `dev.db`, then start the server. No separate migrate step needed for SQLite locally.
+
+(Railway/production uses PostgreSQL and `prisma migrate deploy` on deploy.)
 
 ### 4. Start Development Servers
 

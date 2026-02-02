@@ -45,7 +45,7 @@ export default function ResetPassword() {
         navigate("/login");
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to reset password");
+      setError(err.response?.data?.error || t("auth.resetPasswordFailed"));
     } finally {
       setLoading(false);
     }

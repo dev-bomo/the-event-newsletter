@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
 import LanguagePicker from "../components/LanguagePicker";
+import WallpaperPicker from "../components/WallpaperPicker";
 import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
@@ -14,7 +15,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showInfoWindow, setShowInfoWindow] = useState(true);
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [wallpaperPickerOpen, setWallpaperPickerOpen] = useState(false);
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
@@ -78,7 +80,7 @@ export default function Login() {
                       onClick={() => setShowInfoWindow(false)}
                       className="text-xs font-bold text-[#000080] hover:underline"
                     >
-                      Hide details
+                      {t("login.hideDetails")}
                     </button>
                   </div>
                 )}
@@ -86,9 +88,10 @@ export default function Login() {
                   <button
                     type="button"
                     onClick={() => setShowInfoWindow(true)}
-                    className="text-xs font-bold text-[#000080] hover:underline"
+                    title={t("login.expandHint")}
+                    className="text-sm font-bold text-black text-left hover:text-[#000080] transition-colors"
                   >
-                    {t("login.title")} →
+                    {t("login.description")} ▼
                   </button>
                 )}
               </div>
@@ -165,12 +168,17 @@ export default function Login() {
                   </Link>
                 </div>
                 <div className="flex justify-center">
-                  <LanguagePicker />
+                  <LanguagePicker onWallpaperClick={() => setWallpaperPickerOpen(true)} />
                 </div>
               </div>
             </form>
           </div>
         </Windows98Window>
+
+        <WallpaperPicker
+          isOpen={wallpaperPickerOpen}
+          onClose={() => setWallpaperPickerOpen(false)}
+        />
       </div>
     </div>
   );

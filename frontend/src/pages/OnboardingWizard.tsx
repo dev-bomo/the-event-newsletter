@@ -1,8 +1,29 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
+import Windows98Window from "../components/Windows98Window";
+import Windows98ReadingPane from "../components/Windows98ReadingPane";
+
+const LOGO_COLORS = [
+  "#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#EF4444",
+  "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#A855F7", "#EAB308",
+];
+function getTagColor(text: string): string {
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = text.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return LOGO_COLORS[Math.abs(hash) % LOGO_COLORS.length];
+}
+function hexToRgba(hex: string, opacity: number): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
 
 interface Preferences {
   interests: string[];
@@ -32,6 +53,7 @@ interface Newsletter {
 }
 
 export default function OnboardingWizard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, token, setAuth } = useAuthStore();
   const [currentStep, setCurrentStep] = useState(1);
@@ -74,8 +96,8 @@ export default function OnboardingWizard() {
     setLoadingPreferences(true);
     try {
       const response = await api.get("/preferences");
-      setPreferences(response.data);
-      // Load city from user object if available
+      const { _limits, ...prefs } = response.data;
+      setPreferences(prefs);
       if (user?.city) {
         setCity(user.city);
       }
@@ -108,9 +130,9 @@ export default function OnboardingWizard() {
       setEventSources([...eventSources, response.data]);
       setNewEventSourceUrl("");
       setNewEventSourceName("");
-      setSuccess("Event source added!");
+      setSuccess(t("preferences.eventSources.added"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to add event source");
+      setError(err.response?.data?.error || t("common.addEventSourceFailed"));
     } finally {
       setAddingSource(false);
     }
@@ -121,9 +143,9 @@ export default function OnboardingWizard() {
     try {
       await api.delete(`/event-sources/${id}`);
       setEventSources(eventSources.filter((s) => s.id !== id));
-      setSuccess("Event source removed!");
+      setSuccess(t("preferences.eventSources.removed"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to remove event source");
+      setError(err.response?.data?.error || t("common.removeEventSourceFailed"));
     }
   };
 
@@ -155,36 +177,30 @@ export default function OnboardingWizard() {
 
   const handleSavePreferencesAndContinue = async () => {
     setError("");
+    if (!city) {
+      setError(t("onboarding.setCityRequired"));
+      return;
+    }
     try {
-      await Promise.all([
-        api.put("/preferences", preferences),
-        api.put("/preferences/city", { city }),
-      ]);
-
-      if (!city) {
-        setError("Please set your city");
-        return;
-      }
+      await api.put("/preferences", { ...preferences, city });
 
       // Update user in auth store with new city
       if (user && token) {
         setAuth(token, { ...user, city });
       }
 
-      setSuccess("Preferences saved!");
+      setSuccess(t("preferences.preferencesSection.saved"));
       setTimeout(() => {
         setCurrentStep(2);
         setSuccess("");
       }, 1000);
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to save preferences");
+      setError(err.response?.data?.error || t("common.savePreferencesFailed"));
     }
   };
 
   const handleReset = async () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to reset all preferences? This will clear all your interests, genres, event types, venues, and artists. This action cannot be undone."
-    );
+    const confirmed = window.confirm(t("preferences.resetConfirm"));
 
     if (!confirmed) {
       return;
@@ -197,9 +213,9 @@ export default function OnboardingWizard() {
     try {
       const response = await api.delete("/preferences/reset");
       setPreferences(response.data);
-      setSuccess("All preferences have been reset.");
+      setSuccess(t("preferences.resetSuccess"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to reset preferences");
+      setError(err.response?.data?.error || t("common.resetPreferencesFailed"));
     } finally {
       setResetting(false);
     }
@@ -214,9 +230,9 @@ export default function OnboardingWizard() {
     try {
       const response = await api.post("/newsletters/generate");
       setNewsletter(response.data);
-      setSuccess("Newsletter generated!");
+      setSuccess(t("newsletters.generated"));
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to generate newsletter");
+      setError(err.response?.data?.error || t("common.generateNewsletterFailed"));
     } finally {
       setGenerating(false);
     }
@@ -228,371 +244,297 @@ export default function OnboardingWizard() {
 
   const categories: Array<{
     key: keyof Preferences;
-    label: string;
-    placeholder: string;
+    labelKey: string;
+    placeholderKey: string;
   }> = [
-    {
-      key: "interests",
-      label: "Interests",
-      placeholder:
-        "e.g., music, movies, theater, philosophy, programming, art, sports, food, literature, science",
-    },
-    {
-      key: "genres",
-      label: "Genres",
-      placeholder:
-        "e.g., rock, drama, comedy, existentialism, web development, contemporary, basketball, fine dining, poetry, physics",
-    },
-    {
-      key: "eventTypes",
-      label: "Event Types",
-      placeholder:
-        "e.g., concerts, film screenings, plays, lectures, hackathons, exhibitions, games, food festivals, book readings, talks",
-    },
-    {
-      key: "venues",
-      label: "Venues",
-      placeholder:
-        "e.g., Blue Note, Lincoln Center, The Met, Madison Square Garden, local theaters, art galleries, concert halls",
-    },
-    {
-      key: "artists",
-      label: "Artists",
-      placeholder: "e.g., artist names, bands",
-    },
+    { key: "interests", labelKey: "interests", placeholderKey: "interests" },
+    { key: "genres", labelKey: "genres", placeholderKey: "genres" },
+    { key: "eventTypes", labelKey: "eventTypes", placeholderKey: "eventTypes" },
+    { key: "venues", labelKey: "venues", placeholderKey: "venues" },
+    { key: "artists", labelKey: "artists", placeholderKey: "artists" },
   ];
 
   return (
     <Layout>
-      <div className="px-4 py-6 sm:px-0">
-        {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center">
-            {[1, 2].map((step) => (
-              <div key={step} className="flex items-center">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    currentStep >= step
-                      ? "bg-indigo-600 border-indigo-600 text-white"
-                      : "border-gray-300 text-gray-500"
-                  }`}
-                >
-                  {step}
-                </div>
-                {step < 2 && (
-                  <div
-                    className={`w-24 h-1 mx-2 ${
-                      currentStep > step ? "bg-indigo-600" : "bg-gray-300"
-                    }`}
-                  />
-                )}
+      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
+        <Windows98Window title={t("onboarding.step1Title")}>
+          <div className="space-y-4">
+            {/* Progress indicator */}
+            <div className="flex items-center gap-2 mb-4">
+              <div
+                className={`w-6 h-6 flex items-center justify-center text-xs font-bold border-2 ${
+                  currentStep >= 1
+                    ? "bg-[#000080] border-[#000080] text-white"
+                    : "bg-[#c0c0c0] border-[#808080] text-black"
+                }`}
+              >
+                1
               </div>
-            ))}
-          </div>
-          <div className="flex justify-center mt-4 text-sm text-gray-600">
-            <div
-              className={
-                currentStep === 1 ? "font-semibold text-indigo-600" : ""
-              }
-            >
-              Set Preferences
+              <div className="flex-1 h-0.5 bg-[#808080]" />
+              <div
+                className={`w-6 h-6 flex items-center justify-center text-xs font-bold border-2 ${
+                  currentStep >= 2
+                    ? "bg-[#000080] border-[#000080] text-white"
+                    : "bg-[#c0c0c0] border-[#808080] text-black"
+                }`}
+              >
+                2
+              </div>
             </div>
-            <div className="mx-4">→</div>
-            <div
-              className={
-                currentStep === 2 ? "font-semibold text-indigo-600" : ""
-              }
-            >
-              Preview Newsletter
-            </div>
-          </div>
-        </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+            {error && (
+              <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-black">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-black">
+                {success}
+              </div>
+            )}
 
-        {success && (
-          <div className="bg-green-50 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {success}
-          </div>
-        )}
+            {currentStep === 1 && (
+              <>
+                <Windows98ReadingPane>
+                  <p className="text-xs text-black mb-4">{t("onboarding.intro")}</p>
+                </Windows98ReadingPane>
 
-        {/* Intro Description */}
-        {currentStep === 1 && (
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6 mb-6">
-            <p className="text-sm text-gray-700">
-              <strong>Let's get you set up.</strong> Add your interests, genres,
-              venues, artists, and other preferences below. You can always edit
-              preferences later, and you'll rarely need to update them—set it
-              once and you're done.
-            </p>
-          </div>
-        )}
+                <Windows98ReadingPane>
+                  <h3 className="text-xs font-bold text-black mb-2">
+                    {t("preferences.preferencesSection.title")}
+                  </h3>
+                  <p className="text-xs text-black mb-3">
+                    {t("preferences.preferencesSection.description")}
+                  </p>
 
-        {/* Step 1: Preferences */}
-        {currentStep === 1 && (
-          <div className="space-y-6">
-            {/* Section 1: Enter Your Preferences */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                1. Enter Your Preferences
-              </h2>
-              <p className="text-sm text-gray-600 mb-6">
-                Add your interests, genres, venues, artists, and other
-                preferences to get personalized event recommendations.
-              </p>
-
-              {loadingPreferences ? (
-                <div className="text-center py-8">Loading preferences...</div>
-              ) : (
-                <>
-                  <div className="mb-6">
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Your City *
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                      placeholder="e.g., New York, NY"
-                      required
-                    />
-                  </div>
-
-                  {categories.map((category) => (
-                    <div key={category.key} className="mb-6">
-                      <h3 className="font-semibold mb-2">{category.label}</h3>
-                      <div className="flex gap-2 mb-2">
+                  {loadingPreferences ? (
+                    <div className="text-xs text-black py-4">{t("common.loading")}</div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <label htmlFor="city" className="block text-xs font-bold text-black mb-1">
+                          {t("preferences.preferencesSection.city")} *
+                        </label>
                         <input
                           type="text"
-                          value={newItem[category.key] || ""}
-                          onChange={(e) =>
-                            setNewItem({
-                              ...newItem,
-                              [category.key]: e.target.value,
-                            })
-                          }
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addPreferenceItem(category.key);
-                            }
-                          }}
-                          className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                          placeholder={category.placeholder}
+                          id="city"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          className="win98-input block w-full"
+                          placeholder={t("preferences.preferencesSection.cityPlaceholder")}
+                          required
                         />
-                        <button
-                          onClick={() => addPreferenceItem(category.key)}
-                          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-                        >
-                          Add
-                        </button>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {preferences[category.key].map((item, index) => (
-                          <span
-                            key={index}
-                            className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
-                          >
-                            {item}
-                            <button
-                              onClick={() =>
-                                removePreferenceItem(category.key, index)
+
+                      {categories.map((category) => (
+                        <div key={category.key} className="mb-4">
+                          <h3 className="text-xs font-bold text-black mb-2">
+                            {t(`preferences.categories.${category.labelKey}`)}
+                          </h3>
+                          <div className="flex gap-2 mb-2">
+                            <input
+                              type="text"
+                              value={newItem[category.key] || ""}
+                              onChange={(e) =>
+                                setNewItem({ ...newItem, [category.key]: e.target.value })
                               }
-                              className="ml-2 text-indigo-600 hover:text-indigo-800"
-                            >
-                              ×
+                              onKeyPress={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  addPreferenceItem(category.key);
+                                }
+                              }}
+                              className="win98-input flex-1"
+                              placeholder={t(`preferences.placeholders.${category.placeholderKey}`)}
+                            />
+                            <button onClick={() => addPreferenceItem(category.key)} className="win98-button">
+                              {t("common.add")}
                             </button>
-                          </span>
-                        ))}
-                        {preferences[category.key].length === 0 && (
-                          <span className="text-gray-400 text-sm">
-                            No items added yet
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-
-            {/* Section 2: Enter Links for Event Postings */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">
-                2. Enter Links for Event Postings
-              </h2>
-              <p className="text-sm text-gray-600 mb-4">
-                Add URLs to venues or event providers you normally follow. These
-                will be checked for events in your newsletter.
-              </p>
-
-              <form onSubmit={handleAddEventSource} className="mb-4">
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="url"
-                    value={newEventSourceUrl}
-                    onChange={(e) => setNewEventSourceUrl(e.target.value)}
-                    className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                    placeholder="https://example.com/events or https://theater.com/calendar"
-                    required
-                  />
-                  <input
-                    type="text"
-                    value={newEventSourceName}
-                    onChange={(e) => setNewEventSourceName(e.target.value)}
-                    className="w-48 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2 border"
-                    placeholder="Name (optional)"
-                  />
-                  <button
-                    type="submit"
-                    disabled={addingSource}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                  >
-                    {addingSource ? "Adding..." : "Add"}
-                  </button>
-                </div>
-              </form>
-
-              {eventSources.length > 0 ? (
-                <div className="space-y-2">
-                  {eventSources.map((source) => (
-                    <div
-                      key={source.id}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded border"
-                    >
-                      <div className="flex-1">
-                        {source.name && (
-                          <div className="font-medium text-gray-900">
-                            {source.name}
                           </div>
-                        )}
-                        <a
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-indigo-600 hover:text-indigo-500 break-all"
-                        >
-                          {source.url}
-                        </a>
-                      </div>
+                          <div className="flex flex-wrap gap-2">
+                            {preferences[category.key].map((item, index) => {
+                              const tagColor = getTagColor(item);
+                              return (
+                                <span
+                                  key={index}
+                                  className="inline-flex items-center px-2 py-1 text-xs font-bold text-white border-2 border-[#808080]"
+                                  style={{ backgroundColor: tagColor, borderColor: tagColor }}
+                                >
+                                  {item}
+                                  <button
+                                    onClick={() => removePreferenceItem(category.key, index)}
+                                    className="ml-2 text-white hover:text-black font-bold"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              );
+                            })}
+                            {preferences[category.key].length === 0 && (
+                              <span className="text-xs text-black">
+                                {t("preferences.preferencesSection.noItems")}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </Windows98ReadingPane>
+
+                <Windows98ReadingPane>
+                  <h3 className="text-xs font-bold text-black mb-2">
+                    {t("preferences.eventSources.title")}
+                  </h3>
+                  <p className="text-xs text-black mb-3">
+                    {t("preferences.eventSources.description")}
+                  </p>
+                  <form onSubmit={handleAddEventSource} className="mb-3">
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="url"
+                        value={newEventSourceUrl}
+                        onChange={(e) => setNewEventSourceUrl(e.target.value)}
+                        className="win98-input flex-1"
+                        placeholder={t("preferences.eventSources.urlPlaceholder")}
+                        required
+                      />
+                      <input
+                        type="text"
+                        value={newEventSourceName}
+                        onChange={(e) => setNewEventSourceName(e.target.value)}
+                        className="win98-input w-48"
+                        placeholder={t("preferences.eventSources.namePlaceholder")}
+                      />
                       <button
-                        onClick={() => handleDeleteEventSource(source.id)}
-                        className="ml-4 px-3 py-1 text-sm text-red-600 hover:text-red-800"
+                        type="submit"
+                        disabled={addingSource}
+                        className="win98-button disabled:opacity-50"
                       >
-                        Remove
+                        {addingSource ? t("preferences.eventSources.adding") : t("common.add")}
                       </button>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm">
-                  No event sources added yet
-                </p>
-              )}
-            </div>
+                  </form>
+                  {eventSources.length > 0 ? (
+                    <div className="space-y-2">
+                      {eventSources.map((source) => {
+                        const tagColor = getTagColor(source.name || source.url);
+                        const mellowColor = hexToRgba(tagColor, 0.5);
+                        return (
+                          <div
+                            key={source.id}
+                            className="flex items-center justify-between p-2 border-2 border-[#808080]"
+                            style={{ backgroundColor: mellowColor, borderColor: mellowColor }}
+                          >
+                            <div className="flex-1">
+                              {source.name && (
+                                <div className="text-xs font-bold text-black">{source.name}</div>
+                              )}
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-[#000080] hover:underline break-all"
+                              >
+                                {source.url}
+                              </a>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteEventSource(source.id)}
+                              className="ml-4 win98-button text-xs"
+                            >
+                              {t("common.remove")}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-black">{t("preferences.eventSources.noSources")}</p>
+                  )}
+                </Windows98ReadingPane>
 
-            {/* Continue Button */}
-            <div className="flex justify-between">
-              <button
-                onClick={handleReset}
-                disabled={resetting}
-                className="px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-              >
-                {resetting ? "Resetting..." : "Reset All Preferences"}
-              </button>
-              <button
-                onClick={handleSavePreferencesAndContinue}
-                disabled={!city}
-                className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-              >
-                Continue to Preview →
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Newsletter Preview */}
-        {currentStep === 2 && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">
-              Step 2: Preview Your Newsletter
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Generate a sample newsletter to see what kind of events we'll find
-              for you.
-            </p>
-
-            {!newsletter ? (
-              <div className="text-center py-8">
-                <button
-                  onClick={handleGenerateNewsletter}
-                  disabled={generating}
-                  className="px-6 py-3 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {generating ? "Generating..." : "Generate Newsletter Preview"}
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="mb-6">
-                  <h3 className="font-semibold mb-2">
-                    Events Found ({newsletter.events.length}):
-                  </h3>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {newsletter.events.map(({ event }) => (
-                      <div
-                        key={event.id}
-                        className="border-l-4 border-indigo-500 pl-4 py-2 bg-gray-50 rounded"
-                      >
-                        <h4 className="font-medium text-gray-900">
-                          {event.title}
-                        </h4>
-                        {event.description && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            {event.description}
-                          </p>
-                        )}
-                        <div className="mt-2 text-sm text-gray-500">
-                          <span>
-                            📅 {new Date(event.date).toLocaleDateString()}
-                          </span>
-                          {event.time && (
-                            <span className="ml-4">🕐 {event.time}</span>
-                          )}
-                          <span className="ml-4">📍 {event.location}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-between mt-4">
                   <button
-                    onClick={() => setCurrentStep(2)}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                    onClick={handleReset}
+                    disabled={resetting}
+                    className="win98-button disabled:opacity-50"
                   >
-                    ← Back
+                    {resetting ? t("preferences.resetting") : t("preferences.resetAll")}
                   </button>
                   <button
-                    onClick={handleComplete}
-                    className="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
+                    onClick={handleSavePreferencesAndContinue}
+                    disabled={!city}
+                    className="win98-button disabled:opacity-50"
                   >
-                    Complete Setup ✓
+                    {t("onboarding.continueToPreview")}
                   </button>
                 </div>
               </>
             )}
+
+            {currentStep === 2 && (
+              <>
+                <Windows98ReadingPane>
+                  <h3 className="text-xs font-bold text-black mb-2">
+                    {t("onboarding.step2Title")}
+                  </h3>
+                  <p className="text-xs text-black mb-4">{t("onboarding.step2Description")}</p>
+
+                  {!newsletter ? (
+                    <div className="py-6 text-center">
+                      <button
+                        onClick={handleGenerateNewsletter}
+                        disabled={generating}
+                        className="win98-button disabled:opacity-50"
+                      >
+                        {generating ? t("onboarding.generating") : t("onboarding.generatePreview")}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <h3 className="text-xs font-bold text-black mb-2">
+                          {t("onboarding.eventsFound")} ({newsletter.events.length}):
+                        </h3>
+                        <div className="space-y-2 max-h-96 overflow-y-auto">
+                          {newsletter.events.map(({ event }) => (
+                            <div
+                              key={event.id}
+                              className="border-l-2 border-[#000080] pl-2 py-2 bg-[#c0c0c0] border border-[#808080]"
+                            >
+                              <h4 className="text-xs font-bold text-black">{event.title}</h4>
+                              {event.description && (
+                                <p className="text-xs text-black mt-1">{event.description}</p>
+                              )}
+                              <div className="mt-1 text-xs text-black">
+                                <span>📅 {new Date(event.date).toLocaleDateString()}</span>
+                                {event.time && <span className="ml-3">🕐 {event.time}</span>}
+                                <span className="ml-3">📍 {event.location}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setCurrentStep(1)}
+                          className="win98-button"
+                        >
+                          ← {t("common.back")}
+                        </button>
+                        <button onClick={handleComplete} className="win98-button">
+                          {t("onboarding.completeSetup")} ✓
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </Windows98ReadingPane>
+              </>
+            )}
           </div>
-        )}
+        </Windows98Window>
       </div>
     </Layout>
   );
