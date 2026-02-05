@@ -69,7 +69,7 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {/* Windows 98 Taskbar */}
       <nav className="fixed top-0 left-0 right-0 h-12 bg-[#c0c0c0] border-b-2 border-[#808080] flex items-center z-50">
         {/* Mobile: Start Button */}
@@ -155,7 +155,21 @@ export default function Layout({ children }: LayoutProps) {
         onClose={() => setWallpaperPickerOpen(false)}
       />
 
-      <main className="pt-12">{children}</main>
+      <main className="flex-1 pt-12">{children}</main>
+
+      {/* Footer - at bottom of viewport when content is short, at bottom of content when long */}
+      <footer className="bg-[#c0c0c0] border-t-2 border-[#808080] py-2 px-4 text-center">
+        <div className="text-xs text-black">
+          © {new Date().getFullYear()} Good Software.{" "}
+          <Link to="/terms" className="text-[#000080] hover:underline font-bold">
+            {t("footer.terms")}
+          </Link>
+          {" · "}
+          <Link to="/privacy" className="text-[#000080] hover:underline font-bold">
+            {t("footer.privacy")}
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Preferences from "./pages/Preferences";
 import Newsletters from "./pages/Newsletters";
 import OnboardingWizard from "./pages/OnboardingWizard";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import "./i18n/config";
 
 function App() {
@@ -48,6 +50,8 @@ function App() {
           path="/onboarding"
           element={token ? <OnboardingWizard /> : <Navigate to="/login" />}
         />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>

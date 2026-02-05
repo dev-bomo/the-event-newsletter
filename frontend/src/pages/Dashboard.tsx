@@ -136,6 +136,7 @@ export default function Dashboard() {
                   >
                     {t("dashboard.howItWorks.step1")}
                   </Link>
+                  <span className="text-[#000080] font-bold"> {t("dashboard.howItWorks.keywordsHint")}</span>
                 </li>
                 <li>{t("dashboard.howItWorks.step2")}</li>
                 <li>{t("dashboard.howItWorks.step3")}</li>

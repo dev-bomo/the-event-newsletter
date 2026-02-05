@@ -296,8 +296,11 @@ export default function Preferences() {
                 <h3 className="text-xs font-bold text-black mb-2">
                   {t("preferences.preferencesSection.title")}
                 </h3>
-                <p className="text-xs text-black mb-3">
+                <p className="text-xs text-black mb-2">
                   {t("preferences.preferencesSection.description")}
+                </p>
+                <p className="text-xs text-black mb-3 text-[#000080] font-bold">
+                  {t("preferences.keywordsHint")}
                 </p>
 
                 <div className="mb-4">
@@ -447,6 +450,7 @@ export default function Preferences() {
                             </a>
                           </div>
                           <button
+                            type="button"
                             onClick={() => handleDeleteEventSource(source.id)}
                             disabled={preferenceLimits ? !preferenceLimits.canEdit : false}
                             className="ml-4 win98-button text-xs disabled:opacity-50"

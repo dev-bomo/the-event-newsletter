@@ -91,6 +91,7 @@
     "viewNewsletters": "Vezi newsletterele",
     "howItWorks": {
       "title": "Cum funcționează",
+      "keywordsHint": "Cuvintele cheie nu trebuie să fie exacte—ex. \"Offspring\" sau \"The Offspring\" funcționează similar. Devin parte din promptul de căutare.",
       "step1": "Setează preferințele tale (oraș, interese, etc.)",
       "step2": "Un profil va fi generat și atașat contului tău.",
       "step3": "Încearcă să generezi un newsletter. Sistemul va face crawling, își va face magia și va încerca să găsească evenimente pentru tine. Vezi dacă se potrivesc.",
@@ -107,6 +108,7 @@
   "preferences": {
     "title": "Preferințe",
     "description": "Gestionează preferințele tale pentru a primi recomandări personalizate de evenimente.",
+    "keywordsHint": "Cuvintele cheie nu trebuie să fie exacte—ex. \"Offspring\" sau \"The Offspring\" funcționează similar. Devin parte din promptul de căutare.",
     "preferencesSection": {
       "title": "1. Introdu Preferințele Tale",
       "description": "Adaugă interesele, genurile, locurile, artiștii și alte preferințe pentru a primi recomandări personalizate de evenimente.",
@@ -168,7 +170,8 @@
     "eventsFound": "Evenimente Găsite",
     "completeSetup": "Finalizează Configurarea",
     "continueToPreview": "Continuă la Previzualizare →",
-    "setCityRequired": "Te rugăm să setezi orașul"
+    "setCityRequired": "Te rugăm să setezi orașul",
+    "keywordsHint": "Cuvintele cheie nu trebuie să fie exacte—ex. \"Offspring\" sau \"The Offspring\" funcționează similar. Devin parte din promptul de căutare."
   },
   "newsletters": {
     "title": "Newslettere",
@@ -215,5 +218,36 @@
     "mergingDesc": "Se calculează scoruri și se elimină duplicatele...",
     "finalizing": "Finalizare",
     "finalizingDesc": "Se pregătește newsletterul tău personalizat..."
+  },
+  "footer": {
+    "terms": "Termeni și Condiții",
+    "privacy": "Politica de Confidențialitate",
+    "copyright": "© {{year}} Good Software"
+  },
+  "terms": {
+    "title": "Termeni și Condiții",
+    "lastUpdated": "Ultima actualizare: Ianuarie 2026",
+    "service": "1. Serviciul",
+    "serviceContent": "The Event Newsletter este un serviciu săptămânal de descoperire a evenimentelor, furnizat de Good Software. Prin utilizarea acestui serviciu, acceptați acești termeni.",
+    "acceptance": "2. Acceptare",
+    "acceptanceContent": "Creând un cont și folosind serviciul nostru, acceptați acești termeni. Putem actualiza acești termeni din când în când; utilizarea continuă după modificări constituie acceptare.",
+    "contact": "3. Contact",
+    "contactContent": "Pentru întrebări despre acești termeni sau despre serviciu, vă rugăm să contactați Good Software."
+  },
+  "privacy": {
+    "title": "Politica de Confidențialitate",
+    "lastUpdated": "Ultima actualizare: Ianuarie 2026",
+    "dataWeCollect": "1. Datele pe care le colectăm",
+    "dataWeCollectContent": "Colectăm adresa ta de email și numele la înregistrare. Aceste informații sunt folosite doar pentru a-ți oferi serviciul (ex. trimiterea newsletterelor) și pentru a-ți identifica contul.",
+    "howWeUseData": "2. Cum folosim datele tale",
+    "howWeUseDataContent": "Emailul și numele tău nu sunt folosite sau partajate cu nicio terță parte. Nu vindem, nu închiriem și nu comercializăm datele tale personale.",
+    "preferences": "3. Preferințe și profil AI",
+    "preferencesContent": "Preferințele tale (interese, oraș, surse de evenimente, etc.) sunt folosite pentru a crea un profil care personalizează newsletterul. Acest profil este partajat cu Perplexity (furnizorul nostru de AI) pentru a descoperi și recomanda evenimente—dar nu este legat de adresa ta de email sau alte date de identificare.",
+    "noSharing": "4. Angajamentul nostru",
+    "noSharingContent": "Plătești pentru serviciu. Nu avem nevoie să ne atingem de datele tale în niciun fel și nu vom face asta. Modelul nostru de business este simplu: plată transparentă și directă pentru un serviciu util.",
+    "payment": "5. Plată",
+    "paymentContent": "Acesta va fi un serviciu plătit când va fi lansat. Plata anuală este transparentă și directă—plătești pentru serviciu, și asta e tot.",
+    "contact": "6. Contact",
+    "contactContent": "Pentru întrebări legate de confidențialitate sau pentru a-ți exercita drepturile (acces, ștergere, etc.), contactează-ne la support@attendtion.eu."
   }
 }

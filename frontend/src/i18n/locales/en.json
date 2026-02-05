@@ -91,6 +91,7 @@
     "viewNewsletters": "View newsletters",
     "howItWorks": {
       "title": "How it works",
+      "keywordsHint": "Keywords don't need to be exact—e.g. \"Offspring\" or \"The Offspring\" work similarly. They become part of the search prompt.",
       "step1": "Set your preferences (town, interests, etc.)",
       "step2": "A profile will be generated and attached to your account.",
       "step3": "Try generating a newsletter. The system will do some crawling, work its magic, and do its best. See if the events it finds fit you.",
@@ -107,6 +108,7 @@
   "preferences": {
     "title": "Preferences",
     "description": "Manage your preferences to get personalized event recommendations.",
+    "keywordsHint": "Keywords don't need to be exact—e.g. \"Offspring\" or \"The Offspring\" work similarly. They become part of the search prompt.",
     "preferencesSection": {
       "title": "1. Enter Your Preferences",
       "description": "Add your interests, genres, venues, artists, and other preferences to get personalized event recommendations.",
@@ -168,7 +170,8 @@
     "eventsFound": "Events Found",
     "completeSetup": "Complete Setup",
     "continueToPreview": "Continue to Preview →",
-    "setCityRequired": "Please set your city"
+    "setCityRequired": "Please set your city",
+    "keywordsHint": "Keywords don't need to be exact—e.g. \"Offspring\" or \"The Offspring\" work similarly. They become part of the search prompt."
   },
   "newsletters": {
     "title": "Newsletters",
@@ -215,5 +218,36 @@
     "mergingDesc": "Scoring and deduplicating events...",
     "finalizing": "Finalizing",
     "finalizingDesc": "Preparing your personalized newsletter..."
+  },
+  "footer": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© {{year}} Good Software"
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: January 2026",
+    "service": "1. Service",
+    "serviceContent": "The Event Newsletter is a personalized weekly event discovery service provided by Good Software. By using this service, you agree to these terms.",
+    "acceptance": "2. Acceptance",
+    "acceptanceContent": "By creating an account and using our service, you accept these terms. We may update these terms from time to time; continued use after changes constitutes acceptance.",
+    "contact": "3. Contact",
+    "contactContent": "For questions about these terms or the service, please contact Good Software."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: January 2026",
+    "dataWeCollect": "1. Data We Collect",
+    "dataWeCollectContent": "We collect your email address and name when you register. This information is used solely to provide you with the service (e.g. sending newsletters) and to identify your account.",
+    "howWeUseData": "2. How We Use Your Data",
+    "howWeUseDataContent": "Your email and name are not used or shared with any third party. We do not sell, rent, or trade your personal data.",
+    "preferences": "3. Preferences & AI Profile",
+    "preferencesContent": "Your preferences (interests, city, event sources, etc.) are used to create a profile that helps personalize your newsletter. This profile is shared with Perplexity (our AI provider) to discover and recommend events—but it is not linked to your email address or other identifying information.",
+    "noSharing": "4. Our Commitment",
+    "noSharingContent": "You pay for the service. We have no need to mess with your data in any way, and we will not do so. Our business model is straightforward: transparent, direct payment for a useful service.",
+    "payment": "5. Payment",
+    "paymentContent": "This will be a paid service when it launches. The yearly payment is transparent and direct—you pay for the service, and that is it.",
+    "contact": "6. Contact",
+    "contactContent": "For privacy-related questions or to exercise your rights (access, deletion, etc.), contact us at support@attendtion.eu."
   }
 }

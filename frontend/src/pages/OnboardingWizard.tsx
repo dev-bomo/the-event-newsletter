@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
+import LoadingOverlay from "../components/LoadingOverlay";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
 import Windows98Window from "../components/Windows98Window";
@@ -256,6 +257,7 @@ export default function OnboardingWizard() {
 
   return (
     <Layout>
+      <LoadingOverlay isVisible={generating} />
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
         <Windows98Window title={t("onboarding.step1Title")}>
           <div className="space-y-4">
@@ -303,8 +305,11 @@ export default function OnboardingWizard() {
                   <h3 className="text-xs font-bold text-black mb-2">
                     {t("preferences.preferencesSection.title")}
                   </h3>
-                  <p className="text-xs text-black mb-3">
+                  <p className="text-xs text-black mb-2">
                     {t("preferences.preferencesSection.description")}
+                  </p>
+                  <p className="text-xs text-black mb-3 text-[#000080] font-bold">
+                    {t("preferences.keywordsHint")}
                   </p>
 
                   {loadingPreferences ? (
@@ -440,6 +445,7 @@ export default function OnboardingWizard() {
                               </a>
                             </div>
                             <button
+                              type="button"
                               onClick={() => handleDeleteEventSource(source.id)}
                               className="ml-4 win98-button text-xs"
                             >
@@ -512,6 +518,16 @@ export default function OnboardingWizard() {
                                 {event.time && <span className="ml-3">🕐 {event.time}</span>}
                                 <span className="ml-3">📍 {event.location}</span>
                               </div>
+                              {event.sourceUrl && (
+                                <a
+                                  href={event.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-[#000080] hover:underline mt-2 inline-block font-bold"
+                                >
+                                  {t("newsletters.learnMore")} →
+                                </a>
+                              )}
                             </div>
                           ))}
                         </div>
