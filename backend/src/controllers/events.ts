@@ -29,6 +29,38 @@ export async function discoverEventsForUser(userId: string): Promise<{
 
   console.log("Using user profile for event discovery");
 
+  // Get user's "hates" (exclusions: organizer, artist, venue)
+  const eventHates = await prisma.eventHate.findMany({
+    where: { userId },
+  });
+  const hatesByType = {
+    organizer: eventHates.filter((h) => h.type === "organizer").map((h) => h.value.toLowerCase()),
+    artist: eventHates.filter((h) => h.type === "artist").map((h) => h.value.toLowerCase()),
+    venue: eventHates.filter((h) => h.type === "venue").map((h) => h.value.toLowerCase()),
+  };
+  const hasHates = eventHates.length > 0;
+  if (hasHates) {
+    console.log(`User has ${eventHates.length} exclusions:`, eventHates.map((h) => `${h.type}=${h.value}`));
+  }
+
+  // Build effective profile: base profile + hates (so AI takes them into account)
+  // Group by type, comma-separated, max 3 lines (organizer, artist, venue)
+  let effectiveProfile = user.profile;
+  if (hasHates) {
+    const byType = {
+      organizer: eventHates.filter((h) => h.type === "organizer").map((h) => h.value),
+      artist: eventHates.filter((h) => h.type === "artist").map((h) => h.value),
+      venue: eventHates.filter((h) => h.type === "venue").map((h) => h.value),
+    };
+    const lines: string[] = [];
+    if (byType.organizer.length) lines.push(`Organizers to exclude: ${byType.organizer.join(", ")}`);
+    if (byType.artist.length) lines.push(`Artists to exclude: ${byType.artist.join(", ")}`);
+    if (byType.venue.length) lines.push(`Venues to exclude: ${byType.venue.join(", ")}`);
+    const hatesText = lines.join("\n");
+    effectiveProfile = `${user.profile}\n\nEXCLUSIONS (do not include these in any results):\n${hatesText}`;
+    console.log("Appended hates to profile for AI context");
+  }
+
   // Get event sources for the general search
   const eventSources = await prisma.eventSource.findMany({
     where: { userId },
@@ -38,7 +70,7 @@ export async function discoverEventsForUser(userId: string): Promise<{
   // Discover events using AI with user profile and event sources
   console.log("Calling discoverEvents with user profile...");
   const { events: discoveredEvents, rawResponse: generalSearchRawResponse } =
-    await discoverEvents(user.city, user.profile, eventSourceUrls);
+    await discoverEvents(user.city, effectiveProfile, eventSourceUrls);
   const generalSearchCount = discoveredEvents.length;
   console.log("Discovered", generalSearchCount, "events from general search");
 
@@ -56,7 +88,7 @@ export async function discoverEventsForUser(userId: string): Promise<{
         const sourceEvents = await discoverEventsFromSource(
           source.url,
           source.name || undefined,
-          user.profile || undefined
+          effectiveProfile
         );
         console.log(
           `Discovered ${sourceEvents.length} events from ${source.url}`
@@ -79,7 +111,10 @@ export async function discoverEventsForUser(userId: string): Promise<{
     `Total discovered events: ${discoveredEvents.length} (${generalSearchCount} from general search, ${customSourceCount} from custom sources)`
   );
 
-  // Filter out events with missing required fields (sourceUrl and location are required)
+  // Filter out events with missing required fields and past dates
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
   const validEvents = discoveredEvents.filter((event) => {
     if (
       !event.sourceUrl ||
@@ -109,6 +144,17 @@ export async function discoverEventsForUser(userId: string): Promise<{
       event.title.trim() === ""
     ) {
       console.warn("Skipping event with missing/invalid title");
+      return false;
+    }
+    // Filter out events with date before today
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    if (eventDate < todayStart) {
+      console.warn(
+        "Skipping event with past date:",
+        event.title,
+        event.date
+      );
       return false;
     }
     return true;
@@ -156,28 +202,52 @@ export async function discoverEventsForUser(userId: string): Promise<{
   // Sort events by score (highest first)
   const sortedEvents = eventsWithScores.sort((a, b) => b.score - a.score);
 
+  // Filter out events matching user's hates (organizer, artist, venue)
+  let eventsAfterHates = sortedEvents;
+  if (hasHates) {
+    eventsAfterHates = sortedEvents.filter((event) => {
+      if (hatesByType.organizer.length > 0 && event.organizer) {
+        const orgLower = event.organizer.toLowerCase();
+        if (hatesByType.organizer.some((h) => orgLower.includes(h) || h.includes(orgLower))) {
+          console.log(`Excluded by organizer hate: "${event.title}" (organizer: ${event.organizer})`);
+          return false;
+        }
+      }
+      if (hatesByType.artist.length > 0 && event.artist) {
+        const artistLower = event.artist.toLowerCase();
+        if (hatesByType.artist.some((h) => artistLower.includes(h) || h.includes(artistLower))) {
+          console.log(`Excluded by artist hate: "${event.title}" (artist: ${event.artist})`);
+          return false;
+        }
+      }
+      if (hatesByType.venue.length > 0) {
+        const venueLower = (event.venue || event.location || "").toLowerCase();
+        if (hatesByType.venue.some((h) => venueLower.includes(h) || h.includes(venueLower))) {
+          console.log(`Excluded by venue hate: "${event.title}" (venue/location: ${event.venue || event.location})`);
+          return false;
+        }
+      }
+      return true;
+    });
+    console.log(`After exclusions: ${sortedEvents.length} -> ${eventsAfterHates.length} events`);
+  }
+
   // Log all events with scores before trimming
   console.log(
-    `Events sorted by score (${sortedEvents.length} total):`,
-    sortedEvents.map((e) => `"${e.title}" (score: ${e.score})`).join(", ")
+    `Events sorted by score (${eventsAfterHates.length} total after exclusions):`,
+    eventsAfterHates.map((e) => `"${e.title}" (score: ${e.score})`).join(", ")
   );
 
-  // Limit to 20
-  const top20Events = sortedEvents.slice(0, 20);
-
-  // Ensure we have at least 12 events if possible, but don't exceed 20
+  // Limit to 20 (from eventsAfterHates, which already had hates applied)
+  const top20FromHates = eventsAfterHates.slice(0, 20);
   const finalEvents =
-    top20Events.length >= 12 ? top20Events : sortedEvents.slice(0, 12);
+    top20FromHates.length >= 12 ? top20FromHates : eventsAfterHates.slice(0, 12);
 
-  const removedByLimit = sortedEvents.length - finalEvents.length;
+  const removedByLimit = eventsAfterHates.length - finalEvents.length;
   if (removedByLimit > 0) {
     console.log(
       `Removed ${removedByLimit} events due to limit (kept top ${finalEvents.length}):`
     );
-    const removed = sortedEvents.slice(finalEvents.length);
-    removed.forEach((e) => {
-      console.log(`  - "${e.title}" (score: ${e.score})`);
-    });
   }
 
   console.log(
@@ -219,9 +289,12 @@ export async function discoverEventsForUser(userId: string): Promise<{
             description: event.description || existing.description,
             time: event.time || existing.time,
             category: event.category || existing.category,
-            sourceUrl: event.sourceUrl!, // Update sourceUrl in case it's different
+            sourceUrl: event.sourceUrl!,
             imageUrl: event.imageUrl || existing.imageUrl,
-            score: Math.round(event.score), // Update score
+            score: Math.round(event.score),
+            organizer: event.organizer ?? existing.organizer,
+            artist: event.artist ?? existing.artist,
+            venue: event.venue ?? existing.venue,
           },
         });
       } else {
@@ -237,6 +310,9 @@ export async function discoverEventsForUser(userId: string): Promise<{
             sourceUrl: event.sourceUrl!,
             imageUrl: event.imageUrl || null,
             score: Math.round(event.score),
+            organizer: event.organizer || null,
+            artist: event.artist || null,
+            venue: event.venue || null,
           },
         });
       }

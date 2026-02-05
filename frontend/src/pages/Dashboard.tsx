@@ -112,12 +112,18 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-[#808080]">
+                  <div className="mt-3 pt-3 border-t border-[#808080] space-y-1">
                     <Link
                       to="/newsletters"
-                      className="text-xs font-bold text-[#000080] hover:underline"
+                      className="block text-xs font-bold text-[#000080] hover:underline"
                     >
                       {t("dashboard.viewNewsletters")} →
+                    </Link>
+                    <Link
+                      to="/hates"
+                      className="block text-xs font-bold text-[#000080] hover:underline"
+                    >
+                      {t("dashboard.myHates")} →
                     </Link>
                   </div>
                 </Windows98ReadingPane>

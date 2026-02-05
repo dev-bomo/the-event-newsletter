@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import LoadingOverlay from "../components/LoadingOverlay";
+import HateThisDropdown from "../components/HateThisDropdown";
 import api from "../lib/api";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
@@ -17,6 +18,9 @@ interface Event {
   sourceUrl: string;
   imageUrl?: string;
   score?: number | null;
+  organizer?: string | null;
+  artist?: string | null;
+  venue?: string | null;
 }
 
 interface Newsletter {
@@ -37,10 +41,43 @@ export default function Newsletters() {
   const [success, setSuccess] = useState("");
   const [showDumpModal, setShowDumpModal] = useState(false);
   const [rawResponses, setRawResponses] = useState<string[]>([]);
+  const [hatesCount, setHatesCount] = useState(0);
+  const [hates, setHates] = useState<Array<{ type: string; value: string }>>([]);
 
   useEffect(() => {
     loadNewsletters();
+    loadHates();
   }, []);
+
+  const loadHates = async () => {
+    try {
+      const res = await api.get("/hates");
+      setHates(res.data ?? []);
+      setHatesCount(res.data?.length ?? 0);
+    } catch {
+      // ignore
+    }
+  };
+
+  const getHatedReasons = (event: Event): string[] => {
+    const reasons: string[] = [];
+    const match = (h: { type: string; value: string }, field: string | null | undefined) => {
+      if (!field) return false;
+      const a = field.toLowerCase();
+      const b = h.value.toLowerCase();
+      return a.includes(b) || b.includes(a);
+    };
+    if (hates.some((h) => h.type === "organizer" && match(h, event.organizer))) {
+      reasons.push(t("hates.hatedOrganizer"));
+    }
+    if (hates.some((h) => h.type === "artist" && match(h, event.artist))) {
+      reasons.push(t("hates.hatedArtist"));
+    }
+    if (hates.some((h) => h.type === "venue" && match(h, event.venue ?? event.location))) {
+      reasons.push(t("hates.hatedVenue"));
+    }
+    return reasons;
+  };
 
   const loadNewsletters = async () => {
     try {
@@ -174,6 +211,9 @@ export default function Newsletters() {
                         <h3 className="text-xs font-bold text-black mb-2">
                           {t("newsletters.events")} ({newsletter.events.length}):
                         </h3>
+                        <p className="text-xs text-[#000080] font-bold mb-2">
+                          {t("newsletters.hateThisHint")}
+                        </p>
                         <div className="space-y-2">
                           {newsletter.events.map(({ event }) => {
                             const score =
@@ -236,14 +276,31 @@ export default function Newsletters() {
                                     </span>
                                   )}
                                 </div>
-                                <a
-                                  href={event.sourceUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-[#000080] hover:underline mt-2 inline-block font-bold"
-                                >
-                                  {t("newsletters.learnMore")} →
-                                </a>
+                                {getHatedReasons(event).length > 0 && (
+                                  <p className="text-xs text-[#800000] font-bold mt-2">
+                                    {t("hates.hatedLabel")} {getHatedReasons(event).join(", ")}
+                                  </p>
+                                )}
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
+                                  <a
+                                    href={event.sourceUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-[#000080] hover:underline font-bold inline-flex items-center"
+                                  >
+                                    {t("newsletters.learnMore")} →
+                                  </a>
+                                  <HateThisDropdown
+                                    event={event}
+                                    hatesCount={hatesCount}
+                                    onHateAdded={(type, value) => {
+                                      loadHates();
+                                      const typeLabel = type === "organizer" ? t("hates.typeOrganizer") : type === "artist" ? t("hates.typeArtist") : t("hates.typeVenue");
+                                      setSuccess(t("hates.addedSuccess", { type: typeLabel, value }));
+                                    }}
+                                    onError={setError}
+                                  />
+                                </div>
                               </div>
                             );
                           })}

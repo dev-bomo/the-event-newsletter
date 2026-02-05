@@ -46,6 +46,9 @@ Please return a JSON object with an "events" array. Each event should have:
 - sourceUrl (preferably the direct link to the specific event's detail page. If the source page lists multiple events and you can find individual event page URLs, use those. If individual event URLs are not available or not accessible, you may use the source URL, but ensure it's a valid, working URL that contains information about the event.)
 - imageUrl (optional, link to event image)
 - score (number from 0-100 indicating how well this event matches the user's profile, where 100 is a perfect match. If no profile is provided, use 75 as a default since the user has explicitly added this source)
+- organizer (optional): event organizer or promoter
+- artist (optional): main artist, band, or performer
+- venue (optional): venue name
 
 Only include events that are happening in the next 30 days. Do NOT include events that have already passed or are in the past.
 Focus on concerts, theater, community gatherings, art shows, and similar local events.

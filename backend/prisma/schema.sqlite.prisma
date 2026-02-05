@@ -29,6 +29,7 @@ model User {
   eventSources  EventSource[]
   newsletters   Newsletter[]
   oauthTokens   OAuthToken[]
+  eventHates    EventHate[]
 }
 
 model Profile {
@@ -89,6 +90,9 @@ model Event {
   sourceUrl     String
   imageUrl      String?
   score         Int?     // Relevance score (0-100) indicating how well the event matches user preferences
+  organizer     String?  // Event organizer (for "hate this" exclusions)
+  artist        String?  // Artist/act name (for "hate this" exclusions)
+  venue         String?  // Venue name (for "hate this" exclusions)
   discoveredAt  DateTime @default(now())
 
   newsletterEvents NewsletterEvent[]
@@ -97,6 +101,19 @@ model Event {
   @@index([category])
   @@index([score])
   @@index([sourceUrl])
+}
+
+model EventHate {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "organizer" | "artist" | "venue"
+  value     String   // The organizer/artist/venue name to exclude
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, value])
+  @@index([userId])
 }
 
 model Newsletter {

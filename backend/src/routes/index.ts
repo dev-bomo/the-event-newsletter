@@ -4,6 +4,7 @@ import { preferenceRoutes } from "./preferences.js";
 import { eventRoutes } from "./events.js";
 import { eventSourceRoutes } from "./eventSources.js";
 import { newsletterRoutes } from "./newsletters.js";
+import { hateRoutes } from "./hates.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 export function setupRoutes(app: Express) {
@@ -15,4 +16,5 @@ export function setupRoutes(app: Express) {
   app.use("/api/event-sources", authenticateToken, eventSourceRoutes);
   app.use("/api/events", authenticateToken, eventRoutes);
   app.use("/api/newsletters", authenticateToken, newsletterRoutes);
+  app.use("/api/hates", authenticateToken, hateRoutes);
 }

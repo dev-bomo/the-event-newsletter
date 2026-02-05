@@ -13,6 +13,9 @@ export interface DiscoveredEvent {
   sourceUrl: string;
   imageUrl?: string;
   score: number; // Relevance score (0-100) indicating how well the event matches user preferences
+  organizer?: string; // For "hate this" exclusions
+  artist?: string;   // For "hate this" exclusions
+  venue?: string;    // For "hate this" exclusions
 }
 
 /**
@@ -303,8 +306,11 @@ For each event, return:
 - category (optional)
 - sourceUrl (URL to the event page or source)
 - imageUrl (optional)
+- organizer (optional): event organizer or promoter name
+- artist (optional): main artist, band, or performer name
+- venue (optional): venue or location name (e.g. "Blue Note", "Lincoln Center")
 
-Return a JSON object with a "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events within the next 30 days. Exclude any events that have already passed.`;
+Return a JSON object with an "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events within the next 30 days. Exclude any events that have already passed.`;
 
   const systemPrompt = `You are extracting raw event data. Return only valid JSON with an "events" array. Do not score or deduplicate. Never include events from the past.`;
 
@@ -377,6 +383,9 @@ Return a JSON object with an "events" array. Each event must have:
 - sourceUrl (valid, verifiable URL)
 - imageUrl (optional)
 - score (0-100)
+- organizer (optional): event organizer or promoter
+- artist (optional): main artist, band, or performer
+- venue (optional): venue name
 
 Raw events to process:
 ${eventsJson}`;
@@ -466,6 +475,9 @@ Return a JSON object with an "events" array containing 20-30 events. Each event 
 - sourceUrl (valid, verifiable URL)
 - imageUrl (optional)
 - score (0-100)
+- organizer (optional): event organizer or promoter
+- artist (optional): main artist, band, or performer
+- venue (optional): venue name
 
 Only include real, verifiable events. Deduplicate by artist/band. Limit to maximum 4 events per sourceUrl.`;
 
