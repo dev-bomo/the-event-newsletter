@@ -317,9 +317,11 @@ For each event, return:
 - artist (optional): main artist, band, or performer name
 - venue (optional): venue or location name (e.g. "Blue Note", "Lincoln Center")
 
-Return a JSON object with an "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events starting tomorrow or later. Exclude events happening today or in the past.`;
+Return a JSON object with an "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events starting tomorrow or later. Exclude events happening today or in the past.
 
-  const systemPrompt = `You are extracting raw event data. Return only valid JSON with an "events" array. Do not score or deduplicate. Never include events from the past.`;
+CRITICAL - NO HALLUCINATION: Only extract events you actually found through web search. Do NOT invent, fabricate, or guess events. If you cannot find enough real events, return fewer or an empty array. A short list of real events is always better than any fake ones.`;
+
+  const systemPrompt = `You are extracting raw event data from web search. Return only valid JSON with an "events" array. Do not score or deduplicate. Never include events from the past. NEVER invent or hallucinate events - only include events you actually found.`;
 
   console.log(`Step 2: Searching for task: "${task.substring(0, 50)}..."`);
   // sonar-pro model automatically enables web search
@@ -380,7 +382,7 @@ async function mergeAndScoreEvents(
 6. Score each event (0-100) based on how well it matches this user profile:
 ${userProfile}
 7. Return between 20-30 events maximum, prioritized by score
-8. Ensure all events are real and verifiable - do not include hallucinated events
+8. CRITICAL - NO HALLUCINATION: Only keep events from the raw candidates provided that have real, verifiable sourceUrl. Remove any that appear fabricated or that you cannot verify. Do NOT add or invent events. If few candidates are real, return fewer events.
 
 Return a JSON object with an "events" array. Each event must have:
 - title
@@ -399,7 +401,7 @@ Return a JSON object with an "events" array. Each event must have:
 Raw events to process:
 ${eventsJson}`;
 
-  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events. Never include events from the past.`;
+  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events from the raw candidates. Never invent or hallucinate events. Never include events from the past.`;
 
   console.log(`Step 3: Merging and scoring ${allRawEvents.length} events...`);
   const rawResponse = await callPerplexity(
@@ -445,8 +447,8 @@ async function repairOrExpandEvents(
   const instruction =
     issue === "too_few"
       ? currentEvents.length > 0
-        ? `You currently have ${currentEvents.length} events, but need 20-30. Add more event candidates that match the user profile.`
-        : `No events were found. Please search for events matching the user profile.`
+        ? `You currently have ${currentEvents.length} events, but need 20-30. Search for more real events that match the user profile. CRITICAL: Only add events you actually find through web search with verifiable URLs. If you cannot find more real events, return the current list as-is. NEVER invent or hallucinate events - it is better to return fewer real events than to include any fake ones.`
+        : `No events were found. Search for events matching the user profile. CRITICAL: Only return events you actually find through web search with verifiable URLs. If you cannot find any real events, return an empty array. NEVER invent or hallucinate events.`
       : `The previous response had invalid JSON. Please fix it and return valid JSON.`;
 
   const currentEventsText =
@@ -476,7 +478,7 @@ ${dateWindow}
 IMPORTANT: Only include events in ${city}. The location field MUST include the city name (e.g. "Venue, ${city}" or "Address, ${city}, Romania"). Exclude festivals, events, or venues in other cities.
 ${eventSourcesText}${currentEventsText}
 
-Return a JSON object with an "events" array containing 20-30 events. Each event must have:
+Return a JSON object with an "events" array (20-30 events if you can find that many). Each event must have:
 - title
 - description (optional)
 - date (ISO format: YYYY-MM-DD) - MUST be tomorrow or later
@@ -490,9 +492,9 @@ Return a JSON object with an "events" array containing 20-30 events. Each event 
 - artist (optional): main artist, band, or performer
 - venue (optional): venue name
 
-Only include real, verifiable events. Deduplicate by artist/band. Limit to maximum 4 events per sourceUrl.`;
+Only include real, verifiable events you found through web search. Deduplicate by artist/band. Limit to maximum 4 events per sourceUrl. NEVER invent events - if few exist, return fewer.`;
 
-  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array. Never include events from the past.`;
+  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array. Never invent or hallucinate events - only include events you actually found. Never include events from the past.`;
 
   console.log(`Step 4: Repairing/expanding events (issue: ${issue})...`);
   // sonar-pro model automatically enables web search

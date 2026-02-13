@@ -54,6 +54,8 @@ Only include events starting tomorrow or later (within the next 30 days). Do NOT
 Focus on concerts, theater, community gatherings, art shows, and similar local events.
 If no events are found or the page doesn't contain events, return an empty array.
 
+CRITICAL - NO HALLUCINATION: Only include events actually listed on the source page. Never invent or fabricate events. Return empty array if none found.
+
 IMPORTANT: Only include URLs that are valid and accessible. Prefer direct event page URLs when available, but prioritize URL validity over specificity.`;
 
   try {
@@ -65,7 +67,7 @@ IMPORTANT: Only include URLs that are valid and accessible. Prefer direct event 
           {
             role: "system",
             content:
-              'You are an event discovery assistant. Return only valid JSON objects with an "events" array.',
+              'You are an event discovery assistant. Return only valid JSON objects with an "events" array. Never invent events - only include events actually listed on the source page.',
           },
           {
             role: "user",
