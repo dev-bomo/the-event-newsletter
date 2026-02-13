@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
+import { useAuthStore } from "../store/authStore";
 import LoadingOverlay from "../components/LoadingOverlay";
-import HateThisDropdown from "../components/HateThisDropdown";
+import HateThisDropdown, { eventHateMatchesEvent } from "../components/HateThisDropdown";
 import api from "../lib/api";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
@@ -34,6 +36,8 @@ interface Newsletter {
 
 export default function Newsletters() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
@@ -43,11 +47,24 @@ export default function Newsletters() {
   const [rawResponses, setRawResponses] = useState<string[]>([]);
   const [hatesCount, setHatesCount] = useState(0);
   const [hates, setHates] = useState<Array<{ type: string; value: string }>>([]);
+  const [expandedDislikedIds, setExpandedDislikedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("testWizard") === "1") {
+      navigate("/onboarding?testWizard=1");
+      return;
+    }
     loadNewsletters();
     loadHates();
-  }, []);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (user === undefined) return;
+    if (!user?.city) {
+      navigate("/onboarding");
+    }
+  }, [user, navigate]);
 
   const loadHates = async () => {
     try {
@@ -76,7 +93,45 @@ export default function Newsletters() {
     if (hates.some((h) => h.type === "venue" && match(h, event.venue ?? event.location))) {
       reasons.push(t("hates.hatedVenue"));
     }
+    if (hates.some((h) => h.type === "event" && eventHateMatchesEvent(h.value, event))) {
+      reasons.push(t("hates.hatedEvent"));
+    }
     return reasons;
+  };
+
+  const isEventDisliked = (event: Event): boolean => getHatedReasons(event).length > 0;
+
+  // Color palette for categories - same category = same color
+  const CATEGORY_COLORS = [
+    "#000080", // navy
+    "#008000", // green
+    "#800080", // purple
+    "#800000", // maroon
+    "#008080", // teal
+    "#808000", // olive
+    "#004080", // dark blue
+    "#804000", // brown
+    "#408080", // cyan
+    "#808080", // gray
+  ];
+  const getCategoryColor = (category?: string | null): string => {
+    const key = (category?.trim() || "(uncategorized)").toLowerCase();
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash = ((hash << 5) - hash) + key.charCodeAt(i);
+    const idx = Math.abs(hash) % CATEGORY_COLORS.length;
+    return CATEGORY_COLORS[idx];
+  };
+
+  const expandDislikedEvent = (eventId: string) => {
+    setExpandedDislikedIds((prev) => new Set(prev).add(eventId));
+  };
+
+  const collapseDislikedEvent = (eventId: string) => {
+    setExpandedDislikedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(eventId);
+      return next;
+    });
   };
 
   const loadNewsletters = async () => {
@@ -216,6 +271,9 @@ export default function Newsletters() {
                         </p>
                         <div className="space-y-2">
                           {newsletter.events.map(({ event }) => {
+                            const disliked = isEventDisliked(event);
+                            const collapsed = disliked && !expandedDislikedIds.has(event.id);
+
                             const score =
                               event.score !== null && event.score !== undefined
                                 ? event.score
@@ -237,11 +295,44 @@ export default function Newsletters() {
                                   : `(${t("newsletters.fairMatch")})`
                                 : "";
 
+                            const categoryColor = getCategoryColor(event.category);
+
+                            if (disliked && collapsed) {
+                              return (
+                                <div
+                                  key={event.id}
+                                  className="border-l-4 pl-2 py-1 bg-[#c0c0c0] border border-[#808080] flex items-center justify-between cursor-pointer hover:bg-[#d4d0c8]"
+                                  style={{ borderLeftColor: categoryColor }}
+                                  onClick={() => expandDislikedEvent(event.id)}
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => e.key === "Enter" && expandDislikedEvent(event.id)}
+                                >
+                                  <span className="text-xs text-[#800000] font-bold truncate flex-1">
+                                    {event.title} · {new Date(event.date).toLocaleDateString()}
+                                    {event.venue && ` · ${event.venue}`}
+                                    {event.artist && !event.venue && ` · ${event.artist}`}
+                                  </span>
+                                  <span className="text-xs text-[#808080] ml-2">▼ {t("hates.expand")}</span>
+                                </div>
+                              );
+                            }
+
                             return (
                               <div
                                 key={event.id}
-                                className="border-l-2 border-[#000080] pl-2 py-2 bg-[#c0c0c0] border border-[#808080]"
+                                className="border-l-4 pl-2 py-2 bg-[#c0c0c0] border border-[#808080]"
+                                style={{ borderLeftColor: categoryColor }}
                               >
+                                {disliked && (
+                                  <button
+                                    type="button"
+                                    onClick={() => collapseDislikedEvent(event.id)}
+                                    className="text-xs text-[#808080] mb-1 hover:underline"
+                                  >
+                                    ▲ {t("hates.collapse")}
+                                  </button>
+                                )}
                                 <div className="flex justify-between items-start mb-1">
                                   <h4 className="text-xs font-bold text-black flex-1">
                                     {event.title}
@@ -295,8 +386,16 @@ export default function Newsletters() {
                                     hatesCount={hatesCount}
                                     onHateAdded={(type, value) => {
                                       loadHates();
-                                      const typeLabel = type === "organizer" ? t("hates.typeOrganizer") : type === "artist" ? t("hates.typeArtist") : t("hates.typeVenue");
-                                      setSuccess(t("hates.addedSuccess", { type: typeLabel, value }));
+                                      const typeLabel =
+                                        type === "organizer"
+                                          ? t("hates.typeOrganizer")
+                                          : type === "artist"
+                                          ? t("hates.typeArtist")
+                                          : type === "venue"
+                                          ? t("hates.typeVenue")
+                                          : t("hates.typeEvent");
+                                      const displayValue = type === "event" ? value.split("|")[0] : value;
+                                      setSuccess(t("hates.addedSuccess", { type: typeLabel, value: displayValue }));
                                     }}
                                     onError={setError}
                                   />

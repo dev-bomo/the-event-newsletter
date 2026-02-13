@@ -96,8 +96,9 @@
       "step1": "Set your preferences (town, interests, etc.)",
       "step2": "A profile will be generated and attached to your account.",
       "step3": "Try generating a newsletter. The system will do some crawling, work its magic, and do its best. See if the events it finds fit you.",
-      "step4": "If they do, great! You're all set and you'll get a new newsletter every Thu around 4 PM.",
-      "step5": "If they don't, try fiddling with your preferences? Just remember this is not deterministic—the events it finds won't always be the same ones. But the important ones should be there."
+      "step4": "If some events don't fit, use \"Hate this\" on newsletters to exclude artists, venues, organizers, or specific events. Future newsletters won't include them.",
+      "step5": "If they do, great! You're all set and you'll get a new newsletter every Thu around 4 PM.",
+      "step6": "If they still don't fit, try fiddling with the preferences? Remember though: This is THE TOOL to get you all the events. This is just meant to make your event finding experience a little better."
     },
     "limits": {
       "title": "Usage Limits (to manage AI costs)",
@@ -144,6 +145,7 @@
     "saving": "Saving...",
     "resetConfirm": "Are you sure you want to reset all preferences? This will clear all your interests, genres, event types, venues, and artists. This action cannot be undone.",
     "resetSuccess": "All preferences have been reset.",
+    "unverifiedMessage": "Your account must be verified before you can generate newsletters. Please contact support to activate your account.",
     "categories": {
       "interests": "Interests",
       "genres": "Genres",
@@ -204,6 +206,7 @@
     "title": "Exclude this from future newsletters (use sparingly—only for events you definitely want gone)",
     "trigger": "Hate this",
     "dropdownTitle": "Exclude from future newsletters",
+    "excludeEvent": "Hate this event: {{value}}",
     "excludeOrganizer": "Exclude this organizer: {{value}}",
     "excludeArtist": "Exclude this artist: {{value}}",
     "excludeVenue": "Exclude this venue: {{value}}",
@@ -216,6 +219,12 @@
     "hatedOrganizer": "this organizer",
     "hatedArtist": "this artist",
     "hatedVenue": "this venue",
+    "hatedEvent": "this event",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "typeEvent": "Event",
+    "eventLimitWarning": "Only the 15 most recently added events are used when finding new events. Events below that are no longer considered.",
+    "notConsidered": "not considered for new events",
     "pageTitle": "My Exclusions",
     "pageDescription": "Events from these organizers, artists, or venues will never appear in your newsletters. Use sparingly—only for things you definitely want gone. Remove any you no longer want excluded.",
     "empty": "No exclusions yet. Add them from the newsletter events list when you see something you definitely want removed.",
@@ -226,6 +235,8 @@
     "deleteAllConfirmMessage": "This will remove every exclusion. Events from these organizers, artists, and venues may appear in future newsletters again.",
     "loadFailed": "Failed to load exclusions",
     "deleteFailed": "Failed to remove exclusion",
+    "howExclusionsWorkTitle": "How exclusions are used",
+    "howExclusionsWork": "When finding events for your newsletter, the system excludes any event that matches your exclusions: events with a hated artist, venue, or organizer are filtered out before ranking. Event exclusions (specific event titles) are also applied. Only the 15 most recently added event exclusions are considered; artist, venue, and organizer exclusions have no limit.",
     "typeOrganizer": "Organizer",
     "typeArtist": "Artist",
     "typeVenue": "Venue"

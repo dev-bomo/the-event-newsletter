@@ -96,8 +96,9 @@
       "step1": "Setează preferințele tale (oraș, interese, etc.)",
       "step2": "Un profil va fi generat și atașat contului tău.",
       "step3": "Încearcă să generezi un newsletter. Sistemul va face crawling, își va face magia și va încerca să găsească evenimente pentru tine. Vezi dacă se potrivesc.",
-      "step4": "Dacă da, perfect! Ești gata și vei primi un newsletter nou în fiecare joi pe la ora 16.",
-      "step5": "Dacă nu, încearcă să ajustezi preferințele? Ține minte că nu e determinist—evenimentele găsite nu vor fi mereu aceleași. Dar cele importante ar trebui să fie acolo."
+      "step4": "Dacă unele evenimente nu se potrivesc, folosește \"Nu vreau\" pe newslettere pentru a exclude artiști, locuri, organizatori sau evenimente anume. Newsletterele viitoare nu le vor include.",
+      "step5": "Dacă da, perfect! Ești gata și vei primi un newsletter nou în fiecare joi pe la ora 16.",
+      "step6": "Dacă tot nu se potrivesc, încearcă să ajustezi preferințele? Ține minte însă: Acesta E UNELTA pentru a obține toate evenimentele. Este doar menit să îți facă experiența de căutare a evenimentelor puțin mai plăcută."
     },
     "limits": {
       "title": "Limite de utilizare (pentru gestionarea costurilor AI)",
@@ -144,6 +145,7 @@
     "saving": "Se salvează...",
     "resetConfirm": "Ești sigur că vrei să resetezi toate preferințele? Se vor șterge toate interesele, genurile, tipurile de evenimente, locurile și artiștii. Această acțiune nu poate fi anulată.",
     "resetSuccess": "Toate preferințele au fost resetate.",
+    "unverifiedMessage": "Contul tău trebuie verificat înainte de a genera newslettere. Te rugăm să contactezi suportul pentru activarea contului.",
     "categories": {
       "interests": "Interese",
       "genres": "Genuri",
@@ -204,6 +206,7 @@
     "title": "Exclude din newslettere viitoare (folosește cu moderație—doar pentru evenimente pe care le vrei definitiv eliminate)",
     "trigger": "Nu vreau",
     "dropdownTitle": "Exclude din newslettere viitoare",
+    "excludeEvent": "Nu vreau acest eveniment: {{value}}",
     "excludeOrganizer": "Exclude organizatorul: {{value}}",
     "excludeArtist": "Exclude artistul: {{value}}",
     "excludeVenue": "Exclude locul: {{value}}",
@@ -216,6 +219,12 @@
     "hatedOrganizer": "acest organizator",
     "hatedArtist": "acest artist",
     "hatedVenue": "acest loc",
+    "hatedEvent": "acest eveniment",
+    "expand": "Expand",
+    "collapse": "Restrânge",
+    "typeEvent": "Eveniment",
+    "eventLimitWarning": "Doar cele 15 evenimente adăugate cel mai recent sunt luate în considerare la căutarea de evenimente noi. Cele de mai jos nu mai sunt considerate.",
+    "notConsidered": "nu mai este considerat pentru evenimente noi",
     "pageTitle": "Excluderile mele",
     "pageDescription": "Evenimente de la acești organizatori, artiști sau locuri nu vor apărea niciodată în newsletterele tale. Folosește cu moderație—doar pentru lucruri pe care le vrei definitiv eliminate. Șterge pe cele pe care nu le mai vrei excluse.",
     "empty": "Nicio excludere încă. Adaugă-le din lista de evenimente din newsletter când vezi ceva pe care îl vrei definitiv eliminat.",
@@ -226,6 +235,8 @@
     "deleteAllConfirmMessage": "Se vor șterge toate excluderile. Evenimente de la acești organizatori, artiști și locuri pot apărea din nou în newsletterele viitoare.",
     "loadFailed": "Încărcarea excluderilor a eșuat",
     "deleteFailed": "Ștergerea excluderii a eșuat",
+    "howExclusionsWorkTitle": "Cum sunt folosite excluderile",
+    "howExclusionsWork": "Când căutăm evenimente pentru newsletterul tău, sistemul exclude orice eveniment care se potrivește excluderilor tale: evenimente cu artist, loc sau organizator exclus sunt filtrate înainte de clasificare. Excluderile de evenimente (titluri specifice) sunt de asemenea aplicate. Doar cele 15 excluderi de evenimente adăugate cel mai recent sunt luate în considerare; excluderile de artist, loc și organizator nu au limită.",
     "typeOrganizer": "Organizator",
     "typeArtist": "Artist",
     "typeVenue": "Loc"

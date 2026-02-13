@@ -240,7 +240,7 @@ export default function OnboardingWizard() {
   };
 
   const handleComplete = () => {
-    navigate("/dashboard");
+    navigate("/newsletters");
   };
 
   const categories: Array<{

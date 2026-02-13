@@ -44,20 +44,33 @@ export async function discoverEventsForUser(userId: string): Promise<{
   }
 
   // Build effective profile: base profile + hates (so AI takes them into account)
-  // Group by type, comma-separated, max 3 lines (organizer, artist, venue)
+  // Group by type: organizer/artist/venue = exclude; event = penalize similar
   let effectiveProfile = user.profile;
   if (hasHates) {
     const byType = {
       organizer: eventHates.filter((h) => h.type === "organizer").map((h) => h.value),
       artist: eventHates.filter((h) => h.type === "artist").map((h) => h.value),
       venue: eventHates.filter((h) => h.type === "venue").map((h) => h.value),
+      event: eventHates.filter((h) => h.type === "event").map((h) => h.value),
     };
     const lines: string[] = [];
     if (byType.organizer.length) lines.push(`Organizers to exclude: ${byType.organizer.join(", ")}`);
     if (byType.artist.length) lines.push(`Artists to exclude: ${byType.artist.join(", ")}`);
     if (byType.venue.length) lines.push(`Venues to exclude: ${byType.venue.join(", ")}`);
+    if (byType.event.length) {
+      const eventHatesOrdered = eventHates
+        .filter((h) => h.type === "event")
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 15);
+      const eventPhrases = eventHatesOrdered.map((h) =>
+        h.value.includes("|") ? h.value.split("|")[0].trim() : h.value
+      );
+      if (eventPhrases.length) {
+        lines.push(`Events the user disliked (lower the relevance score by 15-20 points for similar events - same/similar title, venue, artist, or type): ${eventPhrases.join("; ")}`);
+      }
+    }
     const hatesText = lines.join("\n");
-    effectiveProfile = `${user.profile}\n\nEXCLUSIONS (do not include these in any results):\n${hatesText}`;
+    effectiveProfile = `${user.profile}\n\nEXCLUSIONS AND PREFERENCES:\n${hatesText}`;
     console.log("Appended hates to profile for AI context");
   }
 
@@ -111,9 +124,11 @@ export async function discoverEventsForUser(userId: string): Promise<{
     `Total discovered events: ${discoveredEvents.length} (${generalSearchCount} from general search, ${customSourceCount} from custom sources)`
   );
 
-  // Filter out events with missing required fields and past dates
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  // Filter out events with missing required fields, past dates, and same-day events
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const validEvents = discoveredEvents.filter((event) => {
     if (
@@ -146,12 +161,12 @@ export async function discoverEventsForUser(userId: string): Promise<{
       console.warn("Skipping event with missing/invalid title");
       return false;
     }
-    // Filter out events with date before today
+    // Filter out events on or before today (only include events starting tomorrow onward)
     const eventDate = new Date(event.date);
     eventDate.setHours(0, 0, 0, 0);
-    if (eventDate < todayStart) {
+    if (eventDate < tomorrow) {
       console.warn(
-        "Skipping event with past date:",
+        "Skipping event (past or same-day):",
         event.title,
         event.date
       );
@@ -238,12 +253,30 @@ export async function discoverEventsForUser(userId: string): Promise<{
     eventsAfterHates.map((e) => `"${e.title}" (score: ${e.score})`).join(", ")
   );
 
-  // Limit to 20 (from eventsAfterHates, which already had hates applied)
-  const top20FromHates = eventsAfterHates.slice(0, 20);
-  const finalEvents =
-    top20FromHates.length >= 12 ? top20FromHates : eventsAfterHates.slice(0, 12);
+  // Limit to max 6 per category (remove lowest-scored in each category)
+  const MAX_PER_CATEGORY = 6;
+  const categoryGroups = new Map<string, typeof eventsAfterHates>();
+  for (const event of eventsAfterHates) {
+    const cat = event.category?.trim() || "(uncategorized)";
+    if (!categoryGroups.has(cat)) categoryGroups.set(cat, []);
+    categoryGroups.get(cat)!.push(event);
+  }
+  let eventsAfterCategoryLimit: typeof eventsAfterHates = [];
+  for (const [, group] of categoryGroups) {
+    const trimmed = group.length > MAX_PER_CATEGORY
+      ? group.sort((a, b) => (b.score ?? 0) - (a.score ?? 0)).slice(0, MAX_PER_CATEGORY)
+      : group;
+    eventsAfterCategoryLimit = eventsAfterCategoryLimit.concat(trimmed);
+  }
+  // Re-sort by score (categories are now mixed)
+  eventsAfterCategoryLimit.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-  const removedByLimit = eventsAfterHates.length - finalEvents.length;
+  // Limit to 20 total
+  const top20FromHates = eventsAfterCategoryLimit.slice(0, 20);
+  const finalEvents =
+    top20FromHates.length >= 12 ? top20FromHates : eventsAfterCategoryLimit.slice(0, 12);
+
+  const removedByLimit = eventsAfterCategoryLimit.length - finalEvents.length;
   if (removedByLimit > 0) {
     console.log(
       `Removed ${removedByLimit} events due to limit (kept top ${finalEvents.length}):`

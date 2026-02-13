@@ -19,7 +19,7 @@ export async function getUserNewsletters(userId: string) {
   });
 }
 
-const NEWSLETTER_LIMIT_PER_USER = 5;
+const NEWSLETTER_LIMIT_PER_USER = parseInt(process.env.NEWSLETTER_LIMIT_PER_USER || "5", 10);
 
 export async function generateNewsletter(userId: string) {
   // Check newsletter limit
@@ -166,6 +166,19 @@ export async function sendNewsletter(userId: string, newsletterId: string) {
   return { success: true };
 }
 
+const CATEGORY_COLORS = [
+  "#000080", "#008000", "#800080", "#800000", "#008080",
+  "#808000", "#004080", "#804000", "#408080", "#808080",
+];
+
+function getCategoryColor(category?: string | null): string {
+  const key = (category?.trim() || "(uncategorized)").toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash << 5) - hash + key.charCodeAt(i);
+  const idx = Math.abs(hash) % CATEGORY_COLORS.length;
+  return CATEGORY_COLORS[idx];
+}
+
 function generateNewsletterHTML(userName: string, events: any[]): string {
   const eventsHTML = events
     .slice(0, 20)
@@ -180,9 +193,10 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
             ? "#ffc107"
             : "#dc3545"
           : "#6c757d";
+      const categoryColor = getCategoryColor(event.category);
 
       return `
-    <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+    <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-left: 4px solid ${categoryColor}; border-radius: 8px;">
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
         <h3 style="margin-top: 0; color: #333; flex: 1;">${index + 1}. ${
         event.title
@@ -212,20 +226,6 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
         ${
           event.category
             ? `<p style="margin: 5px 0; color: #555;"><strong>Category:</strong> ${event.category}</p>`
-            : ""
-        }
-        ${
-          score !== null
-            ? `<p style="margin: 5px 0; color: #555; font-size: 12px;">
-                 <strong>Relevance Score:</strong> ${score}/100 
-                 ${
-                   score >= 80
-                     ? "(Excellent match)"
-                     : score >= 60
-                     ? "(Good match)"
-                     : "(Fair match)"
-                 }
-               </p>`
             : ""
         }
         <a href="${

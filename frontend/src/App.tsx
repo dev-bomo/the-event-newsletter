@@ -4,7 +4,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import Dashboard from "./pages/Dashboard";
 import Preferences from "./pages/Preferences";
 import Newsletters from "./pages/Newsletters";
 import OnboardingWizard from "./pages/OnboardingWizard";
@@ -21,23 +20,23 @@ function App() {
       <Routes>
         <Route
           path="/login"
-          element={token ? <Navigate to="/dashboard" /> : <Login />}
+          element={token ? <Navigate to="/newsletters" /> : <Login />}
         />
         <Route
           path="/register"
-          element={token ? <Navigate to="/dashboard" /> : <Register />}
+          element={token ? <Navigate to="/newsletters" /> : <Register />}
         />
         <Route
           path="/forgot-password"
-          element={token ? <Navigate to="/dashboard" /> : <ForgotPassword />}
+          element={token ? <Navigate to="/newsletters" /> : <ForgotPassword />}
         />
         <Route
           path="/reset-password"
-          element={token ? <Navigate to="/dashboard" /> : <ResetPassword />}
+          element={token ? <Navigate to="/newsletters" /> : <ResetPassword />}
         />
         <Route
           path="/dashboard"
-          element={token ? <Dashboard /> : <Navigate to="/login" />}
+          element={<Navigate to="/newsletters" replace />}
         />
         <Route
           path="/preferences"
@@ -57,7 +56,7 @@ function App() {
           path="/hates"
           element={token ? <MyHates /> : <Navigate to="/login" />}
         />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/" element={<Navigate to="/newsletters" />} />
       </Routes>
     </BrowserRouter>
   );

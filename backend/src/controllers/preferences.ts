@@ -109,6 +109,12 @@ export async function updateUserProfile(userId: string) {
       return;
     }
 
+    // Skip profile generation for unverified users (they can save preferences but not generate newsletters)
+    if (!user.verified) {
+      console.log("Skipping profile generation: user not verified");
+      return;
+    }
+
     if (!user.preferences) {
       console.log("Cannot generate profile: preferences not set");
       return;
@@ -192,7 +198,14 @@ export async function updateUserPreferences(
     artists?: string[];
   },
   city?: string
-) {
+): Promise<{
+  interests: string[];
+  genres: string[];
+  eventTypes: string[];
+  venues: string[];
+  artists: string[];
+  _unverified?: boolean;
+}> {
   const limitCheck = await checkPreferenceEditLimit(userId);
   if (!limitCheck.allowed) {
     throw new Error(limitCheck.message || "Preference edit limit reached.");
@@ -273,10 +286,21 @@ export async function updateUserPreferences(
   await recordPreferenceEdit(userId);
   await updateUserProfile(userId);
 
-  return result;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { verified: true },
+  });
+
+  return {
+    ...result,
+    ...(user && !user.verified ? { _unverified: true } : {}),
+  };
 }
 
-export async function updateUserCity(userId: string, city: string) {
+export async function updateUserCity(
+  userId: string,
+  city: string
+): Promise<{ success: boolean; _unverified?: boolean }> {
   const limitCheck = await checkPreferenceEditLimit(userId);
   if (!limitCheck.allowed) {
     throw new Error(limitCheck.message || "Preference edit limit reached.");
@@ -289,6 +313,16 @@ export async function updateUserCity(userId: string, city: string) {
 
   await recordPreferenceEdit(userId);
   await updateUserProfile(userId);
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { verified: true },
+  });
+
+  return {
+    success: true,
+    ...(user && !user.verified ? { _unverified: true } : {}),
+  };
 }
 
 /**

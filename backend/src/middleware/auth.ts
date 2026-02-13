@@ -25,19 +25,6 @@ export async function authenticateToken(
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
-    
-    // Check if user is verified (alpha testing requirement)
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { verified: true },
-    });
-
-    if (!user || !user.verified) {
-      return res.status(403).json({ 
-        error: 'Your account is pending verification. Please contact support to activate your account.' 
-      });
-    }
-
     req.userId = decoded.userId;
     next();
   } catch (error) {

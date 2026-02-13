@@ -1,11 +1,15 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import os from "os";
 import { setupRoutes } from "./routes/index.js";
 import { setupCronJobs } from "./services/cron.js";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Load .env from backend directory (cwd may be project root when run via npm workspaces)
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? "3000", 10);

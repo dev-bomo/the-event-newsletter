@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import api from "../lib/api";
@@ -140,11 +141,16 @@ export default function Preferences() {
     setSuccess("");
 
     try {
-      await api.put("/preferences", { ...preferences, city });
+      const res = await api.put("/preferences", { ...preferences, city });
       const prefsRes = await api.get("/preferences");
       const { _limits } = prefsRes.data;
       setPreferenceLimits(_limits || null);
       setSuccess(t("preferences.preferencesSection.saved"));
+      if (res.data?._unverified) {
+        setSuccess(
+          `${t("preferences.preferencesSection.saved")} ${t("preferences.unverifiedMessage")}`
+        );
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || t("common.savePreferencesFailed"));
     } finally {
@@ -244,6 +250,11 @@ export default function Preferences() {
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
         <Windows98Window title={t("preferences.title")}>
           <div className="space-y-4">
+            <div className="mb-2">
+              <Link to="/hates" className="text-xs font-bold text-[#000080] hover:underline">
+                {t("dashboard.myHates")} →
+              </Link>
+            </div>
             <div className="mb-4">
               <p className="text-xs text-black mb-2">
                 {t("preferences.description")}

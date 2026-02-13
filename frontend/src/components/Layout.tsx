@@ -7,6 +7,7 @@ import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
 import Windows98Sidebar from "./Windows98Sidebar";
 import { getWallpaperCSS } from "./WallpaperPicker";
 import WallpaperPicker from "./WallpaperPicker";
+import HowItWorksOverlay from "./HowItWorksOverlay";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ export default function Layout({ children }: LayoutProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [wallpaperPickerOpen, setWallpaperPickerOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -63,9 +65,8 @@ export default function Layout({ children }: LayoutProps) {
   }, []);
 
   const navigation = [
-    { name: t("nav.dashboard"), href: "/dashboard", key: "dashboard" },
-    { name: t("nav.preferences"), href: "/preferences", key: "preferences" },
     { name: t("nav.newsletters"), href: "/newsletters", key: "newsletters" },
+    { name: t("nav.preferences"), href: "/preferences", key: "preferences" },
   ];
 
   return (
@@ -82,7 +83,7 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Desktop: Start Button with Logo */}
         <Link
-          to="/dashboard"
+          to="/newsletters"
           className="hidden md:flex bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] h-full px-2 items-center hover:bg-[#d4d0c8] active:border-t-[#808080] active:border-l-[#808080] active:border-r-[#ffffff] active:border-b-[#ffffff]"
         >
           <img
@@ -94,7 +95,7 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Mobile: Logo */}
         <Link
-          to="/dashboard"
+          to="/newsletters"
           className="md:hidden flex-1 flex justify-center items-center h-full"
         >
           <img
@@ -105,7 +106,7 @@ export default function Layout({ children }: LayoutProps) {
         </Link>
 
         {/* Desktop: Application Buttons */}
-        <div className="hidden md:flex flex-1 gap-1 px-1">
+        <div className="hidden md:flex flex-1 gap-1 px-1 items-center">
           {navigation.map((item) => {
             const isActive = location.pathname === item.href;
             return (
@@ -122,6 +123,14 @@ export default function Layout({ children }: LayoutProps) {
               </Link>
             );
           })}
+          <button
+            onClick={() => setHowItWorksOpen(true)}
+            className="bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] w-10 h-10 flex items-center justify-center hover:bg-[#d4d0c8] active:border-t-[#808080] active:border-l-[#808080] active:border-r-[#ffffff] active:border-b-[#ffffff]"
+            title={t("dashboard.howItWorks.title")}
+            aria-label={t("dashboard.howItWorks.title")}
+          >
+            <span className="text-[#000080] font-bold text-base">?</span>
+          </button>
         </div>
 
         {/* Desktop: System Tray */}
@@ -147,12 +156,22 @@ export default function Layout({ children }: LayoutProps) {
       </nav>
 
       {/* Mobile Sidebar */}
-      <Windows98Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Windows98Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onHowItWorksClick={() => setHowItWorksOpen(true)}
+      />
 
       {/* Wallpaper Picker */}
       <WallpaperPicker
         isOpen={wallpaperPickerOpen}
         onClose={() => setWallpaperPickerOpen(false)}
+      />
+
+      {/* How it works overlay */}
+      <HowItWorksOverlay
+        isOpen={howItWorksOpen}
+        onClose={() => setHowItWorksOpen(false)}
       />
 
       <main className="flex-1 pt-12">{children}</main>

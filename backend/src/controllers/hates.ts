@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 
-const HATE_TYPES = ["organizer", "artist", "venue"] as const;
+const HATE_TYPES = ["organizer", "artist", "venue", "event"] as const;
 export type HateType = (typeof HATE_TYPES)[number];
 
 export function isValidHateType(type: string): type is HateType {

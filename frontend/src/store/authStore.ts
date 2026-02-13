@@ -5,6 +5,7 @@ interface User {
   email: string;
   name?: string;
   city?: string | null;
+  verified?: boolean;
 }
 
 interface AuthState {

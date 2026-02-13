@@ -11,7 +11,7 @@ import {
 const router = Router();
 
 const addHateSchema = z.object({
-  type: z.enum(["organizer", "artist", "venue"]),
+  type: z.enum(["organizer", "artist", "venue", "event"]),
   value: z.string().min(1).max(500),
 });
 

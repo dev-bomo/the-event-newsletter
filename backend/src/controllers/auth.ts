@@ -31,18 +31,20 @@ export async function register(data: {
   // Hash password
   const passwordHash = await bcrypt.hash(data.password, 10);
 
-  // Create user
+  // Create user (auto-verified; verified field kept in DB for compatibility)
   const user = await prisma.user.create({
     data: {
       email: data.email,
       passwordHash,
       name: data.name,
+      verified: true,
     },
     select: {
       id: true,
       email: true,
       name: true,
       city: true,
+      verified: true,
       createdAt: true,
     },
   });
@@ -74,12 +76,7 @@ export async function login(data: { email: string; password: string }) {
     throw new Error("Invalid email or password");
   }
 
-  // Check if user is verified (alpha testing requirement)
-  if (!user.verified) {
-    throw new Error("Your account is pending verification. Please contact support to activate your account.");
-  }
-
-  // Generate token
+  // Generate token (unverified users can log in but cannot generate newsletters)
   const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
     expiresIn: "30d",
   });
@@ -90,6 +87,7 @@ export async function login(data: { email: string; password: string }) {
       email: user.email,
       name: user.name,
       city: user.city,
+      verified: user.verified,
       createdAt: user.createdAt,
     },
     token,

@@ -61,6 +61,10 @@ export default function MyHates() {
     }
   };
 
+  const eventHates = hates.filter((h) => h.type === "event");
+  const eventHatesBeyondLimit = eventHates.length > 15;
+  const eventLimit = 15;
+
   const typeLabel = (type: string) => {
     switch (type) {
       case "organizer":
@@ -69,6 +73,8 @@ export default function MyHates() {
         return t("hates.typeArtist");
       case "venue":
         return t("hates.typeVenue");
+      case "event":
+        return t("hates.typeEvent");
       default:
         return type;
     }
@@ -79,12 +85,15 @@ export default function MyHates() {
       <div className="px-4 py-6 sm:px-0 max-w-3xl mx-auto">
         <Windows98Window title={t("hates.pageTitle")}>
           <div className="space-y-4">
+            <Link to="/newsletters" className="text-xs font-bold text-[#000080] hover:underline">
+              ← {t("common.back")}
+            </Link>
             <p className="text-xs text-black">
               {t("hates.pageDescription")}
             </p>
-            <Link to="/dashboard" className="text-xs font-bold text-[#000080] hover:underline">
-              ← {t("common.back")}
-            </Link>
+            <p className="text-xs text-black">
+              {t("hates.howExclusionsWork")}
+            </p>
 
             {error && (
               <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-[#800000]">
@@ -103,6 +112,11 @@ export default function MyHates() {
               </Windows98ReadingPane>
             ) : (
               <>
+                {eventHatesBeyondLimit && (
+                  <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-[#800000] mb-3">
+                    {t("hates.eventLimitWarning", { limit: eventLimit })}
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <p className="text-xs font-bold text-black">
                     {t("hates.count", { count: hates.length })}
@@ -117,16 +131,27 @@ export default function MyHates() {
                 </div>
                 <Windows98ReadingPane>
                   <div className="space-y-2">
-                    {hates.map((hate) => (
+                    {hates.map((hate) => {
+                      const isEventBeyondLimit =
+                        hate.type === "event" &&
+                        eventHates.findIndex((eh) => eh.id === hate.id) >= eventLimit;
+                      return (
                       <div
                         key={hate.id}
-                        className="flex justify-between items-center py-2 border-b border-[#808080] last:border-0"
+                        className={`flex justify-between items-center py-2 border-b border-[#808080] last:border-0 ${isEventBeyondLimit ? "opacity-60" : ""}`}
                       >
                         <div>
                           <span className="text-xs font-bold text-black">
                             {typeLabel(hate.type)}:
                           </span>{" "}
-                          <span className="text-xs text-black">{hate.value}</span>
+                          <span className="text-xs text-black">
+                            {hate.type === "event" ? hate.value.split("|")[0] : hate.value}
+                          </span>
+                          {isEventBeyondLimit && (
+                            <span className="text-xs text-[#800000] ml-2">
+                              ({t("hates.notConsidered")})
+                            </span>
+                          )}
                         </div>
                         <button
                           type="button"
@@ -137,7 +162,7 @@ export default function MyHates() {
                           {deleting === hate.id ? t("common.loading") : t("common.remove")}
                         </button>
                       </div>
-                    ))}
+                    );})}
                   </div>
                 </Windows98ReadingPane>
               </>

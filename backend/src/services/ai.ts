@@ -221,7 +221,10 @@ Date window: Next 30 days
 
 Your task is to create a plan for finding events. Break down the search into 5-6 specific tasks or sites to query. Each task should be a specific search query or website/source to check.
 
+IMPORTANT: Include ONE task that finds events from the Facebook page for local events in ${city}. For example: "Check Facebook events for ${city}" or "Search facebook.com/events for ${city} events" or "Find the Facebook ${city} events page and list upcoming events there". The goal is to surface events from Facebook's local events discovery (e.g. facebook.com/events/explore or a local "Facebook ${city} Events" page).
+
 Return a JSON object with a "tasks" array. Each task should be a string describing what to search for or which site to query. Examples:
+- "Check Facebook events for ${city}"
 - "Search Bandsintown for rock/metal concerts in ${city}"
 - "Check iabilet.ro for events at Casa Tineretului"
 - "Find stand-up comedy shows in ${city} on Eventbrite"
@@ -262,6 +265,7 @@ Return exactly 5-6 tasks, no more, no less.`;
     console.error("Failed to parse planning response:", error);
     // Fallback: create default tasks
     const defaultTasks = [
+      `Check Facebook events for ${city}`,
       `Search for concerts and music events in ${city}`,
       `Find theater and performing arts events in ${city}`,
       `Search for meetups and talks in ${city}`,
@@ -278,6 +282,7 @@ Return exactly 5-6 tasks, no more, no less.`;
 async function searchEventsForTask(
   task: string,
   userProfile: string,
+  city: string,
   eventSources?: string[]
 ): Promise<{ events: any[]; rawResponse: string }> {
   const eventSourcesText =
@@ -286,9 +291,11 @@ async function searchEventsForTask(
       : "";
 
   const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days). Do NOT include events that have already passed or are in the past.`;
+  const dateWindow = `Events must start from ${tomorrow.toISOString().split("T")[0]} (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}. Do NOT include events happening today or in the past.`;
 
   const prompt = `From this site/search: "${task}"
 
@@ -302,7 +309,7 @@ For each event, return:
 - description (optional)
 - date (ISO format: YYYY-MM-DD) - MUST be within the next 30 days
 - time (optional, HH:MM format)
-- location (full address)
+- location (full address - MUST include the city name, e.g. "Venue Name, ${city}" or "Street, ${city}, Country")
 - category (optional)
 - sourceUrl (URL to the event page or source)
 - imageUrl (optional)
@@ -310,7 +317,7 @@ For each event, return:
 - artist (optional): main artist, band, or performer name
 - venue (optional): venue or location name (e.g. "Blue Note", "Lincoln Center")
 
-Return a JSON object with an "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events within the next 30 days. Exclude any events that have already passed.`;
+Return a JSON object with an "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events starting tomorrow or later. Exclude events happening today or in the past.`;
 
   const systemPrompt = `You are extracting raw event data. Return only valid JSON with an "events" array. Do not score or deduplicate. Never include events from the past.`;
 
@@ -357,14 +364,16 @@ async function mergeAndScoreEvents(
   const eventsJson = JSON.stringify(allRawEvents.slice(0, 100)); // Limit to 100 events max for prompt
 
   const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days only).`;
+  const dateWindow = `Events must start from ${tomorrow.toISOString().split("T")[0]} (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}.`;
 
   const prompt = `You have been given ${allRawEvents.length} raw event candidates. Your task is to:
 
-1. Filter events to ONLY include those within the next 30 days (${dateWindow}). Exclude ALL events that have already passed or are in the past.
-2. Filter to keep ONLY events in ${city} - the location field MUST contain "${city}" or a clear reference to ${city}. Exclude festivals, events, or venues in other cities.
+1. Filter events to ONLY include those starting tomorrow or later (${dateWindow}). Exclude ALL events happening today or in the past.
+2. Filter to keep ONLY events in ${city}. The location field MUST include the city name (e.g. "Venue, ${city}" or "Address, ${city}, Romania"). Exclude festivals, events, or venues in other cities.
 3. Deduplicate by artist/band (if multiple events feature the same performer, keep only the most relevant one)
 4. Limit to maximum 4 events per sourceUrl (if multiple events share the same sourceUrl, keep only the top 4 by relevance)
 5. Validate all URLs - only keep events with real, verifiable sourceUrl
@@ -376,9 +385,9 @@ ${userProfile}
 Return a JSON object with an "events" array. Each event must have:
 - title
 - description (optional)
-- date (ISO format: YYYY-MM-DD) - MUST be within next 30 days
+- date (ISO format: YYYY-MM-DD) - MUST be tomorrow or later
 - time (optional, HH:MM format)
-- location (full address)
+- location (full address - MUST include "${city}", e.g. "Venue, ${city}" or "Address, ${city}")
 - category (optional)
 - sourceUrl (valid, verifiable URL)
 - imageUrl (optional)
@@ -451,9 +460,11 @@ async function repairOrExpandEvents(
       : "";
 
   const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must be between ${today.toISOString().split("T")[0]} and ${thirtyDaysLater.toISOString().split("T")[0]} (next 30 days only). Do NOT include events that have already passed.`;
+  const dateWindow = `Events must start from ${tomorrow.toISOString().split("T")[0]} (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}. Do NOT include events happening today or in the past.`;
 
   const prompt = `${instruction}
 
@@ -462,15 +473,15 @@ ${userProfile}
 
 City: ${city}
 ${dateWindow}
-IMPORTANT: Only include events in ${city}. The location field MUST contain "${city}" or a clear reference to ${city}. Exclude festivals, events, or venues in other cities.
+IMPORTANT: Only include events in ${city}. The location field MUST include the city name (e.g. "Venue, ${city}" or "Address, ${city}, Romania"). Exclude festivals, events, or venues in other cities.
 ${eventSourcesText}${currentEventsText}
 
 Return a JSON object with an "events" array containing 20-30 events. Each event must have:
 - title
 - description (optional)
-- date (ISO format: YYYY-MM-DD) - MUST be within next 30 days
+- date (ISO format: YYYY-MM-DD) - MUST be tomorrow or later
 - time (optional, HH:MM format)
-- location (full address) - MUST be in ${city}
+- location (full address - MUST include "${city}", e.g. "Venue, ${city}" or "Address, ${city}")
 - category (optional)
 - sourceUrl (valid, verifiable URL)
 - imageUrl (optional)
@@ -551,7 +562,7 @@ export async function discoverEvents(
     console.log(`Step 2: Executing ${tasks.length} parallel searches...`);
     const searchResults = await Promise.all(
       tasks.map((task) =>
-        searchEventsForTask(task, truncatedProfile, eventSources)
+        searchEventsForTask(task, truncatedProfile, city, eventSources)
       )
     );
 
@@ -640,36 +651,75 @@ export async function discoverEvents(
       }
     };
 
-    // Post-processing: Filter by date, location, and limit per source
+    // Post-processing: Filter by date (tomorrow onward), location, and limit per source
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
     const thirtyDaysLater = new Date(today);
     thirtyDaysLater.setDate(today.getDate() + 30);
 
-    // Filter events to next 30 days
+    // Filter events to tomorrow through 30 days (exclude same-day)
     const eventsInDateRange = events.filter((e) => {
-      if (!e.date) return false;
+      if (!e.date) {
+        console.log(`[date filter] excluded "${e.title}": no date`);
+        return false;
+      }
       const eventDate = new Date(e.date);
-      return eventDate >= today && eventDate <= thirtyDaysLater;
+      eventDate.setHours(0, 0, 0, 0);
+      if (eventDate < tomorrow) {
+        console.log(`[date filter] excluded "${e.title}": date ${e.date} is today or in the past`);
+        return false;
+      }
+      if (eventDate > thirtyDaysLater) {
+        console.log(`[date filter] excluded "${e.title}": date ${e.date} is after 30 days`);
+        return false;
+      }
+      return true;
     });
 
     console.log(
-      `Filtered ${events.length} events to ${eventsInDateRange.length} events within 30 days`
+      `Filtered ${events.length} events to ${eventsInDateRange.length} events (tomorrow through 30 days)`
     );
 
-    // Filter events by location - must be in the specified city
-    const cityLower = city.toLowerCase().trim();
-    const eventsInCity = eventsInDateRange.filter((e) => {
-      if (!e.location) return false;
-      const locationLower = e.location.toLowerCase();
-      // Check if location contains the city name
-      // Also handle common variations (e.g., "Timisoara" vs "Timișoara")
-      const cityVariations = [
-        cityLower,
-        cityLower.replace(/ș/g, "s").replace(/ț/g, "t"), // Remove diacritics
-        cityLower.replace(/s/g, "ș").replace(/t/g, "ț"), // Add diacritics
-      ];
-      return cityVariations.some((variation) => locationLower.includes(variation));
+    // Filter events by city - check location, venue, and description for city name.
+    // Normalize diacritics so "Timisoara" matches "Timișoara" (ș = s with comma below, can be different code points).
+    const normalizeForCityMatch = (s: string): string => {
+      return s
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // strip combining diacritical marks (e.g. ș → s, ț → t)
+        .replace(/\u0219/g, "s") // ș (s with comma below) if not decomposed
+        .replace(/\u021b/g, "t"); // ț (t with comma below) if not decomposed
+    };
+    const cityNormalized = normalizeForCityMatch(city);
+    const textContainsCity = (text: string | null | undefined): boolean => {
+      if (!text || typeof text !== "string") return false;
+      return normalizeForCityMatch(text).includes(cityNormalized);
+    };
+    let eventsInCity = eventsInDateRange.filter((e) => {
+      const inLocation = textContainsCity(e.location);
+      const inVenue = textContainsCity(e.venue);
+      const inDescription = textContainsCity(e.description);
+      const keep = inLocation || inVenue || inDescription;
+      if (!keep) {
+        const loc = (e.location || "(empty)").slice(0, 50);
+        const ven = (e.venue || "(empty)").slice(0, 30);
+        const desc = (e.description || "(empty)").slice(0, 30);
+        console.log(
+          `[city filter] excluded "${e.title}": city "${city}" not in location="${loc}" venue="${ven}" description="${desc}"`
+        );
+      }
+      return keep;
     });
+
+    // If city filter would remove everything, skip it (merge/repair were already scoped to city)
+    if (eventsInCity.length === 0 && eventsInDateRange.length > 0) {
+      console.log(
+        `[city filter] would remove all ${eventsInDateRange.length} events (no location/venue/description contained "${city}"); keeping them as fallback`
+      );
+      eventsInCity = eventsInDateRange;
+    }
 
     console.log(
       `Filtered ${eventsInDateRange.length} events to ${eventsInCity.length} events in ${city}`
@@ -684,10 +734,10 @@ export async function discoverEvents(
 
     // Filter out events with score below 50
     const eventsAboveThreshold = sortedEvents.filter((e) => {
-      const score = e.score || 0;
+      const score = e.score ?? 0;
       if (score < 50) {
         console.log(
-          `Filtering out event with score below 50: "${e.title}" (score: ${score})`
+          `[score filter] excluded "${e.title}": score ${score} < 50`
         );
         return false;
       }
@@ -698,15 +748,58 @@ export async function discoverEvents(
       `Filtered ${sortedEvents.length} events to ${eventsAboveThreshold.length} events with score >= 50`
     );
 
+    // Limit events when venue or artist has >4 events sharing the same "significant" name
+    // Key = words longer than 3 chars, normalized. Only apply when key has >3 such words (substantial name).
+    const getSignificantWordsKey = (text: string | null | undefined): string | null => {
+      if (!text || typeof text !== "string") return null;
+      const words = text
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, " ")
+        .split(/\s+/)
+        .filter((w) => w.length > 3);
+      if (words.length <= 3) return null; // need more than 3 words > 3 chars
+      return words.sort().join(" ");
+    };
+    const MAX_PER_VENUE_OR_ARTIST = 4;
+    const toRemoveByVenueArtist = new Set<number>();
+    for (const field of ["venue", "artist"] as const) {
+      const groups = new Map<string, Array<{ e: (typeof eventsAboveThreshold)[0]; i: number }>>();
+      for (let i = 0; i < eventsAboveThreshold.length; i++) {
+        const e = eventsAboveThreshold[i];
+        const key = getSignificantWordsKey(e[field]);
+        if (!key) continue;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key)!.push({ e, i });
+      }
+      for (const [key, group] of groups) {
+        if (group.length <= MAX_PER_VENUE_OR_ARTIST) continue;
+        const sorted = group.sort((a, b) => (b.e.score ?? 0) - (a.e.score ?? 0));
+        for (let j = MAX_PER_VENUE_OR_ARTIST; j < sorted.length; j++) {
+          const { e: item, i: idx } = sorted[j];
+          toRemoveByVenueArtist.add(idx);
+          console.log(
+            `[venue/artist limit] excluded "${item.title}": >${MAX_PER_VENUE_OR_ARTIST} events with same ${field} (key="${key}"), kept top by score`
+          );
+        }
+      }
+    }
+    const limitedByVenueArtist = eventsAboveThreshold.filter(
+      (_, i) => !toRemoveByVenueArtist.has(i)
+    );
+
+    console.log(
+      `Limited ${eventsAboveThreshold.length} to ${limitedByVenueArtist.length} events (max ${MAX_PER_VENUE_OR_ARTIST} per venue/artist with 4+ significant words)`
+    );
+
     // Limit to 4 events per normalized sourceUrl, keeping the top 4 by score
     const sourceUrlCounts = new Map<string, number>();
-    const limitedBySource = eventsAboveThreshold.filter((e) => {
+    const limitedBySource = limitedByVenueArtist.filter((e) => {
       if (!e.sourceUrl) return false;
       const normalizedUrl = normalizeSourceUrl(e.sourceUrl);
       const count = sourceUrlCounts.get(normalizedUrl) || 0;
       if (count >= 4) {
         console.log(
-          `Limiting events from source: ${normalizedUrl} (original: ${e.sourceUrl}, already have ${count} events, score: ${e.score})`
+          `[source limit] excluded "${e.title}": already ${count} events from source ${normalizedUrl} (max 4)`
         );
         return false;
       }
@@ -715,7 +808,7 @@ export async function discoverEvents(
     });
 
     console.log(
-      `Limited to ${limitedBySource.length} events (max 4 per source, sorted by score)`
+      `Limited to ${limitedBySource.length} events (max 4 per source)`
     );
 
     // Limit to 4-5 events per location, keeping the top 4-5 by score
@@ -727,7 +820,7 @@ export async function discoverEvents(
       const maxPerLocation = 5; // Allow up to 5 events per location
       if (count >= maxPerLocation) {
         console.log(
-          `Limiting events at location: ${e.location} (already have ${count} events, score: ${e.score})`
+          `[location limit] excluded "${e.title}": already ${count} events at location "${e.location}" (max 5)`
         );
         return false;
       }
@@ -740,9 +833,20 @@ export async function discoverEvents(
     );
 
     // Validate events have required fields
-    const validEvents = limitedEvents.filter(
-      (e) => e.title && e.sourceUrl && e.location && e.date
-    );
+    const validEvents = limitedEvents.filter((e) => {
+      const missing: string[] = [];
+      if (!e.title) missing.push("title");
+      if (!e.sourceUrl) missing.push("sourceUrl");
+      if (!e.location) missing.push("location");
+      if (!e.date) missing.push("date");
+      if (missing.length > 0) {
+        console.log(
+          `[required fields] excluded "${e.title || "(no title)"}": missing ${missing.join(", ")}`
+        );
+        return false;
+      }
+      return true;
+    });
 
     console.log(`Final result: ${validEvents.length} valid events`);
     return {

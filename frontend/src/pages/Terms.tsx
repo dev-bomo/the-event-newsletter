@@ -26,7 +26,7 @@ export default function Terms() {
               </p>
             </div>
             <Link
-              to="/dashboard"
+              to="/newsletters"
               className="inline-block win98-button mt-4"
             >
               ← {t("common.back")}
