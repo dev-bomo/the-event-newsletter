@@ -59,20 +59,20 @@ export default function Login() {
                         <p className="font-bold text-black text-xs">
                           {t("login.whyExists")}
                         </p>
-                        <ul className="list-none space-y-1 ml-2 text-xs text-black">
-                          <li>• {t("login.why1")}</li>
-                          <li>• {t("login.why2")}</li>
-                          <li>• {t("login.why3")}</li>
-                        </ul>
+                        <div className="space-y-1 text-xs text-black">
+                          <p>{t("login.why1")}</p>
+                          <p>{t("login.why2")}</p>
+                          <p>{t("login.why3")}</p>
+                        </div>
                       </div>
                       <div className="space-y-2 mt-4 md:mt-0">
                         <p className="font-bold text-black text-xs">
-                          {t("login.failure")}
+                          {t("login.expectation")}
                         </p>
-                        <ul className="list-none space-y-1 ml-2 text-xs text-black">
-                          <li>• {t("login.failure1")}</li>
-                          <li>• {t("login.failure2")}</li>
-                        </ul>
+                        <div className="space-y-1 text-xs text-black">
+                          <p>{t("login.expect1")}</p>
+                          <p>{t("login.expect2")}</p>
+                        </div>
                       </div>
                     </div>
                     <button

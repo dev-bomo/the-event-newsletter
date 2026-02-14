@@ -13,8 +13,8 @@ export default function LanguagePicker({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const languages = [
-    { code: "en", flag: "🇬🇧" },
-    { code: "ro", flag: "🇷🇴" },
+    { code: "en", flag: "gb", label: "English" },
+    { code: "ro", flag: "ro", label: "Română" },
   ];
 
   const handleLanguageChange = (langCode: string) => {
@@ -52,8 +52,12 @@ export default function LanguagePicker({
         onClick={() => setIsOpen(!isOpen)}
         className="appearance-none bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] pl-7 pr-6 py-1 text-xs font-bold w-full hover:bg-[#d4d0c8] focus:outline-none h-8"
       >
-        <div className="absolute inset-y-0 left-0 flex items-center pl-2 text-lg pointer-events-none">
-          {currentLanguage.flag}
+        <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+          <img
+            src={`https://flagcdn.com/20x15/${currentLanguage.flag}.png`}
+            alt=""
+            className="h-3 w-4 object-contain"
+          />
         </div>
         <div className="absolute inset-y-0 right-0 flex items-center pr-1 text-black pointer-events-none">
           <svg
@@ -87,8 +91,12 @@ export default function LanguagePicker({
                       : ""
                   }`}
                 >
-                  <span className="mr-2">{lang.flag}</span>
-                  {lang.code === "en" ? "English" : "Română"}
+                  <img
+                    src={`https://flagcdn.com/20x15/${lang.flag}.png`}
+                    alt=""
+                    className="inline-block h-3 w-4 object-contain mr-2 align-middle"
+                  />
+                  {lang.label}
                 </button>
               ))}
               {onWallpaperClick && (

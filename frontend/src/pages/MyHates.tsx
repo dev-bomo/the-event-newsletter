@@ -85,15 +85,25 @@ export default function MyHates() {
       <div className="px-4 py-6 sm:px-0 max-w-3xl mx-auto">
         <Windows98Window title={t("hates.pageTitle")}>
           <div className="space-y-4">
-            <Link to="/newsletters" className="text-xs font-bold text-[#000080] hover:underline">
-              ← {t("common.back")}
-            </Link>
-            <p className="text-xs text-black">
-              {t("hates.pageDescription")}
-            </p>
-            <p className="text-xs text-black">
-              {t("hates.howExclusionsWork")}
-            </p>
+            <div className="flex items-start gap-3">
+              <img
+                src="/attention.png"
+                alt=""
+                width={96}
+                height={96}
+                className="flex-shrink-0"
+                aria-hidden
+              />
+              <div className="space-y-2 text-xs text-black">
+                <p className="font-bold">{t("hates.pageHeader")}</p>
+                <ul className="list-disc list-inside space-y-1 ml-0">
+                  <li>{t("hates.dislikeInfoLine2")}</li>
+                  <li>{t("hates.dislikeInfoLine3")}</li>
+                  <li>{t("hates.dislikeInfoLine4Page")}</li>
+                </ul>
+                <p className="italic">{t("hates.dislikeInfoLine5")}</p>
+              </div>
+            </div>
 
             {error && (
               <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-xs text-[#800000]">

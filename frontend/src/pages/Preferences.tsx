@@ -7,31 +7,28 @@ import { useAuthStore } from "../store/authStore";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
-// Logo color palette - vibrant colors typical of modern logos
-const LOGO_COLORS = [
-  "#3B82F6", // Blue
-  "#8B5CF6", // Purple
-  "#EC4899", // Pink
-  "#F59E0B", // Amber
-  "#10B981", // Green
-  "#EF4444", // Red
-  "#06B6D4", // Cyan
-  "#F97316", // Orange
-  "#6366F1", // Indigo
-  "#14B8A6", // Teal
-  "#A855F7", // Violet
-  "#EAB308", // Yellow
+// Windows 98 color palette - darker colors for white text on colored backgrounds
+const WIN98_TAG_COLORS = [
+  "#000080", // Navy
+  "#008000", // Green
+  "#008080", // Teal
+  "#800000", // Maroon
+  "#800080", // Purple
+  "#808000", // Olive
+  "#004080", // Dark blue
+  "#804000", // Brown
+  "#408080", // Dark cyan
+  "#404040", // Dark gray
 ];
 
 // Get a consistent color for a tag based on its text
 function getTagColor(text: string): string {
-  // Simple hash function to get consistent color for same text
   let hash = 0;
   for (let i = 0; i < text.length; i++) {
     hash = text.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const index = Math.abs(hash) % LOGO_COLORS.length;
-  return LOGO_COLORS[index];
+  const index = Math.abs(hash) % WIN98_TAG_COLORS.length;
+  return WIN98_TAG_COLORS[index];
 }
 
 // Convert hex color to rgba with opacity
@@ -365,10 +362,12 @@ export default function Preferences() {
                         return (
                           <span
                             key={index}
-                            className="inline-flex items-center px-2 py-1 text-xs font-bold text-white border-2 border-[#808080]"
+                            className="inline-flex items-center px-2 py-1 text-xs font-bold text-white"
                             style={{
                               backgroundColor: tagColor,
-                              borderColor: tagColor,
+                              border: "1px solid",
+                              borderColor: "#ffffff #000000 #000000 #ffffff",
+                              boxShadow: "1px 1px 0 0 #000000",
                             }}
                           >
                             {item}
@@ -432,17 +431,18 @@ export default function Preferences() {
                 {eventSources.length > 0 ? (
                   <div className="space-y-2">
                     {eventSources.map((source) => {
-                      // Use name if available, otherwise use URL for color consistency
                       const colorKey = source.name || source.url;
                       const tagColor = getTagColor(colorKey);
                       const mellowColor = hexToRgba(tagColor, 0.5);
                       return (
                         <div
                           key={source.id}
-                          className="flex items-center justify-between p-2 border-2 border-[#808080]"
+                          className="flex items-center justify-between p-2"
                           style={{
                             backgroundColor: mellowColor,
-                            borderColor: mellowColor,
+                            border: "1px solid",
+                            borderColor: "#ffffff #000000 #000000 #ffffff",
+                            boxShadow: "1px 1px 0 0 #000000",
                           }}
                         >
                           <div className="flex-1">

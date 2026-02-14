@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import LanguagePicker from "../components/LanguagePicker";
 import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
+import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
 export default function ResetPassword() {
@@ -53,26 +54,21 @@ export default function ResetPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="flex justify-center mb-8">
-            <Windows98ReadingPane className="w-64">
-              <div className="flex items-center justify-center px-4 py-2">
+      <div className="max-w-md w-full">
+        <Windows98Window title={t("auth.resetPassword")}>
+          <div className="space-y-6">
+            <Windows98ReadingPane>
+              <div className="flex justify-center">
                 <img
                   src={logo}
                   alt="The Newsletter"
                   className="h-12 w-auto"
                 />
               </div>
+              <p className="mt-3 text-center text-xs text-black">
+                {t("auth.enterResetCodeAndPassword")}
+              </p>
             </Windows98ReadingPane>
-          </div>
-          <h2 className="mt-6 text-center text-2xl font-bold text-black">
-            {t("auth.resetPassword")}
-          </h2>
-          <p className="mt-2 text-center text-xs text-black">
-            {t("auth.enterResetCodeAndPassword")}
-          </p>
-        </div>
 
         {success ? (
           <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
@@ -80,7 +76,7 @@ export default function ResetPassword() {
             <p className="text-xs mt-1">{t("auth.redirectingToLogin")}</p>
           </div>
         ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
                 {error}
@@ -204,6 +200,8 @@ export default function ResetPassword() {
             </div>
           </form>
         )}
+          </div>
+        </Windows98Window>
       </div>
     </div>
   );
