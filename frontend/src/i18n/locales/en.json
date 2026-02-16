@@ -270,6 +270,27 @@
     "finalizing": "Finalizing",
     "finalizingDesc": "Preparing your personalized newsletter..."
   },
+  "landing": {
+    "heroTitle": "The Event Newsletter",
+    "heroSub": "Stay connected to local events without browsing social media. A weekly email, curated by your preferences.",
+    "why1Title": "No social media browsing",
+    "why1Desc": "Avoid the dopamine trap of endless feeds. Get events delivered to your inbox instead.",
+    "why2Title": "Weekly email only",
+    "why2Desc": "Intentional, not addictive. You get events for the month ahead, so you have time to plan.",
+    "why3Title": "Curated for you",
+    "why3Desc": "We filter events so you don't waste time sifting through everything.",
+    "step1": "Set your preferences — city, interests, genres, venues, artists",
+    "step2": "A profile is generated for your account",
+    "step3": "Get a personalized newsletter every Thursday at 4 PM",
+    "step4": "Fine-tune with the dislike feature to exclude what doesn't fit",
+    "expect1": "This won't be THE TOOL to discover events. It'll help.",
+    "expect2": "Expectation is that you don't miss really important events and you have 1–2 'wow, this is interesting' events every week.",
+    "privacyTitle": "Privacy & Pricing",
+    "privacy1": "Your email and name are not shared with any third party",
+    "privacy2": "Preferences are anonymized when sent to AI — not linked to your identity",
+    "privacy3": "Transparent, direct payment model — you pay for the service, that's it",
+    "getStarted": "Get Started"
+  },
   "footer": {
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",

@@ -186,13 +186,13 @@ export default function Newsletters() {
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
         <Windows98Window title={t("newsletters.title")}>
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-              <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-2">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <img
                   src="/attention.png"
                   alt=""
-                  width={64}
-                  height={64}
+                  width={80}
+                  height={80}
                   className="flex-shrink-0"
                   title={t("newsletters.autoNewsletterInfo")}
                   aria-hidden

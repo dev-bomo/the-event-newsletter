@@ -10,6 +10,7 @@ import OnboardingWizard from "./pages/OnboardingWizard";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import MyHates from "./pages/MyHates";
+import LandingPage from "./pages/LandingPage";
 import "./i18n/config";
 
 function App() {
@@ -56,7 +57,10 @@ function App() {
           path="/hates"
           element={token ? <MyHates /> : <Navigate to="/login" />}
         />
-        <Route path="/" element={<Navigate to="/newsletters" />} />
+        <Route
+          path="/"
+          element={token ? <Navigate to="/newsletters" /> : <LandingPage />}
+        />
       </Routes>
     </BrowserRouter>
   );

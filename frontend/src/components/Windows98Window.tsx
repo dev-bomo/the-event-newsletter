@@ -33,7 +33,7 @@ export default function Windows98Window({
         )}
       </div>
       {/* Content */}
-      <div className="p-2 bg-[#c0c0c0]">{children}</div>
+      <div className="p-1 bg-[#c0c0c0]">{children}</div>
     </div>
   );
 }

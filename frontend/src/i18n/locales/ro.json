@@ -270,6 +270,27 @@
     "finalizing": "Finalizare",
     "finalizingDesc": "Se pregătește newsletterul tău personalizat..."
   },
+  "landing": {
+    "heroTitle": "Newsletterul de Evenimente",
+    "heroSub": "Rămâi conectat la evenimentele locale fără să navighezi pe rețele sociale. Un email săptămânal, curat după preferințele tale.",
+    "why1Title": "Fără rețele sociale",
+    "why1Desc": "Evită capcana dopaminei din feed-urile nesfârșite. Primești evenimentele direct în inbox.",
+    "why2Title": "Doar un email săptămânal",
+    "why2Desc": "Intenționat, nu pasiv. Primești evenimente pentru luna următoare, așa că ai timp să planifici.",
+    "why3Title": "Special pentru tine",
+    "why3Desc": "Filtrăm evenimentele ca să nu pierzi timp sortând prin toate.",
+    "step1": "Setează preferințele — oraș, interese, genuri, locuri, artiști",
+    "step2": "Un profil este generat pentru contul tău",
+    "step3": "Primești un newsletter personalizat în fiecare joi la ora 16",
+    "step4": "Ajustează cu funcția de dislike pentru a exclude ce nu se potrivește",
+    "expect1": "Nu va fi UNELTA principală pentru a descoperi evenimente. Te va ajuta.",
+    "expect2": "Așteptarea e să nu pierzi evenimente cu adevărat importante și să ai 1\u20132 evenimente 'wow, e interesant' pe săptămână.",
+    "privacyTitle": "Confidențialitate și Prețuri",
+    "privacy1": "Emailul și numele tău nu sunt partajate cu terți",
+    "privacy2": "Preferințele sunt anonimizate când sunt trimise la AI — nu sunt legate de identitatea ta",
+    "privacy3": "Model de plată transparent și direct — plătești pentru serviciu, atât",
+    "getStarted": "Începe"
+  },
   "footer": {
     "terms": "Termeni și Condiții",
     "privacy": "Politica de Confidențialitate",

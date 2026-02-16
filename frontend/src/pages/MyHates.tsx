@@ -89,8 +89,8 @@ export default function MyHates() {
               <img
                 src="/attention.png"
                 alt=""
-                width={96}
-                height={96}
+                width={80}
+                height={80}
                 className="flex-shrink-0"
                 aria-hidden
               />
