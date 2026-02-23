@@ -5,7 +5,7 @@ import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
 import LanguagePicker from "../components/LanguagePicker";
 import WallpaperPicker from "../components/WallpaperPicker";
-import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
+import logo from "../assets/logo3lines.png";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 import Windows98Window from "../components/Windows98Window";
 
@@ -52,13 +52,15 @@ export default function Register() {
                 <div className="flex justify-center">
                   <img
                     src={logo}
-                    alt="The Newsletter"
-                    className="h-12 w-auto"
+                    alt="The Event Newsletter"
+                    className="h-36 w-auto"
                   />
                 </div>
                 {messageExpanded && (
                   <div className="space-y-3">
-                    <p className="text-sm font-bold text-black">{t("login.description")}</p>
+                    <p className="text-sm font-bold text-black">
+                      {t("login.description")}
+                    </p>
                     <div className="md:grid md:grid-cols-2 md:gap-4">
                       <div className="space-y-2">
                         <p className="font-bold text-black text-xs">
@@ -109,7 +111,7 @@ export default function Register() {
                   {error}
                 </div>
               )}
-              
+
               <div className="flex flex-col items-center gap-4">
                 <div className="w-full max-w-xs">
                   <label
@@ -187,7 +189,9 @@ export default function Register() {
                   {t("auth.alreadyHaveAccount")} {t("auth.signInHere")}
                 </Link>
                 <div className="flex justify-center">
-                  <LanguagePicker onWallpaperClick={() => setWallpaperPickerOpen(true)} />
+                  <LanguagePicker
+                    onWallpaperClick={() => setWallpaperPickerOpen(true)}
+                  />
                 </div>
               </div>
             </form>

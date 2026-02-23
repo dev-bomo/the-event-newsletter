@@ -43,15 +43,13 @@ Please return a JSON object with an "events" array. Each event should have:
 - time (optional, HH:MM format)
 - location (full address - MUST include the city name, e.g. "Venue, City" or "Address, City, Country")
 - category (optional)
-- sourceUrl (preferably the direct link to the specific event's detail page. If the source page lists multiple events and you can find individual event page URLs, use those. If individual event URLs are not available or not accessible, you may use the source URL, but ensure it's a valid, working URL that contains information about the event.)
-- imageUrl (optional, link to event image)
-- score (number from 0-100 indicating how well this event matches the user's profile, where 100 is a perfect match. If no profile is provided, use 75 as a default since the user has explicitly added this source)
+- sourceUrl (preferably the direct link to the specific event's detail page. If the source page lists multiple events and you can find individual event page URLs, use those.)
+- score (number from 0-100 indicating how well this event matches the user's profile, where 100 is a perfect match.)
 - organizer (optional): event organizer or promoter
 - artist (optional): main artist, band, or performer
 - venue (optional): venue name
 
 Only include events starting tomorrow or later (within the next 30 days). Do NOT include events happening today or in the past.
-Focus on concerts, theater, community gatherings, art shows, and similar local events.
 If no events are found or the page doesn't contain events, return an empty array.
 
 CRITICAL - NO HALLUCINATION: Only include events actually listed on the source page. Never invent or fabricate events. Return empty array if none found.

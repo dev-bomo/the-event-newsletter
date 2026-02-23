@@ -14,6 +14,10 @@ const STEPS: LoadingStep[] = [
   { id: "finalizing", labelKey: "loading.finalizing", descriptionKey: "loading.finalizingDesc" },
 ];
 
+/** Box counts per step: 2 for step 1, 2 for step 2, 3 for step 3, 5 for step 4 (total 12) */
+const BOX_COUNTS = [2, 2, 3, 5];
+const TOTAL_BOXES = BOX_COUNTS.reduce((a, b) => a + b, 0);
+
 interface LoadingOverlayProps {
   isVisible: boolean;
 }
@@ -68,14 +72,14 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] p-4 max-w-md w-full mx-4">
+      <div className="bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] p-1 max-w-md w-full mx-4">
         {/* Windows 98 Title Bar */}
-        <div className="bg-[#000080] text-white px-2 py-1 flex items-center justify-between mb-4">
+        <div className="bg-[#000080] text-white px-2 py-1 flex items-center justify-between mb-1">
           <span className="text-xs font-bold">{t("loading.newsletter")}</span>
         </div>
 
         {/* Windows 98 Style Spinner/Progress */}
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-center mb-1">
           <div className="relative w-32 h-8 bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-1">
             <div className="h-full bg-[#000080] relative overflow-hidden">
               {/* Animated progress bar effect */}
@@ -108,7 +112,7 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
         </div>
 
         {/* Step indicator with fade animation */}
-        <div className="mb-4">
+        <div className="mb-1">
           <div className="flex justify-between items-center mb-2">
             <h3
               className={`text-xs font-bold text-black transition-opacity duration-300 ${
@@ -130,20 +134,26 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
           </p>
         </div>
 
-        {/* Progress indicator blocks (Windows 98 style) */}
+        {/* Progress indicator blocks (Windows 98 style): 2 + 2 + 3 + 5 boxes */}
         <div className="flex justify-center gap-1">
-          {STEPS.map((step, index) => (
-            <div
-              key={step.id}
-              className={`h-4 w-4 transition-all duration-300 ${
-                index === currentStepIndex
-                  ? "bg-[#000080] border-2 border-[#000080]"
-                  : index < currentStepIndex
-                  ? "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff]"
-                  : "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] opacity-50"
-              }`}
-            />
-          ))}
+          {Array.from({ length: TOTAL_BOXES }, (_, i) => {
+            const filledEnd = BOX_COUNTS.slice(0, currentStepIndex + 1).reduce((a, b) => a + b, 0);
+            const completedEnd = BOX_COUNTS.slice(0, currentStepIndex).reduce((a, b) => a + b, 0);
+            const isCompleted = i < completedEnd;
+            const isCurrent = i >= completedEnd && i < filledEnd;
+            return (
+              <div
+                key={i}
+                className={`h-4 w-4 transition-all duration-300 ${
+                  isCurrent
+                    ? "bg-[#000080] border-2 border-[#000080]"
+                    : isCompleted
+                    ? "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff]"
+                    : "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] opacity-50"
+                }`}
+              />
+            );
+          })}
         </div>
 
         <style>{`

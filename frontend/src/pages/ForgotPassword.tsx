@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import LanguagePicker from "../components/LanguagePicker";
-import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
+import logo from "../assets/logo3lines.png";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 import Windows98Window from "../components/Windows98Window";
 
@@ -41,8 +41,8 @@ export default function ForgotPassword() {
                 <div className="flex justify-center">
                   <img
                     src={logo}
-                    alt="The Newsletter"
-                    className="h-12 w-auto"
+                    alt="The Event Newsletter"
+                    className="h-36 w-auto"
                   />
                 </div>
                 <p className="text-xs text-black text-center">

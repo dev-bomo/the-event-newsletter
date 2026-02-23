@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import api from "../lib/api";
 import LanguagePicker from "../components/LanguagePicker";
-import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
+import logo from "../assets/logo3lines.png";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
@@ -59,147 +59,143 @@ export default function ResetPassword() {
           <div className="space-y-6">
             <Windows98ReadingPane>
               <div className="flex justify-center">
-                <img
-                  src={logo}
-                  alt="The Newsletter"
-                  className="h-12 w-auto"
-                />
+                <img src={logo} alt="The Newsletter" className="h-12 w-auto" />
               </div>
               <p className="mt-3 text-center text-xs text-black">
                 {t("auth.enterResetCodeAndPassword")}
               </p>
             </Windows98ReadingPane>
 
-        {success ? (
-          <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
-            <p className="font-bold">{t("auth.passwordResetSuccess")}</p>
-            <p className="text-xs mt-1">{t("auth.redirectingToLogin")}</p>
-          </div>
-        ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
+            {success ? (
               <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
-                {error}
+                <p className="font-bold">{t("auth.passwordResetSuccess")}</p>
+                <p className="text-xs mt-1">{t("auth.redirectingToLogin")}</p>
               </div>
+            ) : (
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                {error && (
+                  <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-4 py-3 text-black text-xs">
+                    {error}
+                  </div>
+                )}
+
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-xs font-bold text-black mb-1"
+                  >
+                    {t("auth.email")}
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="win98-input w-full"
+                    placeholder={t("auth.email")}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="code"
+                    className="block text-xs font-bold text-black mb-1"
+                  >
+                    {t("auth.resetCode")}
+                  </label>
+                  <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    required
+                    maxLength={6}
+                    className="win98-input w-full text-center text-xl tracking-widest"
+                    placeholder="000000"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="newPassword"
+                    className="block text-xs font-bold text-black mb-1"
+                  >
+                    {t("auth.newPassword")}
+                  </label>
+                  <input
+                    id="newPassword"
+                    name="newPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={8}
+                    className="win98-input w-full"
+                    placeholder={t("auth.newPassword")}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-xs font-bold text-black mb-1"
+                  >
+                    {t("auth.confirmPassword")}
+                  </label>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={8}
+                    className="win98-input w-full"
+                    placeholder={t("auth.confirmPassword")}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="win98-button w-full disabled:opacity-50"
+                  >
+                    {loading ? t("common.loading") : t("auth.resetPassword")}
+                  </button>
+                </div>
+
+                <div className="text-center space-y-4">
+                  <div className="space-y-2">
+                    <div>
+                      <Link
+                        to="/login"
+                        className="font-bold text-[#000080] hover:underline text-xs"
+                      >
+                        {t("auth.rememberPassword")} {t("auth.signInHere")}
+                      </Link>
+                    </div>
+                    <div>
+                      <Link
+                        to="/forgot-password"
+                        className="text-xs font-bold text-[#000080] hover:underline"
+                      >
+                        {t("auth.requestNewCode")}
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    <LanguagePicker />
+                  </div>
+                </div>
+              </form>
             )}
-
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-bold text-black mb-1"
-              >
-                {t("auth.email")}
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="win98-input w-full"
-                placeholder={t("auth.email")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="code"
-                className="block text-xs font-bold text-black mb-1"
-              >
-                {t("auth.resetCode")}
-              </label>
-              <input
-                id="code"
-                name="code"
-                type="text"
-                required
-                maxLength={6}
-                className="win98-input w-full text-center text-xl tracking-widest"
-                placeholder="000000"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="newPassword"
-                className="block text-xs font-bold text-black mb-1"
-              >
-                {t("auth.newPassword")}
-              </label>
-              <input
-                id="newPassword"
-                name="newPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                className="win98-input w-full"
-                placeholder={t("auth.newPassword")}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="block text-xs font-bold text-black mb-1"
-              >
-                {t("auth.confirmPassword")}
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                className="win98-input w-full"
-                placeholder={t("auth.confirmPassword")}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="win98-button w-full disabled:opacity-50"
-              >
-                {loading ? t("common.loading") : t("auth.resetPassword")}
-              </button>
-            </div>
-
-            <div className="text-center space-y-4">
-              <div className="space-y-2">
-                <div>
-                  <Link
-                    to="/login"
-                    className="font-bold text-[#000080] hover:underline text-xs"
-                  >
-                    {t("auth.rememberPassword")} {t("auth.signInHere")}
-                  </Link>
-                </div>
-                <div>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs font-bold text-[#000080] hover:underline"
-                  >
-                    {t("auth.requestNewCode")}
-                  </Link>
-                </div>
-              </div>
-              <div className="flex justify-center">
-                <LanguagePicker />
-              </div>
-            </div>
-          </form>
-        )}
           </div>
         </Windows98Window>
       </div>

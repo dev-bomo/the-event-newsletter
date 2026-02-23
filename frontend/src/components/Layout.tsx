@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store/authStore";
 import LanguagePicker from "./LanguagePicker";
 import { useState, useEffect } from "react";
-import logo from "../assets/ChatGPT Image Jan 24, 2026, 07_44_14 AM.png";
+import logo1line from "../assets/logo1line.png";
 import Windows98Sidebar from "./Windows98Sidebar";
 import { getWallpaperCSS } from "./WallpaperPicker";
 import WallpaperPicker from "./WallpaperPicker";
@@ -81,14 +81,14 @@ export default function Layout({ children }: LayoutProps) {
           <span className="text-[#000080]">☰</span>
         </button>
 
-        {/* Desktop: Start Button with Logo */}
+        {/* Desktop: Start Button with favicon */}
         <Link
           to="/newsletters"
           className="hidden md:flex bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] h-full px-2 items-center hover:bg-[#d4d0c8] active:border-t-[#808080] active:border-l-[#808080] active:border-r-[#ffffff] active:border-b-[#ffffff]"
         >
           <img
-            src={logo}
-            alt="The Newsletter"
+            src="/favicon.png"
+            alt="Start"
             className="h-8 w-auto"
           />
         </Link>
@@ -99,8 +99,8 @@ export default function Layout({ children }: LayoutProps) {
           className="md:hidden flex-1 flex justify-center items-center h-full"
         >
           <img
-            src={logo}
-            alt="The Newsletter"
+            src={logo1line}
+            alt="The Event Newsletter"
             className="h-8 w-auto"
           />
         </Link>

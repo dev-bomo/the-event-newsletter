@@ -14,8 +14,8 @@ export interface DiscoveredEvent {
   imageUrl?: string;
   score: number; // Relevance score (0-100) indicating how well the event matches user preferences
   organizer?: string; // For "hate this" exclusions
-  artist?: string;   // For "hate this" exclusions
-  venue?: string;    // For "hate this" exclusions
+  artist?: string; // For "hate this" exclusions
+  venue?: string; // For "hate this" exclusions
 }
 
 /**
@@ -95,13 +95,13 @@ ${eventSourcesText}`;
 
 The profile should be written in natural language and be suitable for use as a prompt to find relevant events. Be concise and to the point.
 
-IMPORTANT: Return plain text only. Do not use markdown formatting (no **, no *, no code blocks, etc.). Just write natural, flowing text.`;
+IMPORTANT: Return plain text only. Do not use markdown formatting (no **, no *, no code blocks, etc.). Just write natural, flowing text. Do not include any meta-commentary or explanation of what you did—output only the profile text.`;
 
   try {
     const response = await axios.post(
       PERPLEXITY_API_URL,
       {
-        model: "sonar-pro",
+        model: "sonar-reasoning-pro",
         messages: [
           {
             role: "system",
@@ -204,9 +204,10 @@ async function planEventSearch(
   userProfile: string,
   eventSources?: string[]
 ): Promise<{ tasks: string[]; rawResponse: string }> {
+  const sourcesList = Array.isArray(eventSources) ? eventSources : [];
   const eventSourcesText =
-    eventSources && eventSources.length > 0
-      ? `\n\nPages they normally access to find events are:\n${eventSources.join(
+    sourcesList.length > 0
+      ? `\n\nPages they normally access to find events are:\n${sourcesList.join(
           "\n"
         )}`
       : "";
@@ -221,22 +222,15 @@ Date window: Next 30 days
 
 Your task is to create a plan for finding events. Break down the search into 5-6 specific tasks or sites to query. Each task should be a specific search query or website/source to check.
 
-IMPORTANT: Include ONE task that finds events from the Facebook page for local events in ${city}. For example: "Check Facebook events for ${city}" or "Search facebook.com/events for ${city} events" or "Find the Facebook ${city} events page and list upcoming events there". The goal is to surface events from Facebook's local events discovery (e.g. facebook.com/events/explore or a local "Facebook ${city} Events" page).
-
-Return a JSON object with a "tasks" array. Each task should be a string describing what to search for or which site to query. Examples:
-- "Check Facebook events for ${city}"
-- "Search Bandsintown for rock/metal concerts in ${city}"
-- "Check iabilet.ro for events at Casa Tineretului"
-- "Find stand-up comedy shows in ${city} on Eventbrite"
-- "Search for philosophy talks and meetups in ${city}"
+Return a JSON object with a "tasks" array. Each task should be a string describing what to search for or which site to query.
 
 Return exactly 5-6 tasks, no more, no less.`;
 
-  const systemPrompt = `You are a planning assistant for event discovery. Return only valid JSON with a "tasks" array containing 5-6 search tasks.`;
+  const systemPrompt = `You are a planning assistant for event discovery. Return only valid JSON with a "tasks" array containing 5-6 search tasks. Do not include any explanation, reasoning, or commentary—output only the JSON object, no preamble or postamble.`;
 
   console.log("Step 1: Planning event search...");
   const rawResponse = await callPerplexity(
-    "sonar-pro",
+    "sonar-reasoning-pro",
     systemPrompt,
     prompt,
     0.7
@@ -263,16 +257,7 @@ Return exactly 5-6 tasks, no more, no less.`;
     return { tasks: tasks.slice(0, 6), rawResponse }; // Limit to 6 max
   } catch (error) {
     console.error("Failed to parse planning response:", error);
-    // Fallback: create default tasks
-    const defaultTasks = [
-      `Check Facebook events for ${city}`,
-      `Search for concerts and music events in ${city}`,
-      `Find theater and performing arts events in ${city}`,
-      `Search for meetups and talks in ${city}`,
-      `Find comedy shows in ${city}`,
-      `Search for sports and running events in ${city}`,
-    ];
-    return { tasks: defaultTasks, rawResponse };
+    return { tasks: [], rawResponse };
   }
 }
 
@@ -281,13 +266,15 @@ Return exactly 5-6 tasks, no more, no less.`;
  */
 async function searchEventsForTask(
   task: string,
-  userProfile: string,
   city: string,
   eventSources?: string[]
 ): Promise<{ events: any[]; rawResponse: string }> {
+  const sourcesList = Array.isArray(eventSources) ? eventSources : [];
   const eventSourcesText =
-    eventSources && eventSources.length > 0
-      ? `\n\nIMPORTANT: The user follows these event sources. If this task relates to any of these sources, prioritize checking them:\n${eventSources.join("\n")}`
+    sourcesList.length > 0
+      ? `\n\nIMPORTANT: The user follows these event sources. If this task relates to any of these sources, prioritize checking them:\n${sourcesList.join(
+          "\n"
+        )}`
       : "";
 
   const today = new Date();
@@ -295,14 +282,20 @@ async function searchEventsForTask(
   tomorrow.setDate(today.getDate() + 1);
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must start from ${tomorrow.toISOString().split("T")[0]} (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}. Do NOT include events happening today or in the past.`;
+  const dateWindow = `Events must start from ${
+    tomorrow.toISOString().split("T")[0]
+  } (tomorrow) through ${
+    thirtyDaysLater.toISOString().split("T")[0]
+  }. Do NOT include events happening today or in the past.`;
 
   const prompt = `From this site/search: "${task}"
 
-Extract raw event candidates as simple objects. Do NOT score, deduplicate, or filter. Just extract all relevant events you can find.
+Extract raw event candidates as simple objects. Never return more than 9 events from any one task.
 
 ${dateWindow}
 ${eventSourcesText}
+
+DEDUPLICATE before returning: If titles are very similar remove the duplicates. Do this even if the dates are not the same.
 
 For each event, return:
 - title
@@ -312,21 +305,19 @@ For each event, return:
 - location (full address - MUST include the city name, e.g. "Venue Name, ${city}" or "Street, ${city}, Country")
 - category (optional)
 - sourceUrl (URL to the event page or source)
-- imageUrl (optional)
 - organizer (optional): event organizer or promoter name
 - artist (optional): main artist, band, or performer name
 - venue (optional): venue or location name (e.g. "Blue Note", "Lincoln Center")
 
-Return a JSON object with an "events" array containing all events found. Include as many as you can find, even if they seem similar. Only include events starting tomorrow or later. Exclude events happening today or in the past.
+Return a JSON object with an "events" array. Only include events starting tomorrow or later. Exclude events happening today or in the past.
 
 CRITICAL - NO HALLUCINATION: Only extract events you actually found through web search. Do NOT invent, fabricate, or guess events. If you cannot find enough real events, return fewer or an empty array. A short list of real events is always better than any fake ones.`;
 
-  const systemPrompt = `You are extracting raw event data from web search. Return only valid JSON with an "events" array. Do not score or deduplicate. Never include events from the past. NEVER invent or hallucinate events - only include events you actually found.`;
+  const systemPrompt = `You are extracting raw event data from web search. Return only valid JSON with an "events" array. Do not score. Before returning, deduplicate by title: if two events have titles sharing 3+ words (each word > 3 chars), keep only one. Never include events from the past. NEVER invent or hallucinate events - only include events you actually found. Do not include any explanation, reasoning, or commentary—output only the JSON object, no preamble or postamble.`;
 
   console.log(`Step 2: Searching for task: "${task.substring(0, 50)}..."`);
-  // sonar-pro model automatically enables web search
   const rawResponse = await callPerplexity(
-    "sonar-pro",
+    "sonar-reasoning-pro",
     systemPrompt,
     prompt,
     0.7
@@ -370,7 +361,9 @@ async function mergeAndScoreEvents(
   tomorrow.setDate(today.getDate() + 1);
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must start from ${tomorrow.toISOString().split("T")[0]} (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}.`;
+  const dateWindow = `Events must start from ${
+    tomorrow.toISOString().split("T")[0]
+  } (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}.`;
 
   const prompt = `You have been given ${allRawEvents.length} raw event candidates. Your task is to:
 
@@ -401,11 +394,11 @@ Return a JSON object with an "events" array. Each event must have:
 Raw events to process:
 ${eventsJson}`;
 
-  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events from the raw candidates. Never invent or hallucinate events. Never include events from the past.`;
+  const systemPrompt = `You are an event scoring and deduplication assistant. Return only valid JSON with an "events" array. Only include real, verifiable events from the raw candidates. Never invent or hallucinate events. Never include events from the past. Do not include any explanation, reasoning, or commentary—output only the JSON object, no preamble or postamble.`;
 
   console.log(`Step 3: Merging and scoring ${allRawEvents.length} events...`);
   const rawResponse = await callPerplexity(
-    "sonar-pro",
+    "sonar-reasoning-pro",
     systemPrompt,
     prompt,
     0.5 // Lower temperature for more consistent scoring
@@ -453,12 +446,19 @@ async function repairOrExpandEvents(
 
   const currentEventsText =
     currentEvents.length > 0
-      ? `\n\nCurrent events (${currentEvents.length}):\n${JSON.stringify(currentEvents.slice(0, 10), null, 2)}`
+      ? `\n\nCurrent events (${currentEvents.length}):\n${JSON.stringify(
+          currentEvents.slice(0, 10),
+          null,
+          2
+        )}`
       : "";
 
+  const sourcesList = Array.isArray(eventSources) ? eventSources : [];
   const eventSourcesText =
-    eventSources && eventSources.length > 0
-      ? `\n\nIMPORTANT: The user follows these event sources. Prioritize checking them:\n${eventSources.join("\n")}`
+    sourcesList.length > 0
+      ? `\n\nIMPORTANT: The user follows these event sources. Prioritize checking them:\n${sourcesList.join(
+          "\n"
+        )}`
       : "";
 
   const today = new Date();
@@ -466,7 +466,11 @@ async function repairOrExpandEvents(
   tomorrow.setDate(today.getDate() + 1);
   const thirtyDaysLater = new Date(today);
   thirtyDaysLater.setDate(today.getDate() + 30);
-  const dateWindow = `Events must start from ${tomorrow.toISOString().split("T")[0]} (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}. Do NOT include events happening today or in the past.`;
+  const dateWindow = `Events must start from ${
+    tomorrow.toISOString().split("T")[0]
+  } (tomorrow) through ${
+    thirtyDaysLater.toISOString().split("T")[0]
+  }. Do NOT include events happening today or in the past.`;
 
   const prompt = `${instruction}
 
@@ -494,12 +498,11 @@ Return a JSON object with an "events" array (20-30 events if you can find that m
 
 Only include real, verifiable events you found through web search. Deduplicate by artist/band. Limit to maximum 4 events per sourceUrl. NEVER invent events - if few exist, return fewer.`;
 
-  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array. Never invent or hallucinate events - only include events you actually found. Never include events from the past.`;
+  const systemPrompt = `You are repairing/expanding event results. Return only valid JSON with an "events" array. Never invent or hallucinate events - only include events you actually found. Never include events from the past. Do not include any explanation, reasoning, or commentary—output only the JSON object, no preamble or postamble.`;
 
   console.log(`Step 4: Repairing/expanding events (issue: ${issue})...`);
-  // sonar-pro model automatically enables web search
   const rawResponse = await callPerplexity(
-    "sonar-pro",
+    "sonar-reasoning-pro",
     systemPrompt,
     prompt,
     0.7
@@ -570,11 +573,17 @@ export async function discoverEvents(
 
     const allRawEvents: any[] = [];
     searchResults.forEach((result, index) => {
-      allRawResponses.push(`=== SEARCH TASK ${index + 1}: ${tasks[index]} ===\n${result.rawResponse}`);
+      allRawResponses.push(
+        `=== SEARCH TASK ${index + 1}: ${tasks[index]} ===\n${
+          result.rawResponse
+        }`
+      );
       allRawEvents.push(...result.events);
     });
 
-    console.log(`Collected ${allRawEvents.length} raw events from all searches`);
+    console.log(
+      `Collected ${allRawEvents.length} raw events from all searches`
+    );
 
     if (allRawEvents.length === 0) {
       console.warn("No events found in search phase");
@@ -615,7 +624,9 @@ export async function discoverEvents(
           eventSources
         );
       allRawResponses.push(
-        `=== REPAIR (${mergeFailed ? "broken_json" : "too_few"}) ===\n${repairResponse}`
+        `=== REPAIR (${
+          mergeFailed ? "broken_json" : "too_few"
+        }) ===\n${repairResponse}`
       );
       events = repairedEvents;
     } else if (finalEvents.length < 15) {
@@ -670,11 +681,15 @@ export async function discoverEvents(
       const eventDate = new Date(e.date);
       eventDate.setHours(0, 0, 0, 0);
       if (eventDate < tomorrow) {
-        console.log(`[date filter] excluded "${e.title}": date ${e.date} is today or in the past`);
+        console.log(
+          `[date filter] excluded "${e.title}": date ${e.date} is today or in the past`
+        );
         return false;
       }
       if (eventDate > thirtyDaysLater) {
-        console.log(`[date filter] excluded "${e.title}": date ${e.date} is after 30 days`);
+        console.log(
+          `[date filter] excluded "${e.title}": date ${e.date} is after 30 days`
+        );
         return false;
       }
       return true;
@@ -752,7 +767,9 @@ export async function discoverEvents(
 
     // Limit events when venue or artist has >4 events sharing the same "significant" name
     // Key = words longer than 3 chars, normalized. Only apply when key has >3 such words (substantial name).
-    const getSignificantWordsKey = (text: string | null | undefined): string | null => {
+    const getSignificantWordsKey = (
+      text: string | null | undefined
+    ): string | null => {
       if (!text || typeof text !== "string") return null;
       const words = text
         .toLowerCase()
@@ -765,7 +782,10 @@ export async function discoverEvents(
     const MAX_PER_VENUE_OR_ARTIST = 4;
     const toRemoveByVenueArtist = new Set<number>();
     for (const field of ["venue", "artist"] as const) {
-      const groups = new Map<string, Array<{ e: (typeof eventsAboveThreshold)[0]; i: number }>>();
+      const groups = new Map<
+        string,
+        Array<{ e: (typeof eventsAboveThreshold)[0]; i: number }>
+      >();
       for (let i = 0; i < eventsAboveThreshold.length; i++) {
         const e = eventsAboveThreshold[i];
         const key = getSignificantWordsKey(e[field]);
@@ -775,7 +795,9 @@ export async function discoverEvents(
       }
       for (const [key, group] of groups) {
         if (group.length <= MAX_PER_VENUE_OR_ARTIST) continue;
-        const sorted = group.sort((a, b) => (b.e.score ?? 0) - (a.e.score ?? 0));
+        const sorted = group.sort(
+          (a, b) => (b.e.score ?? 0) - (a.e.score ?? 0)
+        );
         for (let j = MAX_PER_VENUE_OR_ARTIST; j < sorted.length; j++) {
           const { e: item, i: idx } = sorted[j];
           toRemoveByVenueArtist.add(idx);
@@ -843,7 +865,9 @@ export async function discoverEvents(
       if (!e.date) missing.push("date");
       if (missing.length > 0) {
         console.log(
-          `[required fields] excluded "${e.title || "(no title)"}": missing ${missing.join(", ")}`
+          `[required fields] excluded "${
+            e.title || "(no title)"
+          }": missing ${missing.join(", ")}`
         );
         return false;
       }
