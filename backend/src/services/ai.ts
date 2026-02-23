@@ -567,7 +567,7 @@ export async function discoverEvents(
     console.log(`Step 2: Executing ${tasks.length} parallel searches...`);
     const searchResults = await Promise.all(
       tasks.map((task) =>
-        searchEventsForTask(task, truncatedProfile, city, eventSources)
+        searchEventsForTask(task, city, eventSources)
       )
     );
 
