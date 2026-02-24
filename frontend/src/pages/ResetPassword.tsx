@@ -59,7 +59,9 @@ export default function ResetPassword() {
           <div className="space-y-6">
             <Windows98ReadingPane>
               <div className="flex justify-center">
-                <img src={logo} alt="The Newsletter" className="h-12 w-auto" />
+                <Link to="/" className="inline-block">
+                  <img src={logo} alt="The Event Newsletter" className="h-12 w-auto" />
+                </Link>
               </div>
               <p className="mt-3 text-center text-xs text-black">
                 {t("auth.enterResetCodeAndPassword")}

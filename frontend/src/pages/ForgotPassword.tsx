@@ -39,11 +39,13 @@ export default function ForgotPassword() {
             <Windows98ReadingPane>
               <div className="space-y-2">
                 <div className="flex justify-center">
-                  <img
-                    src={logo}
-                    alt="The Event Newsletter"
-                    className="h-36 w-auto"
-                  />
+                  <Link to="/" className="inline-block">
+                    <img
+                      src={logo}
+                      alt="The Event Newsletter"
+                      className="h-36 w-auto"
+                    />
+                  </Link>
                 </div>
                 <p className="text-xs text-black text-center">
                   {t("auth.forgotPasswordDescription")}

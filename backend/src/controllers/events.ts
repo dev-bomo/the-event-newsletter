@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import { discoverEvents } from "../services/ai.js";
 import { discoverEventsFromSource } from "../services/eventSources.js";
+import { updateUserProfile } from "./preferences.js";
 
 export async function discoverEventsForUser(userId: string): Promise<{
   events: Awaited<ReturnType<typeof prisma.event.findMany>>;
@@ -9,7 +10,7 @@ export async function discoverEventsForUser(userId: string): Promise<{
   console.log("discoverEventsForUser called for userId:", userId);
 
   // Get user with profile
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
@@ -19,6 +20,15 @@ export async function discoverEventsForUser(userId: string): Promise<{
 
   if (!user.city) {
     throw new Error("User city not set. Please set your city in preferences.");
+  }
+
+  // Refresh profile if missing or dirty (e.g. after preference/city/source changes)
+  if (!user.profile || user.profileIsDirty) {
+    await updateUserProfile(userId);
+    user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) throw new Error("User not found");
   }
 
   if (!user.profile) {
@@ -83,7 +93,7 @@ export async function discoverEventsForUser(userId: string): Promise<{
   // Discover events using AI with user profile and event sources
   console.log("Calling discoverEvents with user profile...");
   const { events: discoveredEvents, rawResponse: generalSearchRawResponse } =
-    await discoverEvents(user.city, effectiveProfile, eventSourceUrls);
+    await discoverEvents(user.city!, effectiveProfile, eventSourceUrls);
   const generalSearchCount = discoveredEvents.length;
   console.log("Discovered", generalSearchCount, "events from general search");
 

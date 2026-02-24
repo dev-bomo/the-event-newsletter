@@ -1,82 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import { generateUserProfile } from "../services/ai.js";
 
-const PREFERENCE_EDIT_LIMIT = 5;
-const PREFERENCE_EDIT_WEEK_DAYS = 7;
-
-export async function checkPreferenceEditLimit(userId: string): Promise<{
-  allowed: boolean;
-  remaining?: number;
-  nextAllowedAt?: Date;
-  message?: string;
-}> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { preferenceEditCount: true, lastPreferenceEditAt: true },
-  });
-
-  if (!user) {
-    return { allowed: false, message: "User not found" };
-  }
-
-  const { preferenceEditCount, lastPreferenceEditAt } = user;
-
-  if (preferenceEditCount < PREFERENCE_EDIT_LIMIT) {
-    return {
-      allowed: true,
-      remaining: PREFERENCE_EDIT_LIMIT - preferenceEditCount,
-    };
-  }
-
-  // Used all 5, check weekly limit
-  if (!lastPreferenceEditAt) {
-    return { allowed: true }; // Edge case: count is 5 but never set lastEdit
-  }
-
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - PREFERENCE_EDIT_WEEK_DAYS);
-
-  if (lastPreferenceEditAt <= weekAgo) {
-    return { allowed: true };
-  }
-
-  const nextAllowedAt = new Date(lastPreferenceEditAt);
-  nextAllowedAt.setDate(nextAllowedAt.getDate() + PREFERENCE_EDIT_WEEK_DAYS);
-
-  return {
-    allowed: false,
-    nextAllowedAt,
-    message: `You've used your 5 preference edits. You can edit again in ${Math.ceil((nextAllowedAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days (rolling weekly limit to manage AI costs).`,
-  };
-}
-
-export async function recordPreferenceEdit(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { preferenceEditCount: true },
-  });
-
-  if (!user) return;
-
-  const now = new Date();
-
-  if (user.preferenceEditCount < PREFERENCE_EDIT_LIMIT) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        preferenceEditCount: user.preferenceEditCount + 1,
-        lastPreferenceEditAt: now,
-      },
-    });
-  } else {
-    // Already at 5, just update lastPreferenceEditAt (weekly rolling)
-    await prisma.user.update({
-      where: { id: userId },
-      data: { lastPreferenceEditAt: now },
-    });
-  }
-}
-
 // Helper to parse JSON arrays (for SQLite compatibility)
 function parseArray(str: string): string[] {
   try {
@@ -151,10 +75,10 @@ export async function updateUserProfile(userId: string) {
       eventSources,
     });
 
-    // Save profile to user
+    // Save profile to user and clear dirty flag
     await prisma.user.update({
       where: { id: userId },
-      data: { profile },
+      data: { profile, profileIsDirty: false },
     });
 
     console.log("User profile generated and saved successfully");
@@ -206,11 +130,6 @@ export async function updateUserPreferences(
   artists: string[];
   _unverified?: boolean;
 }> {
-  const limitCheck = await checkPreferenceEditLimit(userId);
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || "Preference edit limit reached.");
-  }
-
   const existing = await prisma.preference.findUnique({
     where: { userId },
   });
@@ -278,13 +197,14 @@ export async function updateUserPreferences(
   if (city !== undefined) {
     await prisma.user.update({
       where: { id: userId },
-      data: { city },
+      data: { city, profileIsDirty: true },
+    });
+  } else {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { profileIsDirty: true },
     });
   }
-
-  // Record the edit and generate profile
-  await recordPreferenceEdit(userId);
-  await updateUserProfile(userId);
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -301,18 +221,10 @@ export async function updateUserCity(
   userId: string,
   city: string
 ): Promise<{ success: boolean; _unverified?: boolean }> {
-  const limitCheck = await checkPreferenceEditLimit(userId);
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || "Preference edit limit reached.");
-  }
-
   await prisma.user.update({
     where: { id: userId },
-    data: { city },
+    data: { city, profileIsDirty: true },
   });
-
-  await recordPreferenceEdit(userId);
-  await updateUserProfile(userId);
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -359,10 +271,10 @@ export async function resetPreferences(userId: string) {
     });
   }
 
-  // Clear user profile since preferences are empty
+  // Clear user profile and mark dirty so next newsletter generation will regenerate
   await prisma.user.update({
     where: { id: userId },
-    data: { profile: null },
+    data: { profile: null, profileIsDirty: true },
   });
 
   return {

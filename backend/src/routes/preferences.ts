@@ -6,7 +6,6 @@ import {
   updateUserPreferences,
   updateUserCity,
   resetPreferences,
-  checkPreferenceEditLimit,
 } from "../controllers/preferences.js";
 
 const router = Router();
@@ -27,14 +26,9 @@ const updateCitySchema = z.object({
 router.get("/", async (req: AuthRequest, res) => {
   try {
     const preferences = await getUserPreferences(req.userId!);
-    const limitStatus = await checkPreferenceEditLimit(req.userId!);
     res.json({
       ...preferences,
-      _limits: {
-        canEdit: limitStatus.allowed,
-        remaining: limitStatus.remaining,
-        nextAllowedAt: limitStatus.nextAllowedAt?.toISOString(),
-      },
+      _limits: { canEdit: true },
     });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

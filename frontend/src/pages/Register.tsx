@@ -50,11 +50,13 @@ export default function Register() {
             <Windows98ReadingPane>
               <div className="space-y-4">
                 <div className="flex justify-center">
-                  <img
-                    src={logo}
-                    alt="The Event Newsletter"
-                    className="h-36 w-auto"
-                  />
+                  <Link to="/" className="inline-block">
+                    <img
+                      src={logo}
+                      alt="The Event Newsletter"
+                      className="h-36 w-auto"
+                    />
+                  </Link>
                 </div>
                 {messageExpanded && (
                   <div className="space-y-3">

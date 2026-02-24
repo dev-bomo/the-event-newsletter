@@ -69,7 +69,7 @@
     "readMore": "Click to read more about this service",
     "expandHint": "Click for full explanation",
     "hideDetails": "Hide details",
-    "description": "Weekly event newsletter. Curated by you.",
+    "description": "Local events. Curated by AI, for you.",
     "whyExists": "Why this exists:",
     "why1": "🚫 No social media browsing — avoid the dopamine trap of endless feeds",
     "why2": "📧 Weekly email only — intentional, not addictive. You get events for the month ahead, so you have time to plan",
@@ -320,6 +320,6 @@
     "payment": "5. Payment",
     "paymentContent": "This will be a paid service when it launches. The yearly payment is transparent and direct—you pay for the service, and that is it.",
     "contact": "6. Contact",
-    "contactContent": "For privacy-related questions or to exercise your rights (access, deletion, etc.), contact us at support@attendtion.eu."
+    "contactContent": "For privacy-related questions or to exercise your rights (access, deletion, etc.), contact us at support@event-newsletter.com."
   }
 }

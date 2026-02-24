@@ -15,7 +15,9 @@ function sleep(ms: number) {
 async function processNewsletterBatch(users: { id: string; email: string }[]) {
   for (const user of users) {
     try {
-      const { newsletter } = await generateNewsletter(user.id);
+      const { newsletter } = await generateNewsletter(user.id, {
+        isScheduledRun: true,
+      });
       await sendNewsletter(user.id, newsletter.id);
       console.log(`Newsletter sent to ${user.email}`);
     } catch (error) {

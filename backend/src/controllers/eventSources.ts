@@ -1,9 +1,4 @@
 import { prisma } from "../lib/prisma.js";
-import {
-  updateUserProfile,
-  checkPreferenceEditLimit,
-  recordPreferenceEdit,
-} from "./preferences.js";
 
 export async function getUserEventSources(userId: string) {
   return prisma.eventSource.findMany({
@@ -17,11 +12,6 @@ export async function addEventSource(
   url: string,
   name?: string
 ) {
-  const limitCheck = await checkPreferenceEditLimit(userId);
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || "Preference edit limit reached.");
-  }
-
   // Check if source already exists for this user
   const existing = await prisma.eventSource.findFirst({
     where: {
@@ -42,18 +32,15 @@ export async function addEventSource(
     },
   });
 
-  await recordPreferenceEdit(userId);
-  await updateUserProfile(userId);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { profileIsDirty: true },
+  });
 
   return eventSource;
 }
 
 export async function deleteEventSource(userId: string, sourceId: string) {
-  const limitCheck = await checkPreferenceEditLimit(userId);
-  if (!limitCheck.allowed) {
-    throw new Error(limitCheck.message || "Preference edit limit reached.");
-  }
-
   // Verify the source belongs to the user
   const source = await prisma.eventSource.findFirst({
     where: {
@@ -70,6 +57,8 @@ export async function deleteEventSource(userId: string, sourceId: string) {
     where: { id: sourceId },
   });
 
-  await recordPreferenceEdit(userId);
-  await updateUserProfile(userId);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { profileIsDirty: true },
+  });
 }

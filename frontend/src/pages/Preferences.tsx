@@ -256,7 +256,9 @@ export default function Preferences() {
               <p className="text-xs text-black mb-2">
                 {t("preferences.description")}
               </p>
-              {preferenceLimits && (
+              {preferenceLimits &&
+                (preferenceLimits.remaining !== undefined ||
+                  preferenceLimits.nextAllowedAt) && (
                 <p className="text-xs text-black">
                   {preferenceLimits.canEdit ? (
                     preferenceLimits.remaining !== undefined &&

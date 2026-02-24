@@ -16,6 +16,7 @@ model User {
   name                   String?
   city                   String?
   profile                String?   // AI-generated profile for event discovery
+  profileIsDirty          Boolean  @default(false) // True when preferences/city/sources changed; refresh before newsletter
   verified               Boolean   @default(false) // Alpha testing: users must be verified to log in
   resetCode              String?
   resetCodeExpiresAt     DateTime?

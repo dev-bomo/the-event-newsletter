@@ -21,18 +21,23 @@ export async function getUserNewsletters(userId: string) {
 
 const NEWSLETTER_LIMIT_PER_USER = parseInt(process.env.NEWSLETTER_LIMIT_PER_USER || "5", 10);
 
-export async function generateNewsletter(userId: string) {
-  // Check newsletter limit
-  const count = await prisma.newsletter.count({
-    where: { userId },
-  });
-  if (count >= NEWSLETTER_LIMIT_PER_USER) {
-    throw new Error(
-      "You've reached the limit of 5 newsletters. Contact support to request more."
-    );
+export async function generateNewsletter(
+  userId: string,
+  options?: { isScheduledRun?: boolean }
+) {
+  // Apply manual-generation limit only when user triggers generation (not for weekly scheduled run)
+  if (!options?.isScheduledRun) {
+    const count = await prisma.newsletter.count({
+      where: { userId },
+    });
+    if (count >= NEWSLETTER_LIMIT_PER_USER) {
+      throw new Error(
+        "You've reached the limit of 5 newsletters. Contact support to request more."
+      );
+    }
   }
 
-  // Discover events for user
+  // Discover events for user (will refresh profile if dirty)
   const { events, rawResponses } = await discoverEventsForUser(userId);
 
   console.log(
