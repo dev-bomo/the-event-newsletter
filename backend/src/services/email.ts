@@ -20,8 +20,8 @@ export async function sendEmail(data: {
     throw new Error(error);
   }
 
-  if (!FROM_EMAIL || FROM_EMAIL === 'noreply@example.com') {
-    const error = 'FROM_EMAIL not configured or using placeholder. Please set FROM_EMAIL=the-newsletter@attendtion.eu (or your verified domain) in .env. The domain must be verified in Resend.';
+  if (!FROM_EMAIL || FROM_EMAIL === 'noreply@example.com' || FROM_EMAIL === 'noreply@yourdomain.com') {
+    const error = 'FROM_EMAIL not configured or using placeholder. Please set FROM_EMAIL=this-week@event-newsletter.com (or your verified domain) in .env. The domain must be verified in Resend.';
     console.error(error);
     throw new Error(error);
   }

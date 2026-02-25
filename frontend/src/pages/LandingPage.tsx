@@ -63,10 +63,16 @@ export default function LandingPage() {
               </p>
               <p className="text-xs text-[#404040]">{t("landing.heroSub")}</p>
               <div className="flex justify-center gap-3 pt-1">
-                <Link to="/register" className="win98-button font-bold">
+                <Link
+                  to="/register"
+                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+                >
                   {t("auth.register")}
                 </Link>
-                <Link to="/login" className="win98-button font-bold">
+                <Link
+                  to="/login"
+                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+                >
                   {t("auth.login")}
                 </Link>
               </div>
@@ -499,7 +505,10 @@ export default function LandingPage() {
 
             {/* Section 6: Footer CTA */}
             <div className="text-center space-y-3">
-              <Link to="/register" className="win98-button font-bold">
+              <Link
+                to="/register"
+                className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+              >
                 {t("landing.getStarted")}
               </Link>
               <div className="text-xs text-black">

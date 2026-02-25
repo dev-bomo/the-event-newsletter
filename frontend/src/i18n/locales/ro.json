@@ -21,7 +21,10 @@
     "removeEventSourceFailed": "Eliminarea sursei de evenimente a eșuat",
     "generateNewsletterFailed": "Generarea newsletterului a eșuat",
     "sendNewsletterFailed": "Trimiterea newsletterului a eșuat",
-    "resetPreferencesFailed": "Resetarea preferințelor a eșuat"
+    "resetPreferencesFailed": "Resetarea preferințelor a eșuat",
+    "supportEmail": "support@event-newsletter.com",
+    "supportInstructions": "Pentru ajutor sau pentru a solicita mai multe newslettere, trimite-ne un email la adresa de mai sus.",
+    "support": "Suport"
   },
   "nav": {
     "dashboard": "Panou de control",
@@ -95,15 +98,16 @@
       "keywordsHint": "Cuvintele cheie nu trebuie să fie exacte—ex. \"Offspring\" sau \"The Offspring\" funcționează similar. Devin parte din promptul de căutare.",
       "step1": "Setează preferințele tale (oraș, interese, etc.)",
       "step2": "Un profil va fi generat și atașat contului tău.",
-      "step3": "Încearcă să generezi un newsletter. Sistemul va face crawling, își va face magia și va încerca să găsească evenimente pentru tine. Vezi dacă se potrivesc.",
+      "step3": "Încearcă să generezi un newsletter. Sistemul va face crawling, își va face magia și va încerca să găsească evenimente pentru tine.",
+      "step3b": "Poți modifica preferințele și următorul newsletter le va lua în considerare.",
       "step4": "Dacă unele evenimente nu se potrivesc, folosește \"Nu-mi place\" pe newslettere pentru a exclude artiști, locuri, organizatori sau evenimente anume. Newsletterele viitoare nu le vor include.",
-      "step5": "Dacă da, perfect! Ești gata și vei primi un newsletter nou în fiecare joi pe la ora 16.",
-      "step6": "Dacă tot nu se potrivesc, încearcă să ajustezi preferințele? Ține minte însă: Acesta E UNELTA pentru a obține toate evenimentele. Este doar menit să îți facă experiența de căutare a evenimentelor puțin mai plăcută."
+      "step5": "Ești gata și vei primi un newsletter nou în fiecare joi pe la ora 16.",
+      "step6": "Rule of thumb: \"Dacă ratez rareori evenimente importante și am 1-2 evenimente 'oh, drăguț!' pe săptămână, sunt mulțumit\"."
     },
     "limits": {
       "title": "Limite de utilizare (pentru gestionarea costurilor AI)",
       "preferences": "Preferințe: Poți edita de 5 ori în total, apoi o dată pe săptămână. Asta ține sub control costurile AI pentru profil.",
-      "newsletters": "Newslettere: Poți genera până la 5 newslettere. Aceleasi considerente legate de cost.",
+      "newsletters": "Newslettere: Poți genera până la 5 newslettere. Ai nevoie de mai multe? Contactează suportul la support@event-newsletter.com.",
       "autoNewsletter": "Auto-newsletter: În fiecare joi la ora 16:00 generăm și trimitem prin email newsletterul tău personalizat automat."
     }
   },

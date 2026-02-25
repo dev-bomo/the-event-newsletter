@@ -6,6 +6,7 @@ import { useAuthStore } from "../store/authStore";
 import LoadingOverlay from "../components/LoadingOverlay";
 import HateThisDropdown, { eventHateMatchesEvent } from "../components/HateThisDropdown";
 import DislikeInfoModal, { hasSeenDislikeInfo } from "../components/DislikeInfoModal";
+import { useWindowContext } from "../context/WindowContext";
 import api from "../lib/api";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
@@ -35,10 +36,26 @@ interface Newsletter {
   events: Array<{ event: Event }>;
 }
 
-export default function Newsletters() {
+export default function Newsletters({ embed }: { embed?: boolean } = {}) {
+  const content = <NewslettersInner />;
+  if (embed) return content;
+  const { t } = useTranslation();
+  return (
+    <Layout>
+      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
+        <Windows98Window title={t("newsletters.title")}>
+          {content}
+        </Windows98Window>
+      </div>
+    </Layout>
+  );
+}
+
+function NewslettersInner() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { openWindow, bringToFront } = useWindowContext();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [generating, setGenerating] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
@@ -181,12 +198,10 @@ export default function Newsletters() {
   };
 
   return (
-    <Layout>
+    <>
       <LoadingOverlay isVisible={generating} />
-      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-        <Windows98Window title={t("newsletters.title")}>
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-2">
+      <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-2">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <img
                   src="/attention.png"
@@ -238,12 +253,14 @@ export default function Newsletters() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-1">
                 {newsletters.map((newsletter) => (
                   <Windows98ReadingPane key={newsletter.id}>
                     <div className="space-y-3">
                       <div className="flex justify-between items-start gap-2">
-                        <h3 className="text-xs font-bold text-black flex-1 min-w-0">{newsletter.subject}</h3>
+                        <h3 className="text-xs font-bold text-black flex-1 min-w-0 break-words">
+                          {newsletter.subject} – {newsletter.events.length} {t("newsletters.events")}
+                        </h3>
                         <button
                           onClick={() => handleSend(newsletter.id)}
                           disabled={sending === newsletter.id || !!newsletter.sentAt}
@@ -258,9 +275,6 @@ export default function Newsletters() {
                       </div>
 
                       <div>
-                        <h3 className="text-xs font-bold text-black mb-2">
-                          {t("newsletters.events")} ({newsletter.events.length}):
-                        </h3>
                         <div className="space-y-2">
                           {newsletter.events.map(({ event }) => {
                             const disliked = isEventDisliked(event);
@@ -311,7 +325,7 @@ export default function Newsletters() {
                                     )}
                                   </p>
                                   <p className="text-xs text-black mt-0.5">
-                                    📅 {new Date(event.date).toLocaleDateString()}
+                                    📅 {new Date(event.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" })}
                                     {event.time && ` · 🕐 ${event.time}`}
                                     {" · 📍 "}{event.location}
                                   </p>
@@ -381,13 +395,15 @@ export default function Newsletters() {
               </div>
             )}
           </div>
-        </Windows98Window>
-      </div>
 
       {/* First-time dislike info modal */}
       <DislikeInfoModal
         isOpen={showDislikeInfoModal}
         onClose={() => setShowDislikeInfoModal(false)}
+        onOpenDislikes={() => {
+          openWindow("dislikes");
+          bringToFront("dislikes");
+        }}
       />
 
       {/* Raw AI Response Modal */}
@@ -395,13 +411,13 @@ export default function Newsletters() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="max-w-4xl w-full max-h-[90vh]">
             <Windows98Window title={t("newsletters.rawAiResponse")} onClose={() => setShowDumpModal(false)}>
-              <div className="space-y-3 max-h-[80vh] overflow-y-auto">
+              <div className="scrollbar-hide space-y-3 max-h-[80vh] overflow-y-auto">
                 {rawResponses.map((response, index) => (
                   <div key={index} className="mb-3">
                     <h3 className="text-xs font-bold text-black mb-2">
                       {t("newsletters.response")} {index + 1}:
                     </h3>
-                    <pre className="bg-[#ffffff] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-3 text-xs overflow-x-auto whitespace-pre-wrap break-words text-black">
+                    <pre className="scrollbar-hide bg-[#ffffff] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-3 text-xs overflow-x-auto whitespace-pre-wrap break-words text-black">
                       {response}
                     </pre>
                   </div>
@@ -411,6 +427,6 @@ export default function Newsletters() {
           </div>
         </div>
       )}
-    </Layout>
+    </>
   );
 }

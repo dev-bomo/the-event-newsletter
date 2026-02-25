@@ -4,8 +4,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import Preferences from "./pages/Preferences";
-import Newsletters from "./pages/Newsletters";
+import Desktop from "./components/Desktop";
+import Layout from "./components/Layout";
 import OnboardingWizard from "./pages/OnboardingWizard";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -41,11 +41,11 @@ function App() {
         />
         <Route
           path="/preferences"
-          element={token ? <Preferences /> : <Navigate to="/login" />}
+          element={token ? <Layout><Desktop /></Layout> : <Navigate to="/login" />}
         />
         <Route
           path="/newsletters"
-          element={token ? <Newsletters /> : <Navigate to="/login" />}
+          element={token ? <Layout><Desktop /></Layout> : <Navigate to="/login" />}
         />
         <Route
           path="/onboarding"

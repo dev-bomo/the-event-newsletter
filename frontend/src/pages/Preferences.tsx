@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import api from "../lib/api";
 import { useAuthStore } from "../store/authStore";
+import { useWindowContext } from "../context/WindowContext";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
@@ -54,9 +54,25 @@ interface EventSource {
   createdAt: string;
 }
 
-export default function Preferences() {
+export default function Preferences({ embed }: { embed?: boolean } = {}) {
+  const content = <PreferencesInner />;
+  if (embed) return content;
+  const { t } = useTranslation();
+  return (
+    <Layout>
+      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
+        <Windows98Window title={t("preferences.title")}>
+          {content}
+        </Windows98Window>
+      </div>
+    </Layout>
+  );
+}
+
+function PreferencesInner() {
   const { t } = useTranslation();
   const { user } = useAuthStore();
+  const { openWindow, bringToFront } = useWindowContext();
   const [preferences, setPreferences] = useState<Preferences>({
     interests: [],
     genres: [],
@@ -232,25 +248,23 @@ export default function Preferences() {
 
   if (loading) {
     return (
-      <Layout>
-        <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-          <Windows98Window title={t("preferences.title")}>
-            <div className="p-3 text-xs text-black">{t("common.loading")}</div>
-          </Windows98Window>
-        </div>
-      </Layout>
+      <div className="p-3 text-xs text-black">{t("common.loading")}</div>
     );
   }
 
   return (
-    <Layout>
-      <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
-        <Windows98Window title={t("preferences.title")}>
-          <div className="space-y-4">
+    <div className="space-y-1">
             <div className="mb-2">
-              <Link to="/hates" className="text-xs font-bold text-[#000080] hover:underline">
+              <button
+                type="button"
+                onClick={() => {
+                  openWindow("dislikes");
+                  bringToFront("dislikes");
+                }}
+                className="text-xs font-bold text-[#000080] hover:underline"
+              >
                 {t("dashboard.myHates")} →
-              </Link>
+              </button>
             </div>
             <div className="mb-4">
               <p className="text-xs text-black mb-2">
@@ -302,7 +316,7 @@ export default function Preferences() {
 
             {/* Section 1: Enter or Fine-tune Preferences */}
             <Windows98ReadingPane>
-              <div className="space-y-4">
+              <div className="space-y-1">
                 <h3 className="text-xs font-bold text-black mb-2">
                   {t("preferences.preferencesSection.title")}
                 </h3>
@@ -497,8 +511,5 @@ export default function Preferences() {
               </button>
             </div>
           </div>
-        </Windows98Window>
-      </div>
-    </Layout>
   );
 }

@@ -19,11 +19,11 @@ Get your API key from: https://resend.com/api-keys
 The `FROM_EMAIL` must use a domain that's verified in Resend:
 
 ```env
-FROM_EMAIL=the-newsletter@attendtion.eu
+FROM_EMAIL=this-week@event-newsletter.com
 ```
 
 **Important:** 
-- The domain `attendtion.eu` must be verified in your Resend dashboard
+- The domain `event-newsletter.com` must be verified in your Resend dashboard
 - You can't use `@example.com` or unverified domains
 - For testing, Resend provides a test domain: `onboarding@resend.dev` (but this may have limitations)
 

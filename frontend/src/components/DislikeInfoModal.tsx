@@ -16,11 +16,13 @@ export function setDislikeInfoSeen(): void {
 interface DislikeInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenDislikes?: () => void;
 }
 
 export default function DislikeInfoModal({
   isOpen,
   onClose,
+  onOpenDislikes,
 }: DislikeInfoModalProps) {
   const { t } = useTranslation();
 
@@ -47,7 +49,7 @@ export default function DislikeInfoModal({
             onClose();
           }}
         >
-          <div className="space-y-4">
+          <div className="space-y-1">
             <Windows98ReadingPane>
               <div className="flex items-start gap-3">
                 <img
@@ -64,16 +66,30 @@ export default function DislikeInfoModal({
                     <li>{t("hates.dislikeInfoLine2")}</li>
                     <li>{t("hates.dislikeInfoLine3")}</li>
                     <li>
-                      <Link
-                        to="/hates"
-                        onClick={() => {
-                          setDislikeInfoSeen();
-                          onClose();
-                        }}
-                        className="text-[#000080] hover:underline font-bold"
-                      >
-                        {t("hates.dislikeInfoLine4")}
-                      </Link>
+                      {onOpenDislikes ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDislikeInfoSeen();
+                            onClose();
+                            onOpenDislikes();
+                          }}
+                          className="text-[#000080] hover:underline font-bold"
+                        >
+                          {t("hates.dislikeInfoLine4")}
+                        </button>
+                      ) : (
+                        <Link
+                          to="/hates"
+                          onClick={() => {
+                            setDislikeInfoSeen();
+                            onClose();
+                          }}
+                          className="text-[#000080] hover:underline font-bold"
+                        >
+                          {t("hates.dislikeInfoLine4")}
+                        </Link>
+                      )}
                     </li>
                   </ul>
                   <p className="italic">{t("hates.dislikeInfoLine5")}</p>

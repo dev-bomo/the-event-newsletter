@@ -39,11 +39,11 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md md:max-w-2xl w-full">
-        <Windows98Window title={t("auth.loginTitle")}>
+        <Windows98Window title={t("auth.loginTitle")} fitContent>
           <div className="space-y-6">
             {/* Logo and Info Section */}
             <Windows98ReadingPane>
-              <div className="space-y-4">
+              <div className="space-y-1">
                 <div className="flex justify-center">
                   <Link to="/" className="inline-block">
                     <img
@@ -102,7 +102,7 @@ export default function Login() {
             </Windows98ReadingPane>
 
             {/* Login Form */}
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form className="space-y-1" onSubmit={handleSubmit}>
               {error && (
                 <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-black text-xs">
                   {error}

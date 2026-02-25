@@ -45,7 +45,7 @@ PERPLEXITY_API_KEY=your-perplexity-api-key
 
 # Email Service
 RESEND_API_KEY=your-resend-api-key
-FROM_EMAIL=the-newsletter@attendtion.eu
+FROM_EMAIL=this-week@event-newsletter.com
 
 # OAuth Services
 # YouTube OAuth (Google Cloud Console)

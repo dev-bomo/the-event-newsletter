@@ -184,6 +184,46 @@ function getCategoryColor(category?: string | null): string {
   return CATEGORY_COLORS[idx];
 }
 
+/** Format date as "Fri, 13 May" (like on the website) */
+function formatEventDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
+  const day = d.getDate();
+  const month = d.toLocaleDateString("en-GB", { month: "short" });
+  return `${weekday}, ${day} ${month}`;
+}
+
+/** Build Google Calendar "Add to Calendar" URL for an all-day event (date only). */
+function buildAddToCalendarUrl(event: { title: string; date: Date | string; time?: string | null; location?: string | null; description?: string | null; sourceUrl?: string | null }): string {
+  const d = typeof event.date === "string" ? new Date(event.date) : event.date;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const dateStr = `${y}${m}${day}`;
+  let startStr: string;
+  let endStr: string;
+  if (event.time) {
+    const [hours, minutes] = event.time.match(/\d{1,2}/g)?.map(Number) || [0, 0];
+    const start = new Date(d);
+    start.setHours(hours, minutes, 0, 0);
+    const end = new Date(start);
+    end.setHours(end.getHours() + 2, 0, 0, 0);
+    startStr = start.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z/, "Z");
+    endStr = end.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z/, "Z");
+  } else {
+    startStr = dateStr;
+    endStr = dateStr;
+  }
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: event.title,
+    dates: `${startStr}/${endStr}`,
+    ...(event.location && { location: event.location }),
+    ...((event.description || event.sourceUrl) && { details: [event.description, event.sourceUrl].filter(Boolean).join("\n\n") }),
+  });
+  return `https://www.google.com/calendar/render?${params.toString()}`;
+}
+
 function generateNewsletterHTML(userName: string, events: any[]): string {
   const eventsHTML = events
     .slice(0, 20)
@@ -199,43 +239,48 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
             : "#dc3545"
           : "#6c757d";
       const categoryColor = getCategoryColor(event.category);
+      const dateDisplay = formatEventDate(event.date);
+      const addToCalendarUrl = buildAddToCalendarUrl({
+        title: event.title,
+        date: event.date,
+        time: event.time,
+        location: event.location,
+        description: event.description,
+        sourceUrl: event.sourceUrl,
+      });
+
+      const scoreBadge =
+        score !== null
+          ? `<td style="vertical-align: top; width: 60px; padding-left: 12px; text-align: center;"><div style="background-color: ${scoreColor}; color: white; border-radius: 12px; font-weight: bold; font-size: 14px; width: 56px; height: 28px; line-height: 28px; text-align: center;">${score}/100</div></td>`
+          : "<td></td>";
 
       return `
     <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-left: 4px solid ${categoryColor}; border-radius: 8px;">
-      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-        <h3 style="margin-top: 0; color: #333; flex: 1;">${index + 1}. ${
-        event.title
-      }</h3>
-        ${
-          score !== null
-            ? `<div style="background-color: ${scoreColor}; color: white; padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 14px; white-space: nowrap; margin-left: 10px;">
-                 ${score}/100
-               </div>`
-            : ""
-        }
-      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;"><tr>
+        <td style="vertical-align: top;"><h3 style="margin: 0; color: #333; font-size: 16px;">${index + 1}. ${event.title}</h3></td>
+        ${scoreBadge}
+      </tr></table>
       ${
         event.description
-          ? `<p style="color: #666;">${event.description}</p>`
+          ? `<p style="color: #666; margin: 0 0 10px 0;">${event.description}</p>`
           : ""
       }
       <div style="margin-top: 10px;">
         <p style="margin: 5px 0; color: #555;">
-          <strong>📅 Date:</strong> ${event.date.toLocaleDateString()} ${
-        event.time || ""
-      }
+          <strong>📅 Date:</strong> ${dateDisplay}${event.time ? ` ${event.time}` : ""}
         </p>
         <p style="margin: 5px 0; color: #555;">
           <strong>📍 Location:</strong> ${event.location}
         </p>
         ${
           event.category
-            ? `<p style="margin: 5px 0; color: #555;"><strong>Category:</strong> ${event.category}</p>`
+            ? `<p style="margin: 5px 0; color: #555;"><strong>🏷️ Category:</strong> ${event.category}</p>`
             : ""
         }
-        <a href="${
-          event.sourceUrl
-        }" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
+        <p style="margin-top: 12px;">
+          <a href="${addToCalendarUrl}" style="display: inline-block; margin-right: 10px; padding: 8px 16px; background-color: #34a853; color: white; text-decoration: none; border-radius: 5px;">Add to Calendar</a>
+          <a href="${event.sourceUrl}" style="display: inline-block; padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
+        </p>
       </div>
     </div>
   `;

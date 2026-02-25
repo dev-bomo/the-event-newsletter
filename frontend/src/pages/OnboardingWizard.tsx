@@ -12,12 +12,22 @@ const LOGO_COLORS = [
   "#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#EF4444",
   "#06B6D4", "#F97316", "#6366F1", "#14B8A6", "#A855F7", "#EAB308",
 ];
+const CATEGORY_COLORS = [
+  "#000080", "#008000", "#800080", "#800000", "#008080",
+  "#808000", "#004080", "#804000", "#408080", "#808080",
+];
 function getTagColor(text: string): string {
   let hash = 0;
   for (let i = 0; i < text.length; i++) {
     hash = text.charCodeAt(i) + ((hash << 5) - hash);
   }
   return LOGO_COLORS[Math.abs(hash) % LOGO_COLORS.length];
+}
+function getCategoryColor(category?: string | null): string {
+  const key = (category?.trim() || "(uncategorized)").toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = ((hash << 5) - hash) + key.charCodeAt(i);
+  return CATEGORY_COLORS[Math.abs(hash) % CATEGORY_COLORS.length];
 }
 function hexToRgba(hex: string, opacity: number): string {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -44,6 +54,7 @@ interface Event {
   category?: string;
   sourceUrl: string;
   imageUrl?: string;
+  score?: number | null;
 }
 
 interface Newsletter {
@@ -260,7 +271,7 @@ export default function OnboardingWizard() {
       <LoadingOverlay isVisible={generating} />
       <div className="px-4 py-6 sm:px-0 max-w-6xl mx-auto">
         <Windows98Window title={t("onboarding.step1Title")}>
-          <div className="space-y-4">
+          <div className="space-y-1">
             {/* Progress indicator */}
             <div className="flex items-center gap-2 mb-4">
               <div
@@ -504,32 +515,64 @@ export default function OnboardingWizard() {
                           {t("onboarding.eventsFound")} ({newsletter.events.length}):
                         </h3>
                         <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {newsletter.events.map(({ event }) => (
-                            <div
-                              key={event.id}
-                              className="border-l-2 border-[#000080] pl-2 py-2 bg-[#c0c0c0] border border-[#808080]"
-                            >
-                              <h4 className="text-xs font-bold text-black">{event.title}</h4>
-                              {event.description && (
-                                <p className="text-xs text-black mt-1">{event.description}</p>
-                              )}
-                              <div className="mt-1 text-xs text-black">
-                                <span>📅 {new Date(event.date).toLocaleDateString()}</span>
-                                {event.time && <span className="ml-3">🕐 {event.time}</span>}
-                                <span className="ml-3">📍 {event.location}</span>
+                          {newsletter.events.map(({ event }) => {
+                            const categoryColor = getCategoryColor(event.category);
+                            const score = event.score !== null && event.score !== undefined ? event.score : null;
+                            const dateStr = new Date(event.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+                            return (
+                              <div
+                                key={event.id}
+                                className="flex gap-2 py-1 items-start"
+                              >
+                                <img
+                                  src="/Calendar.ico"
+                                  alt=""
+                                  width={36}
+                                  height={22}
+                                  className="flex-shrink-0 object-contain mt-0.5"
+                                  aria-hidden
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold text-black truncate">
+                                    {event.title}
+                                    {event.category && (
+                                      <>
+                                        {" · "}
+                                        <span style={{ color: categoryColor }}>{event.category}</span>
+                                      </>
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-black mt-0.5">
+                                    📅 {dateStr}
+                                    {event.time && ` · 🕐 ${event.time}`}
+                                    {" · 📍 "}{event.location}
+                                  </p>
+                                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                                    {score !== null && (
+                                      <span
+                                        className="text-xs font-bold"
+                                        style={{
+                                          color: score >= 80 ? "#008000" : score >= 60 ? "#808000" : "#800000",
+                                        }}
+                                      >
+                                        {score}
+                                      </span>
+                                    )}
+                                    {event.sourceUrl && (
+                                      <a
+                                        href={event.sourceUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-[#000080] hover:underline font-bold inline-flex items-center"
+                                      >
+                                        {t("newsletters.learnMore")} →
+                                      </a>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                              {event.sourceUrl && (
-                                <a
-                                  href={event.sourceUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-[#000080] hover:underline mt-2 inline-block font-bold"
-                                >
-                                  {t("newsletters.learnMore")} →
-                                </a>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
 

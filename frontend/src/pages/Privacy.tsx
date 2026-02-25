@@ -10,7 +10,7 @@ export default function Privacy() {
     <Layout>
       <div className="px-4 py-6 sm:px-0 max-w-3xl mx-auto">
         <Windows98Window title={t("privacy.title")}>
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-1">
             <div className="text-xs text-black space-y-2">
               <p>{t("privacy.lastUpdated")}</p>
               <h3 className="font-bold text-sm">{t("privacy.dataWeCollect")}</h3>

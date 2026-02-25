@@ -21,7 +21,10 @@
     "removeEventSourceFailed": "Failed to remove event source",
     "generateNewsletterFailed": "Failed to generate newsletter",
     "sendNewsletterFailed": "Failed to send newsletter",
-    "resetPreferencesFailed": "Failed to reset preferences"
+    "resetPreferencesFailed": "Failed to reset preferences",
+    "supportEmail": "support@event-newsletter.com",
+    "supportInstructions": "For help or to request more newsletters, email us at the address above.",
+    "support": "Support"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -95,15 +98,16 @@
       "keywordsHint": "Keywords don't need to be exact—e.g. \"Offspring\" or \"The Offspring\" work similarly. They become part of the search prompt.",
       "step1": "Set your preferences (town, interests, etc.)",
       "step2": "A profile will be generated and attached to your account.",
-      "step3": "Try generating a newsletter. The system will do some crawling, work its magic, and do its best. See if the events it finds fit you.",
+      "step3": "Try generating a newsletter. The system will do some crawling, work its magic, and do its best.",
+      "step3b": "You can change preferences and the next newsletter will take those into account.",
       "step4": "If some events don't fit, use \"Dislike this\" on newsletters to exclude artists, venues, organizers, or specific events. Future newsletters won't include them.",
-      "step5": "If they do, great! You're all set and you'll get a new newsletter every Thu around 4 PM.",
-      "step6": "If they still don't fit, try fiddling with the preferences? Remember though: This is THE TOOL to get you all the events. This is just meant to make your event finding experience a little better."
+      "step5": "You're all set and you'll get a new newsletter every Thu around 4 PM.",
+      "step6": "My rule of thumb is: \"If I only rarely miss important events and I get 1-2 'oh, that's nice!' events per week, I'm happy\"."
     },
     "limits": {
       "title": "Usage Limits (to manage AI costs)",
       "preferences": "Preferences: You can edit 5 times total, then once per week. This keeps profile AI costs under control.",
-      "newsletters": "Newsletters: You can generate up to 5 newsletters. Need more? Contact support.",
+      "newsletters": "Newsletters: You can generate up to 5 newsletters. Need more? Contact support at support@event-newsletter.com.",
       "autoNewsletter": "Auto-newsletter: Every Thursday at 4 PM we generate and email your personalized newsletter automatically."
     }
   },

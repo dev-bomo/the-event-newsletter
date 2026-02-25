@@ -33,7 +33,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        <Windows98Window title={t("auth.forgotPassword")}>
+        <Windows98Window title={t("auth.forgotPassword")} fitContent>
           <div className="space-y-6">
             {/* Logo and Info Section */}
             <Windows98ReadingPane>
@@ -67,7 +67,7 @@ export default function ForgotPassword() {
                 </div>
               </div>
             ) : (
-              <form className="space-y-4" onSubmit={handleSubmit}>
+              <form className="space-y-1" onSubmit={handleSubmit}>
                 {error && (
                   <div className="bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] px-3 py-2 text-black text-xs">
                     {error}
