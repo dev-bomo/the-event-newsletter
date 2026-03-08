@@ -21,19 +21,42 @@ export async function getUserNewsletters(userId: string) {
 
 const NEWSLETTER_LIMIT_PER_USER = parseInt(process.env.NEWSLETTER_LIMIT_PER_USER || "5", 10);
 
+/** Free users get one newsletter; after that they hit the paywall. */
+const FREE_NEWSLETTERS_ALLOWED = 1;
+
+/** Error message when a free user tries to generate a second newsletter (paywall). */
+export const PAYWALL_MESSAGE =
+  "Subscribe to generate more newsletters and get the weekly digest. Upgrade to a paid plan when available.";
+
+function hasActiveSubscription(user: { subscriptionExpiresAt: Date | null }): boolean {
+  if (!user.subscriptionExpiresAt) return false;
+  return new Date(user.subscriptionExpiresAt) > new Date();
+}
+
 export async function generateNewsletter(
   userId: string,
   options?: { isScheduledRun?: boolean }
 ) {
-  // Apply manual-generation limit only when user triggers generation (not for weekly scheduled run)
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("User not found");
+  const subscriptionExpiresAt = (user as { subscriptionExpiresAt?: Date | null }).subscriptionExpiresAt ?? null;
+  const subscribed = hasActiveSubscription({ subscriptionExpiresAt });
+
+  // User-initiated generation: apply paywall (free = 1 newsletter) or paid limit (5)
   if (!options?.isScheduledRun) {
     const count = await prisma.newsletter.count({
       where: { userId },
     });
-    if (count >= NEWSLETTER_LIMIT_PER_USER) {
-      throw new Error(
-        "You've reached the limit of 5 newsletters. Contact support to request more."
-      );
+    if (!subscribed) {
+      if (count >= FREE_NEWSLETTERS_ALLOWED) {
+        throw new Error(PAYWALL_MESSAGE);
+      }
+    } else {
+      if (count >= NEWSLETTER_LIMIT_PER_USER) {
+        throw new Error(
+          "You've reached the limit of 5 newsletters. Contact support at support@event-newsletter.com to request more."
+        );
+      }
     }
   }
 
@@ -53,16 +76,7 @@ export async function generateNewsletter(
     throw new Error("No events found for user");
   }
 
-  // Get user info
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  // Generate HTML content
+  // Generate HTML content (user already loaded above)
   const htmlContent = generateNewsletterHTML(user.name || user.email, events);
 
   // Deduplicate events by eventId within this newsletter to avoid unique constraint violations

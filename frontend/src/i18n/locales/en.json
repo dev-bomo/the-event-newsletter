@@ -107,8 +107,8 @@
     "limits": {
       "title": "Usage Limits (to manage AI costs)",
       "preferences": "Preferences: You can edit 5 times total, then once per week. This keeps profile AI costs under control.",
-      "newsletters": "Newsletters: You can generate up to 5 newsletters. Need more? Contact support at support@event-newsletter.com.",
-      "autoNewsletter": "Auto-newsletter: Every Thursday at 4 PM we generate and email your personalized newsletter automatically."
+      "newsletters": "Newsletters: Free accounts get one newsletter; subscribe to generate up to 5 and get the weekly digest. Need more? Contact support at support@event-newsletter.com.",
+      "autoNewsletter": "Auto-newsletter (paid): Every Thursday at 4 PM we generate and email your personalized newsletter automatically."
     }
   },
   "preferences": {
@@ -200,8 +200,10 @@
     "goodMatch": "Good match",
     "fairMatch": "Fair match",
     "relevance": "Relevance",
-    "autoNewsletterInfo": "We automatically generate and email your newsletter every Thursday at 4 PM. You can also generate and send manually below (up to 5 newsletters per account—contact support for more). This helps us manage AI costs.",
-    "limitReached": "You've reached the limit of 5 newsletters. Contact support to request more.",
+    "autoNewsletterInfo": "Your first newsletter is free. Subscribe to generate more and get the weekly digest (every Thursday at 4 PM). Paid accounts can generate up to 5 newsletters and receive the automatic weekly email.",
+    "limitReached": "You've reached the limit of 5 newsletters. Contact support at support@event-newsletter.com to request more.",
+    "paywallMessage": "You've used your free newsletter. Subscribe to generate more and get the weekly digest.",
+    "paywallCta": "Subscribe",
     "rawAiResponse": "Raw AI Response",
     "response": "Response",
     "hateThisHint": "Use 'Dislike this' only for events you DEFINITELY want removed. It excludes that organizer, artist, or venue from future newsletters. Use sparingly."
@@ -307,7 +309,9 @@
     "serviceContent": "The Event Newsletter is a personalized weekly event discovery service provided by Good Software. By using this service, you agree to these terms.",
     "acceptance": "2. Acceptance",
     "acceptanceContent": "By creating an account and using our service, you accept these terms. We may update these terms from time to time; continued use after changes constitutes acceptance.",
-    "contact": "3. Contact",
+    "subscription": "3. Subscription and payment",
+    "subscriptionContent": "Access to the full service (weekly newsletter and the ability to generate more newsletters) requires a paid subscription. You can subscribe monthly, every 6 months, or yearly. Payment is processed securely by Paddle. Your subscription renews automatically at the end of each billing period unless you cancel. You can cancel or manage your subscription through your Paddle account or by contacting us. Refunds are handled according to Paddle's and our refund policy.",
+    "contact": "4. Contact",
     "contactContent": "For questions about these terms or the service, please contact Good Software."
   },
   "privacy": {
@@ -322,8 +326,23 @@
     "noSharing": "4. Our Commitment",
     "noSharingContent": "You pay for the service. We have no need to mess with your data in any way, and we will not do so. Our business model is straightforward: transparent, direct payment for a useful service.",
     "payment": "5. Payment",
-    "paymentContent": "This will be a paid service when it launches. The yearly payment is transparent and direct—you pay for the service, and that is it.",
+    "paymentContent": "The full service (weekly newsletter and generating more newsletters) is paid via subscription. Payment is processed by Paddle; we do not store your payment details. Paddle's privacy policy applies to payment data. We receive only the information needed to provide your subscription (e.g. that your subscription is active and when it expires).",
     "contact": "6. Contact",
     "contactContent": "For privacy-related questions or to exercise your rights (access, deletion, etc.), contact us at support@event-newsletter.com."
+  },
+  "subscribe": {
+    "title": "Subscribe",
+    "heading": "Subscribe to unlock the weekly newsletter. You can also try out different preferences.",
+    "subheading": "It's less than a coffee per month. You can pay monthly or prepay for a discount.",
+    "backToNewsletters": "← Back to Newsletters",
+    "choosePlan": "Choose your plan",
+    "monthly": "per month",
+    "6mo": "every 6 months",
+    "yearly": "per year",
+    "monthlyTag": "Flexible",
+    "save6mo": "Save ~14%",
+    "saveYear": "Best value",
+    "cta": "Subscribe",
+    "securePayment": "Secure payment powered by Paddle."
   }
 }

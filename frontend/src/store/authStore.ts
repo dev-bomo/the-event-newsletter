@@ -6,6 +6,13 @@ interface User {
   name?: string;
   city?: string | null;
   verified?: boolean;
+  /** ISO date string or null. If set and in the future, user has an active subscription. */
+  subscriptionExpiresAt?: string | null;
+}
+
+export function hasActiveSubscription(user: User | null | undefined): boolean {
+  if (!user?.subscriptionExpiresAt) return false;
+  return new Date(user.subscriptionExpiresAt) > new Date();
 }
 
 interface AuthState {

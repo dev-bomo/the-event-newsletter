@@ -143,15 +143,15 @@ IMPORTANT: Return plain text only. Do not use markdown formatting (no **, no *, 
 
     return profileText;
   } catch (error: any) {
-    console.error(
-      "Error generating user profile:",
-      error.response?.data || error.message
-    );
-    throw new Error(
-      `Failed to generate user profile: ${
-        error.response?.data?.message || error.message
-      }`
-    );
+    const data = error.response?.data;
+    const apiMessage =
+      data?.error?.message ?? data?.message ?? error.message;
+    console.error("Error generating user profile:", data || error.message);
+    const isQuota = data?.error?.type === "insufficient_quota" || data?.error?.code === 401;
+    const hint = isQuota
+      ? " Check your Perplexity API plan and billing at https://www.perplexity.ai/settings/api"
+      : "";
+    throw new Error(`Failed to generate user profile: ${apiMessage}.${hint}`);
   }
 }
 

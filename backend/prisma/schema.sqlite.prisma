@@ -18,6 +18,7 @@ model User {
   profile                String?   // AI-generated profile for event discovery
   profileIsDirty          Boolean  @default(false) // True when preferences/city/sources changed; refresh before newsletter
   verified               Boolean   @default(false) // Alpha testing: users must be verified to log in
+  subscriptionExpiresAt  DateTime? // If set and in the future: paid (more newsletters + weekly digest). Null or past: free (1 newsletter only).
   resetCode              String?
   resetCodeExpiresAt     DateTime?
   preferenceEditCount    Int       @default(0)

@@ -10,8 +10,15 @@
   font-style: normal;
 }
 
+html {
+  /* Use dynamic viewport height so when iOS Safari hides its UI on scroll, layout still fills the screen and fixed bottom stays flush */
+  min-height: 100dvh;
+  min-height: 100vh;
+}
+
 body {
   margin: 0;
+  min-height: 100%;
   font-family: 'MS Sans Serif', 'MS Sans Serif 8pt', 'MS Sans Serif', sans-serif;
   /* Smooth text and images on modern/hi-DPI displays; retro look comes from font and UI, not jagged rendering */
   -webkit-font-smoothing: antialiased;

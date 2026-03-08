@@ -4,6 +4,7 @@ import {
   getUserNewsletters,
   generateNewsletter,
   sendNewsletter,
+  PAYWALL_MESSAGE,
 } from "../controllers/newsletters.js";
 
 const router = Router();
@@ -43,10 +44,12 @@ router.post("/generate", async (req: AuthRequest, res) => {
       error instanceof Error ? error.stack : "No stack trace"
     );
     if (error instanceof Error) {
+      const isPaywall = error.message === PAYWALL_MESSAGE;
       return res
-        .status(400)
+        .status(isPaywall ? 402 : 400)
         .json({
           error: error.message,
+          code: isPaywall ? "PAYWALL" : undefined,
           details:
             process.env.NODE_ENV === "development" ? error.stack : undefined,
         });

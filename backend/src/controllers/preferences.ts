@@ -16,76 +16,66 @@ function stringifyArray(arr: string[]): string {
 }
 
 /**
- * Generate and save user profile based on preferences
+ * Generate and save user profile based on preferences.
+ * Called when generating a newsletter (profile missing or dirty).
+ * Throws so the caller can surface the real error (e.g. AI/API failure).
  */
-export async function updateUserProfile(userId: string) {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        preferences: true,
-        eventSources: true,
-      },
-    });
+export async function updateUserProfile(userId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      preferences: true,
+      eventSources: true,
+    },
+  });
 
-    if (!user || !user.city) {
-      console.log("Cannot generate profile: user or city not found");
-      return;
-    }
-
-    // Skip profile generation for unverified users (they can save preferences but not generate newsletters)
-    if (!user.verified) {
-      console.log("Skipping profile generation: user not verified");
-      return;
-    }
-
-    if (!user.preferences) {
-      console.log("Cannot generate profile: preferences not set");
-      return;
-    }
-
-    const preferences = {
-      interests: parseArray(user.preferences.interests),
-      genres: parseArray(user.preferences.genres),
-      eventTypes: parseArray(user.preferences.eventTypes),
-      venues: parseArray(user.preferences.venues),
-      artists: parseArray(user.preferences.artists),
-    };
-
-    // Log preferences being used for profile generation
-    console.log("Generating profile with preferences:", {
-      city: user.city,
-      interests: preferences.interests,
-      genres: preferences.genres,
-      eventTypes: preferences.eventTypes,
-      venues: preferences.venues,
-      artists: preferences.artists.length,
-      eventSources: user.eventSources.length,
-    });
-
-    const eventSources = user.eventSources.map((source) => ({
-      url: source.url,
-      name: source.name || undefined,
-    }));
-
-    // Generate profile using AI
-    const profile = await generateUserProfile({
-      city: user.city,
-      ...preferences,
-      eventSources,
-    });
-
-    // Save profile to user and clear dirty flag
-    await prisma.user.update({
-      where: { id: userId },
-      data: { profile, profileIsDirty: false },
-    });
-
-    console.log("User profile generated and saved successfully");
-  } catch (error: any) {
-    console.error("Error generating user profile:", error);
-    // Don't throw - profile generation failure shouldn't break preference updates
+  if (!user || !user.city) {
+    throw new Error("City not set. Please set your city in preferences first.");
   }
+
+  if (!user.verified) {
+    throw new Error("Account not verified. Please contact support.");
+  }
+
+  if (!user.preferences) {
+    throw new Error("Preferences not set. Please save your preferences first.");
+  }
+
+  const preferences = {
+    interests: parseArray(user.preferences.interests),
+    genres: parseArray(user.preferences.genres),
+    eventTypes: parseArray(user.preferences.eventTypes),
+    venues: parseArray(user.preferences.venues),
+    artists: parseArray(user.preferences.artists),
+  };
+
+  console.log("Generating profile with preferences:", {
+    city: user.city,
+    interests: preferences.interests,
+    genres: preferences.genres,
+    eventTypes: preferences.eventTypes,
+    venues: preferences.venues,
+    artists: preferences.artists.length,
+    eventSources: user.eventSources.length,
+  });
+
+  const eventSources = user.eventSources.map((source) => ({
+    url: source.url,
+    name: source.name || undefined,
+  }));
+
+  const profile = await generateUserProfile({
+    city: user.city,
+    ...preferences,
+    eventSources,
+  });
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { profile, profileIsDirty: false },
+  });
+
+  console.log("User profile generated and saved successfully");
 }
 
 export async function getUserPreferences(userId: string) {

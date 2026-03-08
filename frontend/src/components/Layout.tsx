@@ -145,7 +145,7 @@ function LayoutInner({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Windows 98 Taskbar - mobile and desktop at bottom, gray */}
-      <nav className="fixed left-0 right-0 bottom-0 h-10 md:h-9 bg-[#c0c0c0] border-t-2 border-[#808080] flex items-center z-50">
+      <nav className="fixed left-0 right-0 bottom-0 h-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:h-9 bg-[#c0c0c0] border-t-2 border-[#808080] flex items-center z-50">
         {/* Mobile: Start Button - wider, favicon + "Start" (opens sidebar) */}
         <button
           onClick={() => setSidebarOpen(true)}
@@ -453,7 +453,7 @@ function LayoutInner({ children }: LayoutProps) {
         onClose={() => setWallpaperPickerOpen(false)}
       />
 
-      <main className="flex-1 pt-0 pb-10 md:pt-0 md:pb-9 overflow-x-hidden">{children}</main>
+      <main className="flex-1 pt-0 pb-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:pb-9 overflow-x-hidden">{children}</main>
     </div>
   );
 }

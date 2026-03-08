@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore, hasActiveSubscription } from "../store/authStore";
 import LoadingOverlay from "../components/LoadingOverlay";
 import HateThisDropdown, { eventHateMatchesEvent } from "../components/HateThisDropdown";
 import DislikeInfoModal, { hasSeenDislikeInfo } from "../components/DislikeInfoModal";
@@ -58,6 +58,10 @@ function NewslettersInner() {
   const { openWindow, bringToFront } = useWindowContext();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [generating, setGenerating] = useState(false);
+  const subscribed = hasActiveSubscription(user);
+  const paywalled = !subscribed && newsletters.length >= 1;
+  const limitReached = subscribed && newsletters.length >= 5;
+  const canGenerate = (subscribed && newsletters.length < 5) || (!subscribed && newsletters.length < 1);
   const [sending, setSending] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -216,7 +220,12 @@ function NewslettersInner() {
                   <p className="text-xs text-black leading-tight">
                     {t("newsletters.autoNewsletterInfo")}
                   </p>
-                  {newsletters.length >= 5 && (
+                  {paywalled && (
+                    <p className="text-xs text-[#800000]">
+                      {t("newsletters.paywallMessage")}
+                    </p>
+                  )}
+                  {limitReached && (
                     <p className="text-xs text-[#800000]">
                       {t("newsletters.limitReached")}
                     </p>
@@ -224,13 +233,22 @@ function NewslettersInner() {
                 </div>
               </div>
               <div className="flex sm:items-center flex-shrink-0 w-full sm:w-auto">
-                <button
-                  onClick={handleGenerate}
-                  disabled={generating || newsletters.length >= 5}
-                  className="win98-button disabled:opacity-50 w-full sm:w-auto"
-                >
-                  {generating ? t("newsletters.generating") : t("newsletters.generate")}
-                </button>
+                {paywalled ? (
+                  <Link
+                    to="/subscribe"
+                    className="win98-button w-full sm:w-auto inline-block text-center"
+                  >
+                    {t("newsletters.paywallCta")}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleGenerate}
+                    disabled={generating || !canGenerate}
+                    className="win98-button disabled:opacity-50 w-full sm:w-auto"
+                  >
+                    {generating ? t("newsletters.generating") : t("newsletters.generate")}
+                  </button>
+                )}
               </div>
             </div>
 

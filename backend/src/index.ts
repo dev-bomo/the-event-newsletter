@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import os from "os";
 import { setupRoutes } from "./routes/index.js";
 import { setupCronJobs } from "./services/cron.js";
+import { handlePaddleWebhook } from "./controllers/paddleWebhook.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Load .env from backend directory (cwd may be project root when run via npm workspaces)
@@ -51,6 +52,10 @@ app.use(
     credentials: true,
   })
 );
+
+// Paddle webhook must receive raw body for signature verification (before express.json)
+app.post("/api/webhooks/paddle", express.raw({ type: "application/json" }), handlePaddleWebhook);
+
 app.use(express.json());
 
 // Routes

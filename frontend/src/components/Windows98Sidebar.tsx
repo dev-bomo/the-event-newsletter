@@ -68,7 +68,7 @@ export default function Windows98Sidebar({
         aria-hidden
       />
       {/* Start menu panel: 4px left margin, then 3d border, then blue ribbon + menu. */}
-      <div className="fixed left-0 bottom-10 w-64 h-[400px] flex border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] z-50 overflow-hidden bg-[#c0c0c0] ml-1">
+      <div className="fixed left-0 bottom-[calc(2.5rem+env(safe-area-inset-bottom,0px))] md:bottom-10 w-64 h-[400px] flex border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] z-50 overflow-hidden bg-[#c0c0c0] ml-1">
         {/* Vertical blue bar with 1-line logo (Win98-style left strip) - same navy as window title bar */}
         <div
           className="w-11 shrink-0 flex items-end justify-center min-h-0 bg-[#000080]"

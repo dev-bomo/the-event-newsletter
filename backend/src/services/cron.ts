@@ -36,11 +36,13 @@ export function setupCronJobs() {
     console.log("Running weekly auto-newsletter job (Thursday 4 PM)...");
 
     try {
+      const now = new Date();
       const users = await prisma.user.findMany({
         where: {
           verified: true,
           city: { not: null },
           preferences: { isNot: null },
+          subscriptionExpiresAt: { gt: now },
         },
         select: { id: true, email: true },
       });

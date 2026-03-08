@@ -107,8 +107,8 @@
     "limits": {
       "title": "Limite de utilizare (pentru gestionarea costurilor AI)",
       "preferences": "Preferințe: Poți edita de 5 ori în total, apoi o dată pe săptămână. Asta ține sub control costurile AI pentru profil.",
-      "newsletters": "Newslettere: Poți genera până la 5 newslettere. Ai nevoie de mai multe? Contactează suportul la support@event-newsletter.com.",
-      "autoNewsletter": "Auto-newsletter: În fiecare joi la ora 16:00 generăm și trimitem prin email newsletterul tău personalizat automat."
+      "newsletters": "Newslettere: Conturile gratuite primesc un newsletter; abonează-te pentru până la 5 și digest-ul săptămânal. Ai nevoie de mai multe? Contactează suportul la support@event-newsletter.com.",
+      "autoNewsletter": "Auto-newsletter (plătit): În fiecare joi la 16:00 generăm și trimitem prin email newsletterul tău personalizat automat."
     }
   },
   "preferences": {
@@ -200,8 +200,10 @@
     "goodMatch": "Potrivire bună",
     "fairMatch": "Potrivire acceptabilă",
     "relevance": "Relevanță",
-    "autoNewsletterInfo": "Generăm și trimitem automat newsletterul tău în fiecare joi la ora 16:00. Poți și genera/trimite manual mai jos (maxim 5 newslettere per cont—contactează suportul pentru mai multe). Asta ne ajută să gestionăm costurile AI.",
-    "limitReached": "Ai atins limita de 5 newslettere. Contactează suportul pentru a solicita mai multe.",
+    "autoNewsletterInfo": "Primul newsletter este gratuit. Abonează-te pentru a genera mai multe și pentru digest-ul săptămânal (în fiecare joi la 16:00). Conturile plătite pot genera până la 5 newslettere și primesc emailul săptămânal automat.",
+    "limitReached": "Ai atins limita de 5 newslettere. Contactează suportul la support@event-newsletter.com pentru a solicita mai multe.",
+    "paywallMessage": "Ai folosit newsletterul gratuit. Abonează-te pentru a genera mai multe și pentru digest-ul săptămânal.",
+    "paywallCta": "Abonare",
     "rawAiResponse": "Răspuns AI Brut",
     "response": "Răspuns",
     "hateThisHint": "Folosește 'Nu-mi place' doar pentru evenimente pe care le vrei DEFINITIV eliminate. Exclude organizatorul, artistul sau locul din newsletterele viitoare. Folosește cu moderație."
@@ -307,7 +309,9 @@
     "serviceContent": "The Event Newsletter este un serviciu săptămânal de descoperire a evenimentelor, furnizat de Good Software. Prin utilizarea acestui serviciu, acceptați acești termeni.",
     "acceptance": "2. Acceptare",
     "acceptanceContent": "Creând un cont și folosind serviciul nostru, acceptați acești termeni. Putem actualiza acești termeni din când în când; utilizarea continuă după modificări constituie acceptare.",
-    "contact": "3. Contact",
+    "subscription": "3. Abonament și plată",
+    "subscriptionContent": "Accesul la serviciul complet (newsletter săptămânal și posibilitatea de a genera mai multe newslettere) necesită un abonament plătit. Poți abona lunar, la 6 luni sau anual. Plata este procesată în siguranță prin Paddle. Abonamentul se reînnoiește automat la sfârșitul fiecărei perioade de facturare, cu excepția cazului în care îl anulezi. Poți anula sau gestiona abonamentul prin contul Paddle sau contactându-ne. Rambursările se fac conform politicii Paddle și a politicii noastre de rambursare.",
+    "contact": "4. Contact",
     "contactContent": "Pentru întrebări despre acești termeni sau despre serviciu, vă rugăm să contactați Good Software."
   },
   "privacy": {
@@ -322,8 +326,23 @@
     "noSharing": "4. Angajamentul nostru",
     "noSharingContent": "Plătești pentru serviciu. Nu avem nevoie să ne atingem de datele tale în niciun fel și nu vom face asta. Modelul nostru de business este simplu: plată transparentă și directă pentru un serviciu util.",
     "payment": "5. Plată",
-    "paymentContent": "Acesta va fi un serviciu plătit când va fi lansat. Plata anuală este transparentă și directă—plătești pentru serviciu, și asta e tot.",
+    "paymentContent": "Serviciul complet (newsletter săptămânal și generarea de newslettere) este plătit prin abonament. Plata este procesată de Paddle; nu stocăm datele tale de plată. Politica de confidențialitate Paddle se aplică datelor de plată. Primim doar informațiile necesare pentru a-ți oferi abonamentul (ex. că abonamentul este activ și când expiră).",
     "contact": "6. Contact",
     "contactContent": "Pentru întrebări legate de confidențialitate sau pentru a-ți exercita drepturile (acces, ștergere, etc.), contactează-ne la support@event-newsletter.com."
+  },
+  "subscribe": {
+    "title": "Abonare",
+    "heading": "Abonează-te pentru newsletterul săptămânal. Poți și să îți ajustezi preferințele oricând.",
+    "subheading": "Mai puțin decât o cafea pe lună. Poți plăti lunar sau în avans cu discount.",
+    "backToNewsletters": "← Înapoi la Newslettere",
+    "choosePlan": "Alege planul",
+    "monthly": "pe lună",
+    "6mo": "la 6 luni",
+    "yearly": "pe an",
+    "monthlyTag": "Flexibil",
+    "save6mo": "Economisești ~14%",
+    "saveYear": "Cea mai bună valoare",
+    "cta": "Abonează-te",
+    "securePayment": "Plată securizată prin Paddle."
   }
 }

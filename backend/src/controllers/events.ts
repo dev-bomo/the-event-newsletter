@@ -286,6 +286,9 @@ export async function discoverEventsForUser(userId: string): Promise<{
   const finalEvents =
     top20FromHates.length >= 12 ? top20FromHates : eventsAfterCategoryLimit.slice(0, 12);
 
+  // Sort by date (closest to today first)
+  finalEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   const removedByLimit = eventsAfterCategoryLimit.length - finalEvents.length;
   if (removedByLimit > 0) {
     console.log(
@@ -294,15 +297,7 @@ export async function discoverEventsForUser(userId: string): Promise<{
   }
 
   console.log(
-    `Selected ${finalEvents.length} events (sorted by score, range: ${
-      finalEvents.length >= 1
-        ? Math.min(...finalEvents.map((e) => e.score))
-        : "N/A"
-    }-${
-      finalEvents.length >= 1
-        ? Math.max(...finalEvents.map((e) => e.score))
-        : "N/A"
-    })`
+    `Selected ${finalEvents.length} events (sorted by date, closest first)`
   );
 
   if (finalEvents.length === 0) {

@@ -45,6 +45,7 @@ export async function register(data: {
       name: true,
       city: true,
       verified: true,
+      subscriptionExpiresAt: true,
       createdAt: true,
     },
   });
@@ -88,6 +89,7 @@ export async function login(data: { email: string; password: string }) {
       name: user.name,
       city: user.city,
       verified: user.verified,
+      subscriptionExpiresAt: user.subscriptionExpiresAt?.toISOString() ?? null,
       createdAt: user.createdAt,
     },
     token,

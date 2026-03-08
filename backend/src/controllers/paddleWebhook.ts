@@ -1,0 +1,93 @@
+import { Request, Response } from "express";
+import crypto from "crypto";
+import { prisma } from "../lib/prisma.js";
+
+const PADDLE_WEBHOOK_SECRET = process.env.PADDLE_WEBHOOK_SECRET || "";
+
+function verifyPaddleSignature(rawBody: Buffer, signatureHeader: string): boolean {
+  if (!PADDLE_WEBHOOK_SECRET) return false;
+  const parts = signatureHeader.split(";").reduce((acc, part) => {
+    const [k, v] = part.split("=");
+    if (k && v) acc[k.trim()] = v.trim();
+    return acc;
+  }, {} as Record<string, string>);
+  const ts = parts.ts;
+  const h1 = parts.h1;
+  if (!ts || !h1) return false;
+  const signedPayload = `${ts}:${rawBody.toString("utf8")}`;
+  const expected = crypto.createHmac("sha256", PADDLE_WEBHOOK_SECRET).update(signedPayload).digest("hex");
+  return crypto.timingSafeEqual(Buffer.from(h1, "hex"), Buffer.from(expected, "hex"));
+}
+
+export async function handlePaddleWebhook(req: Request, res: Response): Promise<void> {
+  const rawBody = req.body;
+  if (!Buffer.isBuffer(rawBody)) {
+    res.status(400).json({ error: "Invalid body" });
+    return;
+  }
+
+  const signature = req.headers["paddle-signature"] as string;
+  if (!signature || !verifyPaddleSignature(rawBody, signature)) {
+    res.status(401).json({ error: "Invalid signature" });
+    return;
+  }
+
+  let payload: {
+    event_type?: string;
+    data?: {
+      id?: string;
+      custom_data?: { user_id?: string };
+      current_billing_period?: { ends_at?: string };
+      next_billed_at?: string;
+      status?: string;
+    };
+  };
+  try {
+    payload = JSON.parse(rawBody.toString("utf8"));
+  } catch {
+    res.status(400).json({ error: "Invalid JSON" });
+    return;
+  }
+
+  const eventType = payload.event_type;
+  const data = payload.data;
+  if (!eventType || !data) {
+    res.status(200).json({ received: true });
+    return;
+  }
+
+  const userId = data.custom_data?.user_id;
+  if (!userId) {
+    console.warn("Paddle webhook: no user_id in custom_data", eventType, data.id);
+    res.status(200).json({ received: true });
+    return;
+  }
+
+  if (eventType === "subscription.created" || eventType === "subscription.updated" || eventType === "subscription.activated" || eventType === "subscription.resumed") {
+    const endsAt = data.current_billing_period?.ends_at || data.next_billed_at;
+    if (endsAt) {
+      try {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { subscriptionExpiresAt: new Date(endsAt) },
+        });
+        console.log(`Paddle: set subscriptionExpiresAt for user ${userId} until ${endsAt}`);
+      } catch (e) {
+        console.error("Paddle webhook: failed to update user", userId, e);
+      }
+    }
+  } else if (eventType === "subscription.canceled" || eventType === "subscription.paused") {
+    const endsAt = data.current_billing_period?.ends_at ?? null;
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { subscriptionExpiresAt: endsAt ? new Date(endsAt) : null },
+      });
+      console.log(`Paddle: cleared or set subscriptionExpiresAt for user ${userId}`);
+    } catch (e) {
+      console.error("Paddle webhook: failed to update user", userId, e);
+    }
+  }
+
+  res.status(200).json({ received: true });
+}

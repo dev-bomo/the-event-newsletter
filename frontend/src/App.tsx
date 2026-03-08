@@ -11,6 +11,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import MyHates from "./pages/MyHates";
 import LandingPage from "./pages/LandingPage";
+import Subscribe from "./pages/Subscribe";
 import "./i18n/config";
 
 function App() {
@@ -56,6 +57,10 @@ function App() {
         <Route
           path="/hates"
           element={token ? <MyHates /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/subscribe"
+          element={token ? <Subscribe /> : <Navigate to="/login" />}
         />
         <Route
           path="/"
