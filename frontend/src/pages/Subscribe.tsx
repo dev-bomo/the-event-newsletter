@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useEffect } from "react";
 import Layout from "../components/Layout";
 import Windows98Window from "../components/Windows98Window";
 import logo1line from "../assets/logo1line.png";
