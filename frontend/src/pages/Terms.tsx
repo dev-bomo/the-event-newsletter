@@ -19,6 +19,8 @@ export default function Terms() {
               <p>{t("terms.acceptanceContent")}</p>
               <h3 className="font-bold text-sm">{t("terms.subscription")}</h3>
               <p>{t("terms.subscriptionContent")}</p>
+              <h3 className="font-bold text-sm">{t("terms.refunds")}</h3>
+              <p>{t("terms.refundsContent")}</p>
               <h3 className="font-bold text-sm">{t("terms.contact")}</h3>
               <p>{t("terms.contactContent")}</p>
             </div>

@@ -310,8 +310,10 @@
     "acceptance": "2. Acceptare",
     "acceptanceContent": "Creând un cont și folosind serviciul nostru, acceptați acești termeni. Putem actualiza acești termeni din când în când; utilizarea continuă după modificări constituie acceptare.",
     "subscription": "3. Abonament și plată",
-    "subscriptionContent": "Accesul la serviciul complet (newsletter săptămânal și posibilitatea de a genera mai multe newslettere) necesită un abonament plătit. Poți abona lunar, la 6 luni sau anual. Plata este procesată în siguranță prin Paddle. Abonamentul se reînnoiește automat la sfârșitul fiecărei perioade de facturare, cu excepția cazului în care îl anulezi. Poți anula sau gestiona abonamentul prin contul Paddle sau contactându-ne. Rambursările se fac conform politicii Paddle și a politicii noastre de rambursare.",
-    "contact": "4. Contact",
+    "subscriptionContent": "Accesul la serviciul complet (newsletter săptămânal și posibilitatea de a genera mai multe newslettere) necesită un abonament plătit. Poți abona lunar, la 6 luni sau anual. Plata este procesată în siguranță prin Paddle. Abonamentul se reînnoiește automat la sfârșitul fiecărei perioade de facturare, cu excepția cazului în care îl anulezi. Poți anula sau gestiona abonamentul prin contul Paddle sau contactându-ne. Rambursările se fac conform politicii noastre de rambursare de mai jos.",
+    "refunds": "4. Politica de rambursare",
+    "refundsContent": "Abonamente lunare: Nu acordăm rambursări pentru planurile lunare. Dacă anulezi, abonamentul rămâne activ până la sfârșitul lunii plătite, apoi încetează. Abonamente la 6 luni și anuale: Pentru a solicita o rambursare, contactează-ne la support@event-newsletter.com. Putem, după propria noastră apreciere, acorda o rambursare totală sau parțială în funcție de circumstanțe.",
+    "contact": "5. Contact",
     "contactContent": "Pentru întrebări despre acești termeni sau despre serviciu, vă rugăm să contactați Good Software."
   },
   "privacy": {

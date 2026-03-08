@@ -310,8 +310,10 @@
     "acceptance": "2. Acceptance",
     "acceptanceContent": "By creating an account and using our service, you accept these terms. We may update these terms from time to time; continued use after changes constitutes acceptance.",
     "subscription": "3. Subscription and payment",
-    "subscriptionContent": "Access to the full service (weekly newsletter and the ability to generate more newsletters) requires a paid subscription. You can subscribe monthly, every 6 months, or yearly. Payment is processed securely by Paddle. Your subscription renews automatically at the end of each billing period unless you cancel. You can cancel or manage your subscription through your Paddle account or by contacting us. Refunds are handled according to Paddle's and our refund policy.",
-    "contact": "4. Contact",
+    "subscriptionContent": "Access to the full service (weekly newsletter and the ability to generate more newsletters) requires a paid subscription. You can subscribe monthly, every 6 months, or yearly. Payment is processed securely by Paddle. Your subscription renews automatically at the end of each billing period unless you cancel. You can cancel or manage your subscription through your Paddle account or by contacting us. Refunds are handled according to our refund policy below.",
+    "refunds": "4. Refund policy",
+    "refundsContent": "Monthly subscriptions: We do not offer refunds for monthly plans. If you cancel, your subscription remains active until the end of the paid month and then ends. Six‑month and yearly subscriptions: If you wish to request a refund, contact us at support@event-newsletter.com. We may, at our sole discretion, offer a full or partial refund depending on the circumstances.",
+    "contact": "5. Contact",
     "contactContent": "For questions about these terms or the service, please contact Good Software."
   },
   "privacy": {
