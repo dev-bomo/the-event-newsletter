@@ -13,7 +13,7 @@ declare global {
           items: Array<{ priceId: string; quantity: number }>;
           customer?: { email: string };
           customData?: Record<string, string>;
-          settings?: { displayMode?: string; theme?: string }
+          settings?: { displayMode?: string; theme?: string; successUrl?: string }
         }) => void;
       };
     };
@@ -85,10 +85,11 @@ export async function openPaddleCheckout(
     console.error("Paddle.Checkout not available");
     return;
   }
+  const successUrl = `${window.location.origin}/newsletters`;
   Paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
     customer: customerEmail ? { email: customerEmail } : undefined,
     customData: userId ? { user_id: userId } : undefined,
-    settings: { displayMode: "overlay", theme: "light" },
+    settings: { displayMode: "overlay", theme: "light", successUrl },
   });
 }
