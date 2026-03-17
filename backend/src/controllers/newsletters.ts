@@ -21,10 +21,10 @@ export async function getUserNewsletters(userId: string) {
 
 const NEWSLETTER_LIMIT_PER_USER = parseInt(process.env.NEWSLETTER_LIMIT_PER_USER || "5", 10);
 
-/** Free users get one newsletter; after that they hit the paywall. */
-const FREE_NEWSLETTERS_ALLOWED = 1;
+/** Free users get two newsletters; after that they hit the paywall. */
+const FREE_NEWSLETTERS_ALLOWED = 2;
 
-/** Error message when a free user tries to generate a second newsletter (paywall). */
+/** Error message when a free user tries to generate a third newsletter (paywall). */
 export const PAYWALL_MESSAGE =
   "Subscribe to generate more newsletters and get the weekly digest. Upgrade to a paid plan when available.";
 

@@ -107,7 +107,7 @@
     "limits": {
       "title": "Usage Limits (to manage AI costs)",
       "preferences": "Preferences: You can edit 5 times total, then once per week. This keeps profile AI costs under control.",
-      "newsletters": "Newsletters: Free accounts get one newsletter; subscribe to generate up to 5 and get the weekly digest. Need more? Contact support at support@event-newsletter.com.",
+      "newsletters": "Newsletters: Free accounts get two newsletters; subscribe to generate up to 5 and get the weekly digest. Need more? Contact support at support@event-newsletter.com.",
       "autoNewsletter": "Auto-newsletter (paid): Every Thursday at 4 PM we generate and email your personalized newsletter automatically."
     }
   },
@@ -200,9 +200,9 @@
     "goodMatch": "Good match",
     "fairMatch": "Fair match",
     "relevance": "Relevance",
-    "autoNewsletterInfo": "Your first newsletter is free. Subscribe to generate more and get the weekly digest (every Thursday at 4 PM). Paid accounts can generate up to 5 newsletters and receive the automatic weekly email.",
+    "autoNewsletterInfo": "Your first two newsletters are free. Subscribe to generate more and get the weekly digest (every Thursday at 4 PM). Paid accounts can generate up to 5 newsletters and receive the automatic weekly email.",
     "limitReached": "You've reached the limit of 5 newsletters. Contact support at support@event-newsletter.com to request more.",
-    "paywallMessage": "You've used your free newsletter. Subscribe to generate more and get the weekly digest.",
+    "paywallMessage": "You've used your 2 free newsletters. Subscribe to generate more and get the weekly digest.",
     "paywallCta": "Subscribe",
     "rawAiResponse": "Raw AI Response",
     "response": "Response",
@@ -267,6 +267,9 @@
   },
   "loading": {
     "newsletter": "Generating Newsletter",
+    "copyTitle": "Generating...",
+    "fileName": "newsletter",
+    "fromTo": "From 'Preferences' to 'Inbox'",
     "planning": "Planning",
     "planningDesc": "Generating the list of sources to look through...",
     "searching": "Searching",

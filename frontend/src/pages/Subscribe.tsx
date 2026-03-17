@@ -25,7 +25,7 @@ export default function Subscribe() {
     <Layout>
       <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <Windows98Window title={t("subscribe.title")} className="!border">
+          <Windows98Window title={t("subscribe.title")} className="!border" fitContent>
             <div className="bg-white border border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-4 md:p-6 space-y-6">
               {/* Header */}
               <div className="text-center space-y-3">

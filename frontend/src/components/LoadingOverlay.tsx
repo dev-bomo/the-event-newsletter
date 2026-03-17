@@ -1,22 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import Windows98Window from "./Windows98Window";
 
 interface LoadingStep {
   id: string;
   labelKey: string;
-  descriptionKey: string;
 }
 
 const STEPS: LoadingStep[] = [
-  { id: "planning", labelKey: "loading.planning", descriptionKey: "loading.planningDesc" },
-  { id: "searching", labelKey: "loading.searching", descriptionKey: "loading.searchingDesc" },
-  { id: "merging", labelKey: "loading.merging", descriptionKey: "loading.mergingDesc" },
-  { id: "finalizing", labelKey: "loading.finalizing", descriptionKey: "loading.finalizingDesc" },
+  { id: "planning", labelKey: "loading.planning" },
+  { id: "searching", labelKey: "loading.searching" },
+  { id: "merging", labelKey: "loading.merging" },
+  { id: "finalizing", labelKey: "loading.finalizing" },
 ];
 
-/** Box counts per step: 2 for step 1, 2 for step 2, 3 for step 3, 5 for step 4 (total 12) */
-const BOX_COUNTS = [2, 2, 3, 5];
-const TOTAL_BOXES = BOX_COUNTS.reduce((a, b) => a + b, 0);
+const SEGMENTS = 16;
+const WINDOW_WIDTH = 320;
+const WINDOW_HEIGHT = 180;
+
+function getCenteredPosition() {
+  return {
+    x: Math.max(0, (window.innerWidth - WINDOW_WIDTH) / 2),
+    y: Math.max(0, (window.innerHeight - WINDOW_HEIGHT) / 2),
+  };
+}
 
 interface LoadingOverlayProps {
   isVisible: boolean;
@@ -26,6 +33,18 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
   const { t } = useTranslation();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
+  const [position, setPosition] = useState(getCenteredPosition);
+
+  const updatePosition = useCallback(() => {
+    setPosition(getCenteredPosition());
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, [isVisible, updatePosition]);
 
   useEffect(() => {
     if (!isVisible) {
@@ -34,22 +53,15 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
       return;
     }
 
-    // Cycle through first 3 steps with doubled durations
-    // Planning: 6s, Searching: 16s, Merging: 8s
-    // Finalizing stays until work is done (isVisible becomes false)
     const stepDurations = [6000, 16000, 8000];
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const advanceStep = (stepIndex: number) => {
-      // Fade out
       setIsFading(true);
       setTimeout(() => {
         setCurrentStepIndex(stepIndex);
         setIsFading(false);
-      }, 300); // Fade duration
-      
-      // If we've reached Finalizing (index 3), stop advancing
-      // It will stay on Finalizing until isVisible becomes false
+      }, 300);
       if (stepIndex < STEPS.length - 1) {
         timeoutId = setTimeout(
           () => advanceStep(stepIndex + 1),
@@ -58,9 +70,7 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
       }
     };
 
-    // Start with first step
     timeoutId = setTimeout(() => advanceStep(1), stepDurations[0] || 6000);
-
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
@@ -68,106 +78,43 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
 
   if (!isVisible) return null;
 
+  const progressPercent = ((currentStepIndex + 1) / STEPS.length) * 100;
+  const filledSegments = Math.round((progressPercent / 100) * SEGMENTS);
   const currentStep = STEPS[currentStepIndex];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#c0c0c0] border-2 border-t-[#ffffff] border-l-[#ffffff] border-r-[#808080] border-b-[#808080] p-1 max-w-md w-full mx-4">
-        {/* Windows 98 Title Bar */}
-        <div className="bg-[#000080] text-white px-2 py-1 flex items-center justify-between mb-1">
-          <span className="text-xs font-bold">{t("loading.newsletter")}</span>
-        </div>
-
-        {/* Windows 98 Style Spinner/Progress */}
-        <div className="flex justify-center mb-1">
-          <div className="relative w-32 h-8 bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] p-1">
-            <div className="h-full bg-[#000080] relative overflow-hidden">
-              {/* Animated progress bar effect */}
-              <div 
-                className="absolute inset-0 opacity-30"
-                style={{ 
-                  animation: 'shimmer 1.5s ease-in-out infinite',
-                  background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
-                  backgroundSize: '200% 100%'
-                }}
-              ></div>
-              {/* Progress indicator blocks */}
-              <div className="h-full flex items-center justify-center">
-                <div className="flex gap-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-1 h-4 bg-white ${
-                        Math.floor((currentStepIndex / STEPS.length) * 5) > i ? 'opacity-100' : 'opacity-50'
-                      }`}
-                      style={{
-                        animation: `pulse 1s ease-in-out infinite ${i * 0.1}s`
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Step indicator with fade animation */}
-        <div className="mb-1">
-          <div className="flex justify-between items-center mb-2">
-            <h3
-              className={`text-xs font-bold text-black transition-opacity duration-300 ${
-                isFading ? "opacity-0" : "opacity-100"
-              }`}
-            >
-              {t(currentStep.labelKey)}
-            </h3>
-            <span className="text-xs font-bold text-black">
-              {currentStepIndex + 1} / {STEPS.length}
-            </span>
-          </div>
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]">
+      <Windows98Window
+        title={t("loading.newsletter")}
+        controlledPosition={position}
+        controlledSize={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT }}
+        onClose={() => {}}
+        controlledZIndex={101}
+      >
+        <div className="p-4 flex flex-col items-center gap-4">
           <p
-            className={`text-xs text-black transition-opacity duration-300 ${
+            className={`text-sm text-black font-normal transition-opacity duration-300 ${
               isFading ? "opacity-0" : "opacity-100"
             }`}
           >
-            {t(currentStep.descriptionKey)}
+            {t(currentStep.labelKey)}...
           </p>
-        </div>
 
-        {/* Progress indicator blocks (Windows 98 style): 2 + 2 + 3 + 5 boxes */}
-        <div className="flex justify-center gap-1">
-          {Array.from({ length: TOTAL_BOXES }, (_, i) => {
-            const filledEnd = BOX_COUNTS.slice(0, currentStepIndex + 1).reduce((a, b) => a + b, 0);
-            const completedEnd = BOX_COUNTS.slice(0, currentStepIndex).reduce((a, b) => a + b, 0);
-            const isCompleted = i < completedEnd;
-            const isCurrent = i >= completedEnd && i < filledEnd;
-            return (
+          {/* Recessed progress bar - same style as app windows */}
+          <div
+            className="w-full h-5 flex gap-px p-0.5 border-2 border-t-[#808080] border-l-[#808080] border-r-[#fff] border-b-[#fff] bg-[#c0c0c0]"
+            style={{ boxShadow: "inset 2px 2px 2px rgba(0,0,0,0.15)" }}
+          >
+            {Array.from({ length: SEGMENTS }, (_, i) => (
               <div
                 key={i}
-                className={`h-4 w-4 transition-all duration-300 ${
-                  isCurrent
-                    ? "bg-[#000080] border-2 border-[#000080]"
-                    : isCompleted
-                    ? "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff]"
-                    : "bg-[#c0c0c0] border-2 border-t-[#808080] border-l-[#808080] border-r-[#ffffff] border-b-[#ffffff] opacity-50"
-                }`}
+                className="flex-1 min-w-0 h-full"
+                style={{ backgroundColor: i < filledSegments ? "#000080" : "#c0c0c0" }}
               />
-            );
-          })}
+            ))}
+          </div>
         </div>
-
-        <style>{`
-          @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-          }
-          @keyframes pulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-          }
-        `}</style>
-      </div>
+      </Windows98Window>
     </div>
   );
 }
-

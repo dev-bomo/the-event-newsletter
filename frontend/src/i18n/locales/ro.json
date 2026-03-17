@@ -107,7 +107,7 @@
     "limits": {
       "title": "Limite de utilizare (pentru gestionarea costurilor AI)",
       "preferences": "Preferințe: Poți edita de 5 ori în total, apoi o dată pe săptămână. Asta ține sub control costurile AI pentru profil.",
-      "newsletters": "Newslettere: Conturile gratuite primesc un newsletter; abonează-te pentru până la 5 și digest-ul săptămânal. Ai nevoie de mai multe? Contactează suportul la support@event-newsletter.com.",
+      "newsletters": "Newslettere: Conturile gratuite primesc două newslettere; abonează-te pentru până la 5 și digest-ul săptămânal. Ai nevoie de mai multe? Contactează suportul la support@event-newsletter.com.",
       "autoNewsletter": "Auto-newsletter (plătit): În fiecare joi la 16:00 generăm și trimitem prin email newsletterul tău personalizat automat."
     }
   },
@@ -200,9 +200,9 @@
     "goodMatch": "Potrivire bună",
     "fairMatch": "Potrivire acceptabilă",
     "relevance": "Relevanță",
-    "autoNewsletterInfo": "Primul newsletter este gratuit. Abonează-te pentru a genera mai multe și pentru digest-ul săptămânal (în fiecare joi la 16:00). Conturile plătite pot genera până la 5 newslettere și primesc emailul săptămânal automat.",
+    "autoNewsletterInfo": "Primele două newslettere sunt gratuite. Abonează-te pentru a genera mai multe și pentru digest-ul săptămânal (în fiecare joi la 16:00). Conturile plătite pot genera până la 5 newslettere și primesc emailul săptămânal automat.",
     "limitReached": "Ai atins limita de 5 newslettere. Contactează suportul la support@event-newsletter.com pentru a solicita mai multe.",
-    "paywallMessage": "Ai folosit newsletterul gratuit. Abonează-te pentru a genera mai multe și pentru digest-ul săptămânal.",
+    "paywallMessage": "Ai folosit cele 2 newslettere gratuite. Abonează-te pentru a genera mai multe și pentru digest-ul săptămânal.",
     "paywallCta": "Abonare",
     "rawAiResponse": "Răspuns AI Brut",
     "response": "Răspuns",
@@ -267,6 +267,9 @@
   },
   "loading": {
     "newsletter": "Se generează Newsletterul",
+    "copyTitle": "Se generează...",
+    "fileName": "newsletter",
+    "fromTo": "De la 'Preferințe' la 'Inbox'",
     "planning": "Planificare",
     "planningDesc": "Se generează lista surselor de verificat...",
     "searching": "Căutare",

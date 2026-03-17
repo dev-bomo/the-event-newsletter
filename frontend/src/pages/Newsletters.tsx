@@ -61,9 +61,9 @@ function NewslettersInner() {
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
   const [generating, setGenerating] = useState(false);
   const subscribed = hasActiveSubscription(user);
-  const paywalled = !subscribed && newsletters.length >= 1;
+  const paywalled = !subscribed && newsletters.length >= 2;
   const limitReached = subscribed && newsletters.length >= 5;
-  const canGenerate = (subscribed && newsletters.length < 5) || (!subscribed && newsletters.length < 1);
+  const canGenerate = (subscribed && newsletters.length < 5) || (!subscribed && newsletters.length < 2);
   const [sending, setSending] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
