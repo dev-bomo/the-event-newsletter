@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import { useAuthStore, hasActiveSubscription } from "../store/authStore";
@@ -54,6 +54,8 @@ export default function Newsletters({ embed }: { embed?: boolean } = {}) {
 function NewslettersInner() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const showLoadingTest = searchParams.get("showLoading") === "1";
   const { user } = useAuthStore();
   const { openWindow, bringToFront } = useWindowContext();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
@@ -203,7 +205,7 @@ function NewslettersInner() {
 
   return (
     <>
-      <LoadingOverlay isVisible={generating} />
+      <LoadingOverlay isVisible={generating || showLoadingTest} />
       <div className="space-y-1">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-2">
               <div className="flex items-center gap-3 flex-1 min-w-0">

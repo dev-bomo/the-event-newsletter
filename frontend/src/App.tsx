@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
+import api from "./lib/api";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -12,10 +14,26 @@ import Privacy from "./pages/Privacy";
 import MyHates from "./pages/MyHates";
 import LandingPage from "./pages/LandingPage";
 import Subscribe from "./pages/Subscribe";
+import TestLoading from "./pages/TestLoading";
 import "./i18n/config";
 
 function App() {
-  const { token } = useAuthStore();
+  const { token, setUser, clearAuth } = useAuthStore();
+
+  // Refresh user from API when we have a token (e.g. after Paddle webhook updates subscription)
+  useEffect(() => {
+    if (!token) return;
+    api
+      .get("/auth/me")
+      .then((res) => {
+        if (res.data?.user) setUser(res.data.user);
+      })
+      .catch((err) => {
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          clearAuth();
+        }
+      });
+  }, [token, setUser, clearAuth]);
 
   return (
     <BrowserRouter>
@@ -54,6 +72,7 @@ function App() {
         />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/test-loading" element={<TestLoading />} />
         <Route
           path="/hates"
           element={token ? <MyHates /> : <Navigate to="/login" />}

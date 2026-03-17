@@ -96,6 +96,29 @@ export async function login(data: { email: string; password: string }) {
   };
 }
 
+export async function getMe(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      city: true,
+      verified: true,
+      subscriptionExpiresAt: true,
+    },
+  });
+  if (!user) return null;
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    city: user.city,
+    verified: user.verified,
+    subscriptionExpiresAt: user.subscriptionExpiresAt?.toISOString() ?? null,
+  };
+}
+
 export async function requestPasswordReset(email: string) {
   // Find user
   const user = await prisma.user.findUnique({

@@ -3,9 +3,12 @@ import { z } from "zod";
 import {
   register,
   login,
+  getMe,
   requestPasswordReset,
   resetPassword,
 } from "../controllers/auth.js";
+import { authenticateToken } from "../middleware/auth.js";
+import type { AuthRequest } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -98,6 +101,18 @@ router.post("/reset-password", async (req, res) => {
     if (error instanceof Error) {
       return res.status(400).json({ error: error.message });
     }
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    const user = await getMe((req as AuthRequest).userId!);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({ user });
+  } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
 });
