@@ -85,7 +85,8 @@ export async function openPaddleCheckout(
     console.error("Paddle.Checkout not available");
     return;
   }
-  const successUrl = `${window.location.origin}/newsletters`;
+  // Add a query param so we can show an explicit success dialog on return
+  const successUrl = `${window.location.origin}/newsletters?subscriptionSuccess=1`;
   Paddle.Checkout.open({
     items: [{ priceId, quantity: 1 }],
     customer: customerEmail ? { email: customerEmail } : undefined,

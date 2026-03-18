@@ -53,7 +53,8 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
       return;
     }
 
-    const stepDurations = [6000, 16000, 8000];
+    // Increase timings by 50% (perceived slowness vs actual runtime)
+    const stepDurations = [9000, 18000, 12000];
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const advanceStep = (stepIndex: number) => {
@@ -109,7 +110,9 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
               <div
                 key={i}
                 className="flex-1 min-w-0 h-full"
-                style={{ backgroundColor: i < filledSegments ? "#000080" : "#c0c0c0" }}
+                style={{
+                  backgroundColor: i < filledSegments ? "#000080" : "#c0c0c0",
+                }}
               />
             ))}
           </div>

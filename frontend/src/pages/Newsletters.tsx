@@ -56,6 +56,7 @@ function NewslettersInner() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const showLoadingTest = searchParams.get("showLoading") === "1";
+  const subscriptionSuccess = searchParams.get("subscriptionSuccess") === "1";
   const { user } = useAuthStore();
   const { openWindow, bringToFront } = useWindowContext();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
@@ -73,6 +74,7 @@ function NewslettersInner() {
   const [hates, setHates] = useState<Array<{ type: string; value: string }>>([]);
   const [expandedDislikedIds, setExpandedDislikedIds] = useState<Set<string>>(new Set());
   const [showDislikeInfoModal, setShowDislikeInfoModal] = useState(false);
+  const [showSubscriptionSuccess, setShowSubscriptionSuccess] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -83,6 +85,14 @@ function NewslettersInner() {
     loadNewsletters();
     loadHates();
   }, [navigate]);
+
+  // Show a one-time success dialog after returning from Paddle checkout.
+  useEffect(() => {
+    if (!subscriptionSuccess) return;
+    if (!subscribed) return; // only show when subscription is actually active
+    setShowSubscriptionSuccess(true);
+    navigate("/newsletters", { replace: true });
+  }, [subscriptionSuccess, subscribed, navigate]);
 
   useEffect(() => {
     if (user === undefined) return;
@@ -206,6 +216,31 @@ function NewslettersInner() {
   return (
     <>
       <LoadingOverlay isVisible={generating || showLoadingTest} />
+      {showSubscriptionSuccess && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[110]">
+          <Windows98Window
+            title={t("newsletters.subscriptionSuccessTitle")}
+            fitContent
+            onClose={() => setShowSubscriptionSuccess(false)}
+            className="max-w-md w-[min(420px,calc(100vw-16px))]"
+          >
+            <div className="p-4 space-y-4">
+              <p className="text-xs text-black leading-tight">
+                {t("newsletters.subscriptionSuccessBody")}
+              </p>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="win98-button"
+                  onClick={() => setShowSubscriptionSuccess(false)}
+                >
+                  {t("common.ok")}
+                </button>
+              </div>
+            </div>
+          </Windows98Window>
+        </div>
+      )}
       <div className="space-y-1">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 p-2">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -215,12 +250,12 @@ function NewslettersInner() {
                   width={80}
                   height={80}
                   className="flex-shrink-0"
-                  title={t("newsletters.autoNewsletterInfo")}
+                  title={t(subscribed ? "newsletters.autoNewsletterInfoSubscribed" : "newsletters.autoNewsletterInfo")}
                   aria-hidden
                 />
                 <div className="flex flex-col gap-1 flex-1 min-w-0 max-w-md sm:max-w-none">
                   <p className="text-xs text-black leading-tight">
-                    {t("newsletters.autoNewsletterInfo")}
+                    {t(subscribed ? "newsletters.autoNewsletterInfoSubscribed" : "newsletters.autoNewsletterInfo")}
                   </p>
                   {paywalled && (
                     <p className="text-xs text-[#800000]">
