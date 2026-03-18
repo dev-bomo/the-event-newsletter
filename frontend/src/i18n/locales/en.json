@@ -281,7 +281,8 @@
     "merging": "Merging",
     "mergingDesc": "Scoring and deduplicating events...",
     "finalizing": "Finalizing",
-    "finalizingDesc": "Preparing your personalized newsletter..."
+    "finalizingDesc": "Preparing your personalized newsletter...",
+    "approxTime": "Takes approx. 1 min to generate."
   },
   "landing": {
     "heroTitle": "The Event Newsletter",

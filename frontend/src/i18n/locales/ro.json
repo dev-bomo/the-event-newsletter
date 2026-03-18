@@ -281,7 +281,8 @@
     "merging": "Combinare",
     "mergingDesc": "Se calculează scoruri și se elimină duplicatele...",
     "finalizing": "Finalizare",
-    "finalizingDesc": "Se pregătește newsletterul tău personalizat..."
+    "finalizingDesc": "Se pregătește newsletterul tău personalizat...",
+    "approxTime": "Durează aproximativ 1 minut să se genereze."
   },
   "landing": {
     "heroTitle": "Newsletterul de Evenimente",

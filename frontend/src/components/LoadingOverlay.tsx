@@ -116,6 +116,9 @@ export default function LoadingOverlay({ isVisible }: LoadingOverlayProps) {
               />
             ))}
           </div>
+          <p className="text-xs text-[#404040]">
+            {t("loading.approxTime")}
+          </p>
         </div>
       </Windows98Window>
     </div>
