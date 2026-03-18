@@ -218,7 +218,7 @@ User profile:
 ${userProfile}${eventSourcesText}
 
 City: ${city}
-Date window: Next 30 days
+Date window: Next 60 days
 
 Your task is to create a plan for finding events. Break down the search into 5-6 specific tasks or sites to query. Each task should be a specific search query or website/source to check.
 
@@ -280,12 +280,12 @@ async function searchEventsForTask(
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  const thirtyDaysLater = new Date(today);
-  thirtyDaysLater.setDate(today.getDate() + 30);
+  const sixtyDaysLater = new Date(today);
+  sixtyDaysLater.setDate(today.getDate() + 60);
   const dateWindow = `Events must start from ${
     tomorrow.toISOString().split("T")[0]
   } (tomorrow) through ${
-    thirtyDaysLater.toISOString().split("T")[0]
+    sixtyDaysLater.toISOString().split("T")[0]
   }. Do NOT include events happening today or in the past.`;
 
   const prompt = `From this site/search: "${task}"
@@ -300,7 +300,7 @@ DEDUPLICATE before returning: If titles are very similar remove the duplicates. 
 For each event, return:
 - title
 - description (optional)
-- date (ISO format: YYYY-MM-DD) - MUST be within the next 30 days
+- date (ISO format: YYYY-MM-DD) - MUST be within the next 60 days
 - time (optional, HH:MM format)
 - location (full address - MUST include the city name, e.g. "Venue Name, ${city}" or "Street, ${city}, Country")
 - category (optional)
@@ -359,11 +359,11 @@ async function mergeAndScoreEvents(
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  const thirtyDaysLater = new Date(today);
-  thirtyDaysLater.setDate(today.getDate() + 30);
+  const sixtyDaysLater = new Date(today);
+  sixtyDaysLater.setDate(today.getDate() + 60);
   const dateWindow = `Events must start from ${
     tomorrow.toISOString().split("T")[0]
-  } (tomorrow) through ${thirtyDaysLater.toISOString().split("T")[0]}.`;
+  } (tomorrow) through ${sixtyDaysLater.toISOString().split("T")[0]}.`;
 
   const prompt = `You have been given ${allRawEvents.length} raw event candidates. Your task is to:
 
@@ -464,12 +464,12 @@ async function repairOrExpandEvents(
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  const thirtyDaysLater = new Date(today);
-  thirtyDaysLater.setDate(today.getDate() + 30);
+  const sixtyDaysLater = new Date(today);
+  sixtyDaysLater.setDate(today.getDate() + 60);
   const dateWindow = `Events must start from ${
     tomorrow.toISOString().split("T")[0]
   } (tomorrow) through ${
-    thirtyDaysLater.toISOString().split("T")[0]
+    sixtyDaysLater.toISOString().split("T")[0]
   }. Do NOT include events happening today or in the past.`;
 
   const prompt = `${instruction}
@@ -669,10 +669,10 @@ export async function discoverEvents(
     today.setHours(0, 0, 0, 0);
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    const thirtyDaysLater = new Date(today);
-    thirtyDaysLater.setDate(today.getDate() + 30);
+    const sixtyDaysLater = new Date(today);
+    sixtyDaysLater.setDate(today.getDate() + 60);
 
-    // Filter events to tomorrow through 30 days (exclude same-day)
+    // Filter events to tomorrow through 60 days (exclude same-day)
     const eventsInDateRange = events.filter((e) => {
       if (!e.date) {
         console.log(`[date filter] excluded "${e.title}": no date`);
@@ -686,9 +686,9 @@ export async function discoverEvents(
         );
         return false;
       }
-      if (eventDate > thirtyDaysLater) {
+      if (eventDate > sixtyDaysLater) {
         console.log(
-          `[date filter] excluded "${e.title}": date ${e.date} is after 30 days`
+          `[date filter] excluded "${e.title}": date ${e.date} is after 60 days`
         );
         return false;
       }
@@ -696,7 +696,7 @@ export async function discoverEvents(
     });
 
     console.log(
-      `Filtered ${events.length} events to ${eventsInDateRange.length} events (tomorrow through 30 days)`
+      `Filtered ${events.length} events to ${eventsInDateRange.length} events (tomorrow through 60 days)`
     );
 
     // Filter events by city - check location, venue, and description for city name.

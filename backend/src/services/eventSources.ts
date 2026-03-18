@@ -49,7 +49,7 @@ Please return a JSON object with an "events" array. Each event should have:
 - artist (optional): main artist, band, or performer
 - venue (optional): venue name
 
-Only include events starting tomorrow or later (within the next 30 days). Do NOT include events happening today or in the past.
+Only include events starting tomorrow or later (within the next 60 days). Do NOT include events happening today or in the past.
 If no events are found or the page doesn't contain events, return an empty array.
 
 CRITICAL - NO HALLUCINATION: Only include events actually listed on the source page. Never invent or fabricate events. Return empty array if none found.

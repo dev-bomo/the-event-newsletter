@@ -110,7 +110,7 @@ export async function generateNewsletter(
   const newsletter = await prisma.newsletter.create({
     data: {
       userId,
-      subject: `Your Weekly Local Events (Next 30 Days) - ${new Date().toLocaleDateString()}`,
+      subject: `Your Weekly Local Events (Next 60 Days) - ${new Date().toLocaleDateString()}`,
       htmlContent,
       events: {
         create: uniqueEvents,
@@ -311,7 +311,7 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1 style="color: #007bff;">Your Weekly Local Events</h1>
         <p>Hi ${userName},</p>
-        <p>Here are the local events we found for you in the next 30 days:</p>
+        <p>Here are the local events we found for you in the next 60 days:</p>
         ${eventsHTML}
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
         <p style="color: #666; font-size: 12px;">
