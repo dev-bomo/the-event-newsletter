@@ -57,6 +57,7 @@ function NewslettersInner() {
   const [searchParams] = useSearchParams();
   const showLoadingTest = searchParams.get("showLoading") === "1";
   const subscriptionSuccess = searchParams.get("subscriptionSuccess") === "1";
+  const showSubscriptionSuccessPreview = searchParams.get("showSubscriptionSuccess") === "1";
   const { user } = useAuthStore();
   const { openWindow, bringToFront } = useWindowContext();
   const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
@@ -88,11 +89,12 @@ function NewslettersInner() {
 
   // Show a one-time success dialog after returning from Paddle checkout.
   useEffect(() => {
-    if (!subscriptionSuccess) return;
-    if (!subscribed) return; // only show when subscription is actually active
+    if (!subscriptionSuccess && !showSubscriptionSuccessPreview) return;
+    // For the real Paddle flow: only show when subscription is actually active.
+    if (subscriptionSuccess && !subscribed) return;
     setShowSubscriptionSuccess(true);
     navigate("/newsletters", { replace: true });
-  }, [subscriptionSuccess, subscribed, navigate]);
+  }, [subscriptionSuccess, showSubscriptionSuccessPreview, subscribed, navigate]);
 
   useEffect(() => {
     if (user === undefined) return;
@@ -225,9 +227,44 @@ function NewslettersInner() {
             className="max-w-md w-[min(420px,calc(100vw-16px))]"
           >
             <div className="p-4 space-y-4">
-              <p className="text-xs text-black leading-tight">
-                {t("newsletters.subscriptionSuccessBody")}
-              </p>
+              <div className="flex justify-center">
+                <svg
+                  width="48"
+                  height="48"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                  className="shrink-0"
+                  aria-hidden
+                >
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    fill="#e8f5e9"
+                    stroke="#2e7d32"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M14 24 L21 31 L34 16"
+                    stroke="#2e7d32"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+                <div className="space-y-2">
+                  {t("newsletters.subscriptionSuccessBody")
+                    .split("\n\n")
+                    .map((paragraph, idx) => (
+                      <p
+                        key={idx}
+                        className="text-xs text-black leading-tight"
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
+                </div>
               <div className="flex justify-end">
                 <button
                   type="button"

@@ -80,10 +80,15 @@ router.get("/events/:id.ics", async (req, res) => {
     });
     if (!event) return res.status(404).send("Not found");
 
+    const dateStr =
+      event.date instanceof Date
+        ? event.date.toISOString().slice(0, 10)
+        : String(event.date).slice(0, 10);
+
     const ics = buildEventIcs({
       id: event.id,
       title: event.title,
-      date: event.date,
+      date: dateStr,
       time: event.time,
       location: event.location,
       description: event.description,
