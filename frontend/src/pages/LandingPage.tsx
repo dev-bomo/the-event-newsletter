@@ -62,7 +62,7 @@ export default function LandingPage() {
                 {t("login.description")}
               </p>
               <p className="text-xs text-[#404040]">{t("landing.heroSub")}</p>
-              <div className="flex justify-center gap-3 pt-1">
+              <div className="flex flex-wrap justify-center gap-3 pt-1">
                 <Link
                   to="/register"
                   className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
@@ -74,6 +74,12 @@ export default function LandingPage() {
                   className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
                 >
                   {t("auth.login")}
+                </Link>
+                <Link
+                  to="/pricing"
+                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+                >
+                  {t("landing.pricingLink")}
                 </Link>
               </div>
             </div>
@@ -498,6 +504,11 @@ export default function LandingPage() {
                 <li>{t("landing.privacy1")}</li>
                 <li>{t("landing.privacy2")}</li>
                 <li>{t("landing.privacy3")}</li>
+                <li>
+                  <Link to="/pricing" className="text-[#000080] hover:underline font-bold">
+                    {t("landing.pricingLink")}
+                  </Link>
+                </li>
               </ul>
             </div>
 

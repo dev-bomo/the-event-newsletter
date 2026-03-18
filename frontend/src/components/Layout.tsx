@@ -211,7 +211,12 @@ function LayoutInner({ children }: LayoutProps) {
                     {t("common.support")}
                   </div>
                   <div className="p-2 space-y-1 text-[10px] text-black">
-                    <p className="font-bold">{t("common.supportEmail")}</p>
+                    <a
+                      className="font-bold text-[#000080] hover:underline"
+                      href={`mailto:${t("common.supportEmail")}`}
+                    >
+                      {t("common.supportEmail")}
+                    </a>
                     <p>{t("common.supportInstructions")}</p>
                   </div>
                 </div>
@@ -363,7 +368,12 @@ function LayoutInner({ children }: LayoutProps) {
                     {t("common.support")}
                   </div>
                   <div className="p-2 space-y-1 text-[10px] text-black">
-                    <p className="font-bold">{t("common.supportEmail")}</p>
+                    <a
+                      className="font-bold text-[#000080] hover:underline"
+                      href={`mailto:${t("common.supportEmail")}`}
+                    >
+                      {t("common.supportEmail")}
+                    </a>
                     <p>{t("common.supportInstructions")}</p>
                   </div>
                 </div>

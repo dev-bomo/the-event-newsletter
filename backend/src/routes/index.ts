@@ -5,11 +5,13 @@ import { eventRoutes } from "./events.js";
 import { eventSourceRoutes } from "./eventSources.js";
 import { newsletterRoutes } from "./newsletters.js";
 import { hateRoutes } from "./hates.js";
+import { calendarRoutes } from "./calendar.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 export function setupRoutes(app: Express) {
   // Public routes
   app.use("/api/auth", authRoutes);
+  app.use("/api/calendar", calendarRoutes);
 
   // Protected routes
   app.use("/api/preferences", authenticateToken, preferenceRoutes);

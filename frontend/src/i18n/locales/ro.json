@@ -286,6 +286,7 @@
   "landing": {
     "heroTitle": "Newsletterul de Evenimente",
     "heroSub": "Rămâi conectat la evenimentele locale fără să navighezi pe rețele sociale. Un email săptămânal, curat după preferințele tale.",
+    "pricingLink": "Vezi prețurile",
     "why1Title": "Fără rețele sociale",
     "why1Desc": "Evită capcana dopaminei din feed-urile nesfârșite. Primești evenimentele direct în inbox.",
     "why2Title": "Doar un email săptămânal",
@@ -353,5 +354,14 @@
     "saveYear": "Cea mai bună valoare",
     "cta": "Abonează-te",
     "securePayment": "Plată securizată prin Paddle."
+  },
+  "pricing": {
+    "title": "Prețuri",
+    "heading": "Preț simplu. Un singur abonament.",
+    "subheading": "Poți plăti lunar sau poți plăti în avans pentru discount. Deblochezi newsletterul săptămânal și generarea manuală.",
+    "backHome": "← Înapoi acasă",
+    "createAccount": "Creează cont",
+    "goToSubscribe": "Abonare",
+    "ctaCreateAccount": "Creează cont"
   }
 }

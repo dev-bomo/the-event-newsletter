@@ -13,6 +13,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import MyHates from "./pages/MyHates";
 import LandingPage from "./pages/LandingPage";
+import Pricing from "./pages/Pricing";
 import Subscribe from "./pages/Subscribe";
 import TestLoading from "./pages/TestLoading";
 import "./i18n/config";
@@ -72,6 +73,7 @@ function App() {
         />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/test-loading" element={<TestLoading />} />
         <Route
           path="/hates"

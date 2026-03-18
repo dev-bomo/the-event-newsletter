@@ -286,6 +286,7 @@
   "landing": {
     "heroTitle": "The Event Newsletter",
     "heroSub": "Stay connected to local events without browsing social media. A weekly email, curated by your preferences.",
+    "pricingLink": "See pricing",
     "why1Title": "No social media browsing",
     "why1Desc": "Avoid the dopamine trap of endless feeds. Get events delivered to your inbox instead.",
     "why2Title": "Weekly email only",
@@ -353,5 +354,14 @@
     "saveYear": "Best value",
     "cta": "Subscribe",
     "securePayment": "Secure payment powered by Paddle."
+  },
+  "pricing": {
+    "title": "Pricing",
+    "heading": "Simple pricing. One subscription.",
+    "subheading": "Choose monthly or prepay for a discount. Unlock the weekly newsletter and manual generation.",
+    "backHome": "← Back home",
+    "createAccount": "Create account",
+    "goToSubscribe": "Subscribe",
+    "ctaCreateAccount": "Create account"
   }
 }

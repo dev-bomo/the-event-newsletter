@@ -239,6 +239,7 @@ function buildAddToCalendarUrl(event: { title: string; date: Date | string; time
 }
 
 function generateNewsletterHTML(userName: string, events: any[]): string {
+  const apiBase = (process.env.PUBLIC_API_URL || process.env.BACKEND_PUBLIC_URL || process.env.BACKEND_URL || process.env.FRONTEND_URL || "").replace(/\/$/, "");
   const eventsHTML = events
     .slice(0, 20)
     .map((event, index) => {
@@ -262,6 +263,8 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
         description: event.description,
         sourceUrl: event.sourceUrl,
       });
+      // Use an absolute URL so email clients render the link reliably.
+      const icsUrl = `${apiBase}/api/calendar/events/${event.id}.ics`;
 
       const scoreBadge =
         score !== null
@@ -292,8 +295,9 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
             : ""
         }
         <p style="margin-top: 12px;">
-          <a href="${addToCalendarUrl}" style="display: inline-block; margin-right: 10px; padding: 8px 16px; background-color: #34a853; color: white; text-decoration: none; border-radius: 5px;">Add to Calendar</a>
-          <a href="${event.sourceUrl}" style="display: inline-block; padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
+          <a href="${icsUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-right: 10px; padding: 8px 16px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px;">Add to Calendar</a>
+          <a href="${addToCalendarUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-right: 10px; padding: 8px 16px; background-color: #34a853; color: white; text-decoration: none; border-radius: 5px;">Google Calendar</a>
+          <a href="${event.sourceUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
         </p>
       </div>
     </div>

@@ -269,15 +269,19 @@ function NewslettersInner() {
                   )}
                 </div>
               </div>
-              <div className="flex sm:items-center flex-shrink-0 w-full sm:w-auto">
-                {paywalled ? (
+              <div className="flex sm:items-center flex-shrink-0 w-full sm:w-auto gap-2">
+                {/* Always show Subscribe for non-subscribed users (even before paywall) */}
+                {!subscribed && (
                   <Link
                     to="/subscribe"
                     className="win98-button w-full sm:w-auto inline-block text-center"
                   >
                     {t("newsletters.paywallCta")}
                   </Link>
-                ) : (
+                )}
+
+                {/* Generate remains available until paywalled (or when subscribed & under limit) */}
+                {!paywalled && (
                   <button
                     onClick={handleGenerate}
                     disabled={generating || !canGenerate}
@@ -331,7 +335,21 @@ function NewslettersInner() {
 
                       <div>
                         <div className="space-y-2">
-                          {newsletter.events.map(({ event }) => {
+                          {newsletter.events
+                            .slice()
+                            .sort((a, b) => {
+                              const base = new Date(newsletter.createdAt).getTime();
+                              const ta = new Date(a.event.date).getTime();
+                              const tb = new Date(b.event.date).getTime();
+                              const aInvalid = Number.isNaN(ta);
+                              const bInvalid = Number.isNaN(tb);
+                              if (aInvalid && bInvalid) return 0;
+                              if (aInvalid) return 1;
+                              if (bInvalid) return -1;
+                              // Closest to the day the newsletter was generated, first.
+                              return (ta - base) - (tb - base);
+                            })
+                            .map(({ event }) => {
                             const disliked = isEventDisliked(event);
                             const collapsed = disliked && !expandedDislikedIds.has(event.id);
 
