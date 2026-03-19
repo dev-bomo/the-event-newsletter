@@ -261,14 +261,6 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
           : "#6c757d";
       const categoryColor = getCategoryColor(event.category);
       const dateDisplay = formatEventDate(event.date);
-      const addToCalendarUrl = buildAddToCalendarUrl({
-        title: event.title,
-        date: event.date,
-        time: event.time,
-        location: event.location,
-        description: event.description,
-        sourceUrl: event.sourceUrl,
-      });
       // Use an absolute URL so email clients render the link reliably. Only show ICS link when backend URL is set.
       const icsUrl = apiBase ? `${apiBase}/api/calendar/events/${event.id}.ics` : null;
 
@@ -302,7 +294,6 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
         }
         <p style="margin-top: 12px;">
           ${icsUrl ? `<a href="${icsUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-right: 10px; margin-bottom: 10px; padding: 8px 16px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px;">Add to Calendar</a>` : ""}
-          <a href="${addToCalendarUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-right: 10px; margin-bottom: 10px; padding: 8px 16px; background-color: #34a853; color: white; text-decoration: none; border-radius: 5px;">Google Calendar</a>
           <a href="${event.sourceUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-bottom: 10px; padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
         </p>
       </div>
