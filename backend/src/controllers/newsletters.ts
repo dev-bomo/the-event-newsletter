@@ -240,7 +240,12 @@ function buildAddToCalendarUrl(event: { title: string; date: Date | string; time
 
 function generateNewsletterHTML(userName: string, events: any[]): string {
   // PUBLIC_API_URL must be the backend's public URL (e.g. https://your-api.railway.app) for "Add to Calendar" .ics links in emails.
-  const apiBase = (process.env.PUBLIC_API_URL || process.env.BACKEND_PUBLIC_URL || process.env.BACKEND_URL || "").replace(/\/$/, "");
+  const rawApiBase = (process.env.PUBLIC_API_URL || process.env.BACKEND_PUBLIC_URL || process.env.BACKEND_URL || "").replace(/\/$/, "");
+  // Accept both forms:
+  // - https://host
+  // - https://host/api
+  // and normalize to https://host so we don't generate /api/api/...
+  const apiBase = rawApiBase.replace(/\/api$/i, "");
   const eventsHTML = events
     .slice(0, 20)
     .map((event, index) => {
