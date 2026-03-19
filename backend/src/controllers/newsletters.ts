@@ -185,6 +185,85 @@ export async function sendNewsletter(userId: string, newsletterId: string) {
   return { success: true };
 }
 
+export async function sendTestNewsletterTemplate(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, name: true },
+  });
+  if (!user) throw new Error("User not found");
+
+  const now = new Date();
+  const addDays = (d: Date, days: number) => {
+    const copy = new Date(d);
+    copy.setDate(copy.getDate() + days);
+    return copy;
+  };
+  const dummyEventInputs = [
+    {
+      title: "Indie Night at Riverside Hall",
+      description:
+        "A cozy local show with emerging indie bands and guest DJs.",
+      date: addDays(now, 2),
+      time: "20:00",
+      location: "Riverside Hall",
+      category: "Music",
+      sourceUrl: "https://example.com/events/indie-night",
+      score: 91,
+    },
+    {
+      title: "Saturday Food & Makers Market",
+      description:
+        "Street food, handmade products, and live acoustic performances.",
+      date: addDays(now, 5),
+      time: "11:00",
+      location: "Old Town Square",
+      category: "Market",
+      sourceUrl: "https://example.com/events/food-makers-market",
+      score: 83,
+    },
+    {
+      title: "Open-Air Cinema: Classic Sci-Fi",
+      description:
+        "Bring a blanket and enjoy an outdoor screening under the stars.",
+      date: addDays(now, 9),
+      time: "21:30",
+      location: "City Park Amphitheater",
+      category: "Film",
+      sourceUrl: "https://example.com/events/open-air-cinema",
+      score: 78,
+    },
+  ];
+
+  // Persist test events so the generated ICS links resolve to real event IDs.
+  const dummyEvents = await Promise.all(
+    dummyEventInputs.map((input) =>
+      prisma.event.create({
+        data: input,
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          date: true,
+          time: true,
+          location: true,
+          category: true,
+          sourceUrl: true,
+          score: true,
+        },
+      })
+    )
+  );
+
+  const html = generateNewsletterHTML(user.name || user.email, dummyEvents);
+  await sendEmail({
+    to: user.email,
+    subject: `[TEST TEMPLATE] Your Weekly Local Events (Preview)`,
+    html,
+  });
+
+  return { success: true };
+}
+
 const CATEGORY_COLORS = [
   "#000080", "#008000", "#800080", "#800000", "#008080",
   "#808000", "#004080", "#804000", "#408080", "#808080",
@@ -240,7 +319,14 @@ function buildAddToCalendarUrl(event: { title: string; date: Date | string; time
 
 function generateNewsletterHTML(userName: string, events: any[]): string {
   // PUBLIC_API_URL must be the backend's public URL (e.g. https://your-api.railway.app) for "Add to Calendar" .ics links in emails.
-  const rawApiBase = (process.env.PUBLIC_API_URL || process.env.BACKEND_PUBLIC_URL || process.env.BACKEND_URL || "").replace(/\/$/, "");
+  const rawApiBase = (
+    process.env.PUBLIC_API_URL ||
+    process.env.BACKEND_PUBLIC_URL ||
+    process.env.BACKEND_URL ||
+    (process.env.NODE_ENV !== "production"
+      ? `http://localhost:${process.env.PORT || "3000"}`
+      : "")
+  ).replace(/\/$/, "");
   // Accept both forms:
   // - https://host
   // - https://host/api

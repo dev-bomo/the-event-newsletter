@@ -16,7 +16,13 @@ import LandingPage from "./pages/LandingPage";
 import Pricing from "./pages/Pricing";
 import Subscribe from "./pages/Subscribe";
 import TestLoading from "./pages/TestLoading";
+import Testing from "./pages/Testing";
 import "./i18n/config";
+
+function isLocalhost() {
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host === "::1";
+}
 
 function App() {
   const { token, setUser, clearAuth } = useAuthStore();
@@ -75,6 +81,12 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/test-loading" element={<TestLoading />} />
+        <Route
+          path="/testing"
+          element={
+            token && isLocalhost() ? <Testing /> : <Navigate to="/newsletters" />
+          }
+        />
         <Route
           path="/hates"
           element={token ? <MyHates /> : <Navigate to="/login" />}

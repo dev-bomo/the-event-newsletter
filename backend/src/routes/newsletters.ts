@@ -4,6 +4,7 @@ import {
   getUserNewsletters,
   generateNewsletter,
   sendNewsletter,
+  sendTestNewsletterTemplate,
   PAYWALL_MESSAGE,
 } from "../controllers/newsletters.js";
 
@@ -53,6 +54,18 @@ router.post("/generate", async (req: AuthRequest, res) => {
           details:
             process.env.NODE_ENV === "development" ? error.stack : undefined,
         });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.post("/test-template/send", async (req: AuthRequest, res) => {
+  try {
+    await sendTestNewsletterTemplate(req.userId!);
+    res.json({ success: true, message: "Test template email sent successfully" });
+  } catch (error) {
+    if (error instanceof Error) {
+      return res.status(400).json({ error: error.message });
     }
     res.status(500).json({ error: "Internal server error" });
   }
