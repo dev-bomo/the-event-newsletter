@@ -200,7 +200,8 @@ The cron job is set up in `backend/src/services/cron.ts`.
 
 **Newsletters:**
 
-- `POST /api/newsletters/generate` - Generate newsletter
+- `POST /api/newsletters/generate` - Queue newsletter generation (returns **202** with `jobId`; avoids HTTP timeouts on long runs)
+- `GET /api/newsletters/generate-status/:jobId` - Poll until `completed` or `failed`
 - `POST /api/newsletters/:id/send` - Send newsletter
 
 ### Troubleshooting

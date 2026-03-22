@@ -8,6 +8,7 @@ import HateThisDropdown, { eventHateMatchesEvent } from "../components/HateThisD
 import DislikeInfoModal, { hasSeenDislikeInfo } from "../components/DislikeInfoModal";
 import { useWindowContext } from "../context/WindowContext";
 import api from "../lib/api";
+import { postNewsletterGenerateAndWait } from "../lib/waitForNewsletterJob";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
 
@@ -180,16 +181,15 @@ function NewslettersInner() {
       const params = new URLSearchParams(window.location.search);
       const showDump = params.get("showDump") === "true" || params.get("showDump") === "1";
       
-      const response = await api.post(
-        `/newsletters/generate${showDump ? "?showDump=true" : ""}`
+      const result = await postNewsletterGenerateAndWait(
+        showDump ? "?showDump=true" : ""
       );
-      
+
       setSuccess(t("newsletters.generated"));
       await loadNewsletters();
-      
-      // If showDump is enabled and we have raw responses, show modal
-      if (showDump && response.data.rawResponses) {
-        setRawResponses(response.data.rawResponses);
+
+      if (showDump && result.rawResponses) {
+        setRawResponses(result.rawResponses);
         setShowDumpModal(true);
       }
     } catch (err: any) {

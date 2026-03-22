@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
 import LoadingOverlay from "../components/LoadingOverlay";
 import api from "../lib/api";
+import { postNewsletterGenerateAndWait } from "../lib/waitForNewsletterJob";
 import { useAuthStore } from "../store/authStore";
 import Windows98Window from "../components/Windows98Window";
 import Windows98ReadingPane from "../components/Windows98ReadingPane";
@@ -240,8 +241,8 @@ export default function OnboardingWizard() {
     setSuccess("");
 
     try {
-      const response = await api.post("/newsletters/generate");
-      setNewsletter(response.data);
+      const { newsletter } = await postNewsletterGenerateAndWait("");
+      setNewsletter(newsletter as Newsletter);
       setSuccess(t("newsletters.generated"));
     } catch (err: any) {
       setError(err.response?.data?.error || t("common.generateNewsletterFailed"));
