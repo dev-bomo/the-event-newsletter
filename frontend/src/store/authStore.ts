@@ -25,6 +25,9 @@ interface AuthState {
 
 // Simple localStorage persistence
 const loadAuth = (): { token: string | null; user: User | null } => {
+  if (typeof window === "undefined") {
+    return { token: null, user: null };
+  }
   try {
     const stored = localStorage.getItem("auth-storage");
     if (stored) {
@@ -37,6 +40,9 @@ const loadAuth = (): { token: string | null; user: User | null } => {
 };
 
 const saveAuth = (token: string | null, user: User | null) => {
+  if (typeof window === "undefined") {
+    return;
+  }
   try {
     localStorage.setItem("auth-storage", JSON.stringify({ token, user }));
   } catch (e) {

@@ -4,8 +4,13 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import enTranslations from "./locales/en.json";
 import roTranslations from "./locales/ro.json";
 
+const isBrowser = typeof window !== "undefined";
+
+if (isBrowser) {
+  i18n.use(LanguageDetector);
+}
+
 i18n
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources: {
@@ -17,12 +22,15 @@ i18n
       },
     },
     fallbackLng: "en",
+    lng: isBrowser ? undefined : "en",
     supportedLngs: ["en", "ro"],
-    detection: {
-      order: ["localStorage", "navigator"],
-      caches: ["localStorage"],
-      lookupLocalStorage: "i18nextLng",
-    },
+    detection: isBrowser
+      ? {
+          order: ["localStorage", "navigator"],
+          caches: ["localStorage"],
+          lookupLocalStorage: "i18nextLng",
+        }
+      : undefined,
     interpolation: {
       escapeValue: false,
     },

@@ -61,6 +61,11 @@ app.use(express.json());
 // Routes
 setupRoutes(app);
 
+// Helpful dev redirect so hitting backend root does not show "Cannot GET /"
+app.get("/", (req, res) => {
+  res.redirect(FRONTEND_URL);
+});
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
