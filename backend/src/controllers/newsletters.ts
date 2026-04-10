@@ -269,6 +269,26 @@ const CATEGORY_COLORS = [
   "#808000", "#004080", "#804000", "#408080", "#808080",
 ];
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sanitizeExternalUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
 function getCategoryColor(category?: string | null): string {
   const key = (category?.trim() || "(uncategorized)").toLowerCase();
   let hash = 0;
@@ -346,7 +366,15 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
             : "#dc3545"
           : "#6c757d";
       const categoryColor = getCategoryColor(event.category);
-      const dateDisplay = formatEventDate(event.date);
+      const dateDisplay = escapeHtml(formatEventDate(event.date));
+      const safeTitle = escapeHtml(String(event.title ?? "Untitled event"));
+      const safeDescription = event.description
+        ? escapeHtml(String(event.description))
+        : "";
+      const safeLocation = escapeHtml(String(event.location ?? "Location unavailable"));
+      const safeCategory = event.category ? escapeHtml(String(event.category)) : "";
+      const safeSourceUrl = sanitizeExternalUrl(event.sourceUrl);
+      const safeTime = event.time ? escapeHtml(String(event.time)) : "";
       // Use an absolute URL so email clients render the link reliably. Only show ICS link when backend URL is set.
       const icsUrl = apiBase ? `${apiBase}/api/calendar/events/${event.id}.ics` : null;
 
@@ -358,29 +386,33 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
       return `
     <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-left: 4px solid ${categoryColor}; border-radius: 8px;">
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;"><tr>
-        <td style="vertical-align: top;"><h3 style="margin: 0; color: #333; font-size: 16px;">${index + 1}. ${event.title}</h3></td>
+        <td style="vertical-align: top;"><h3 style="margin: 0; color: #333; font-size: 16px;">${index + 1}. ${safeTitle}</h3></td>
         ${scoreBadge}
       </tr></table>
       ${
-        event.description
-          ? `<p style="color: #666; margin: 0 0 10px 0;">${event.description}</p>`
+        safeDescription
+          ? `<p style="color: #666; margin: 0 0 10px 0;">${safeDescription}</p>`
           : ""
       }
       <div style="margin-top: 10px;">
         <p style="margin: 5px 0; color: #555;">
-          <strong>📅 Date:</strong> ${dateDisplay}${event.time ? ` ${event.time}` : ""}
+          <strong>📅 Date:</strong> ${dateDisplay}${safeTime ? ` ${safeTime}` : ""}
         </p>
         <p style="margin: 5px 0; color: #555;">
-          <strong>📍 Location:</strong> ${event.location}
+          <strong>📍 Location:</strong> ${safeLocation}
         </p>
         ${
-          event.category
-            ? `<p style="margin: 5px 0; color: #555;"><strong>🏷️ Category:</strong> ${event.category}</p>`
+          safeCategory
+            ? `<p style="margin: 5px 0; color: #555;"><strong>🏷️ Category:</strong> ${safeCategory}</p>`
             : ""
         }
         <p style="margin-top: 12px;">
           ${icsUrl ? `<a href="${icsUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-right: 10px; margin-bottom: 10px; padding: 8px 16px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 5px;">Add to Calendar</a>` : ""}
-          <a href="${event.sourceUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-bottom: 10px; padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>
+          ${
+            safeSourceUrl
+              ? `<a href="${safeSourceUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-bottom: 10px; padding: 8px 16px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Learn More</a>`
+              : ""
+          }
         </p>
       </div>
     </div>
@@ -397,7 +429,7 @@ function generateNewsletterHTML(userName: string, events: any[]): string {
       </head>
       <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
         <h1 style="color: #007bff;">Your Weekly Local Events</h1>
-        <p>Hi ${userName},</p>
+        <p>Hi ${escapeHtml(userName)},</p>
         <p>Here are the local events we found for you in the next 60 days:</p>
         ${eventsHTML}
         <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">

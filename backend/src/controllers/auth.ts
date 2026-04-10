@@ -1,8 +1,59 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { prisma } from "../lib/prisma.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
+const RESET_CODE_SIGNING_SECRET = process.env.RESET_CODE_SIGNING_SECRET || JWT_SECRET;
+const RESET_MAX_ATTEMPTS = 5;
+const RESET_LOCK_MS = 15 * 60 * 1000;
+
+type ResetAttemptState = {
+  attempts: number;
+  lockedUntil?: number;
+};
+
+const resetAttempts = new Map<string, ResetAttemptState>();
+
+function resetAttemptsKey(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function hashResetCode(email: string, code: string): string {
+  return crypto
+    .createHmac("sha256", RESET_CODE_SIGNING_SECRET)
+    .update(`${email.trim().toLowerCase()}:${code}`)
+    .digest("hex");
+}
+
+function isResetLocked(email: string): boolean {
+  const key = resetAttemptsKey(email);
+  const state = resetAttempts.get(key);
+  if (!state?.lockedUntil) return false;
+  if (Date.now() > state.lockedUntil) {
+    resetAttempts.delete(key);
+    return false;
+  }
+  return true;
+}
+
+function registerResetFailure(email: string): void {
+  const key = resetAttemptsKey(email);
+  const current = resetAttempts.get(key) ?? { attempts: 0 };
+  const attempts = current.attempts + 1;
+  if (attempts >= RESET_MAX_ATTEMPTS) {
+    resetAttempts.set(key, {
+      attempts,
+      lockedUntil: Date.now() + RESET_LOCK_MS,
+    });
+    return;
+  }
+  resetAttempts.set(key, { attempts });
+}
+
+function clearResetAttempts(email: string): void {
+  resetAttempts.delete(resetAttemptsKey(email));
+}
 
 if (!JWT_SECRET) {
   console.warn(
@@ -120,6 +171,12 @@ export async function getMe(userId: string) {
 }
 
 export async function requestPasswordReset(email: string) {
+  if (!RESET_CODE_SIGNING_SECRET) {
+    throw new Error(
+      "Server configuration error: RESET_CODE_SIGNING_SECRET or JWT_SECRET is not set"
+    );
+  }
+
   // Find user
   const user = await prisma.user.findUnique({
     where: { email },
@@ -133,6 +190,7 @@ export async function requestPasswordReset(email: string) {
 
   // Generate 6-digit code
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedResetCode = hashResetCode(email, resetCode);
   const expiresAt = new Date();
   expiresAt.setMinutes(expiresAt.getMinutes() + 15); // Code expires in 15 minutes
 
@@ -140,10 +198,11 @@ export async function requestPasswordReset(email: string) {
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      resetCode,
+      resetCode: hashedResetCode,
       resetCodeExpiresAt: expiresAt,
     },
   });
+  clearResetAttempts(email);
 
   // Send email with code
   const { sendEmail } = await import("../services/email.js");
@@ -171,6 +230,16 @@ export async function resetPassword(data: {
   code: string;
   newPassword: string;
 }) {
+  if (!RESET_CODE_SIGNING_SECRET) {
+    throw new Error(
+      "Server configuration error: RESET_CODE_SIGNING_SECRET or JWT_SECRET is not set"
+    );
+  }
+
+  if (isResetLocked(data.email)) {
+    throw new Error("Too many invalid reset attempts. Please request a new code later.");
+  }
+
   // Find user
   const user = await prisma.user.findUnique({
     where: { email: data.email },
@@ -186,7 +255,16 @@ export async function resetPassword(data: {
   }
 
   // Check if code matches
-  if (user.resetCode !== data.code) {
+  const expectedHash = user.resetCode;
+  const providedHash = hashResetCode(data.email, data.code);
+  const expectedBuffer = Buffer.from(expectedHash, "hex");
+  const providedBuffer = Buffer.from(providedHash, "hex");
+  const sameLength = expectedBuffer.length === providedBuffer.length;
+  const isMatch =
+    sameLength && crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+
+  if (!isMatch) {
+    registerResetFailure(data.email);
     throw new Error("Invalid reset code");
   }
 
@@ -207,6 +285,7 @@ export async function resetPassword(data: {
       resetCodeExpiresAt: null,
     },
   });
+  clearResetAttempts(data.email);
 
   return { success: true };
 }

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import os from "os";
+import rateLimit from "express-rate-limit";
 import { setupRoutes } from "./routes/index.js";
 import { setupCronJobs } from "./services/cron.js";
 import { handlePaddleWebhook } from "./controllers/paddleWebhook.js";
@@ -14,6 +15,7 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? "3000", 10);
+app.set("trust proxy", 1);
 
 // Get local IP address for network access
 function getLocalIP() {
@@ -53,6 +55,36 @@ app.use(
   })
 );
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please try again later." },
+});
+
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many reset attempts. Please try again later." },
+});
+
+const newsletterGenerateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many generation requests. Please try again later." },
+});
+
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/forgot-password", passwordResetLimiter);
+app.use("/api/auth/reset-password", passwordResetLimiter);
+app.use("/api/newsletters/generate", newsletterGenerateLimiter);
+
 // Paddle webhook must receive raw body for signature verification (before express.json)
 app.post("/api/webhooks/paddle", express.raw({ type: "application/json" }), handlePaddleWebhook);
 
@@ -91,7 +123,7 @@ app.use(
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`🌐 Network access: http://${localIP}:${PORT}`);
-  console.log(`📊 Database: ${process.env.DATABASE_URL || "Not configured"}`);
+  console.log(`📊 Database: ${process.env.DATABASE_URL ? "Configured" : "Not configured"}`);
   console.log(
     `🔑 JWT Secret: ${process.env.JWT_SECRET ? "Set" : "⚠️  NOT SET"}`
   );

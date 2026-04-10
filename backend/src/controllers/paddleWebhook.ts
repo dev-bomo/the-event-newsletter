@@ -3,6 +3,17 @@ import crypto from "crypto";
 import { prisma } from "../lib/prisma.js";
 
 const PADDLE_WEBHOOK_SECRET = process.env.PADDLE_WEBHOOK_SECRET || "";
+const WEBHOOK_MAX_SKEW_MS = 5 * 60 * 1000;
+const processedWebhookEvents = new Map<string, number>();
+const WEBHOOK_DEDUP_TTL_MS = 24 * 60 * 60 * 1000;
+
+function cleanupProcessedWebhookEvents(now: number): void {
+  for (const [eventId, seenAt] of processedWebhookEvents) {
+    if (now - seenAt > WEBHOOK_DEDUP_TTL_MS) {
+      processedWebhookEvents.delete(eventId);
+    }
+  }
+}
 
 function verifyPaddleSignature(rawBody: Buffer, signatureHeader: string): boolean {
   if (!PADDLE_WEBHOOK_SECRET) return false;
@@ -14,9 +25,19 @@ function verifyPaddleSignature(rawBody: Buffer, signatureHeader: string): boolea
   const ts = parts.ts;
   const h1 = parts.h1;
   if (!ts || !h1) return false;
+  if (!/^\d+$/.test(ts)) return false;
+  if (!/^[a-f0-9]+$/i.test(h1) || h1.length !== 64) return false;
+
+  const timestampMs = Number(ts) * 1000;
+  if (!Number.isFinite(timestampMs)) return false;
+  if (Math.abs(Date.now() - timestampMs) > WEBHOOK_MAX_SKEW_MS) return false;
+
   const signedPayload = `${ts}:${rawBody.toString("utf8")}`;
   const expected = crypto.createHmac("sha256", PADDLE_WEBHOOK_SECRET).update(signedPayload).digest("hex");
-  return crypto.timingSafeEqual(Buffer.from(h1, "hex"), Buffer.from(expected, "hex"));
+  const receivedBuffer = Buffer.from(h1, "hex");
+  const expectedBuffer = Buffer.from(expected, "hex");
+  if (receivedBuffer.length !== expectedBuffer.length) return false;
+  return crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
 }
 
 export async function handlePaddleWebhook(req: Request, res: Response): Promise<void> {
@@ -54,6 +75,17 @@ export async function handlePaddleWebhook(req: Request, res: Response): Promise<
   if (!eventType || !data) {
     res.status(200).json({ received: true });
     return;
+  }
+
+  const eventId = data.id;
+  if (eventId) {
+    const now = Date.now();
+    cleanupProcessedWebhookEvents(now);
+    if (processedWebhookEvents.has(eventId)) {
+      res.status(200).json({ received: true, deduplicated: true });
+      return;
+    }
+    processedWebhookEvents.set(eventId, now);
   }
 
   const userId = data.custom_data?.user_id;
