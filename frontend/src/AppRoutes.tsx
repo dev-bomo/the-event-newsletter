@@ -15,6 +15,8 @@ import MyHates from "./pages/MyHates";
 import LandingPage from "./pages/LandingPage";
 import Pricing from "./pages/Pricing";
 import Faq from "./pages/Faq";
+import BlogIndex from "./pages/BlogIndex";
+import BlogPostPage from "./pages/BlogPostPage";
 import Subscribe from "./pages/Subscribe";
 import TestLoading from "./pages/TestLoading";
 import Testing from "./pages/Testing";
@@ -84,6 +86,9 @@ export default function AppRoutes() {
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/faq" element={<Faq />} />
+      <Route path="/blog" element={<BlogIndex />} />
+      <Route path="/blog/:slug" element={<BlogPostPage />} />
+      <Route path="/blog/:slug/:lang" element={<BlogPostPage />} />
       <Route path="/test-loading" element={<TestLoading />} />
       <Route
         path="/testing"

@@ -532,6 +532,13 @@ export default function LandingPage() {
               </div>
               <div className="text-xs text-black">
                 <Link
+                  to="/blog"
+                  className="text-[#000080] hover:underline font-bold"
+                >
+                  Blog
+                </Link>
+                {" · "}
+                <Link
                   to="/faq"
                   className="text-[#000080] hover:underline font-bold"
                 >

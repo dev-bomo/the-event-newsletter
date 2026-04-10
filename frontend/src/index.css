@@ -75,3 +75,48 @@ body {
   display: none;
 }
 
+/* Blog markdown styling (Tailwind typography plugin is not enabled) */
+.blog-markdown h1,
+.blog-markdown h2,
+.blog-markdown h3,
+.blog-markdown h4 {
+  color: #000000;
+  margin: 0;
+  font-weight: 700;
+}
+
+.blog-markdown h1 {
+  font-size: 1.5rem;
+}
+
+.blog-markdown h2 {
+  font-size: 1.25rem;
+  margin-top: 1rem;
+}
+
+.blog-markdown h3 {
+  font-size: 1.05rem;
+  margin-top: 0.75rem;
+}
+
+.blog-markdown p {
+  margin: 0.5rem 0;
+  color: #303030;
+  line-height: 1.5;
+}
+
+.blog-markdown ul,
+.blog-markdown ol {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+}
+
+.blog-markdown li {
+  margin: 0.25rem 0;
+}
+
+.blog-markdown a {
+  color: #000080;
+  text-decoration: underline;
+  font-weight: 700;
+}
+
