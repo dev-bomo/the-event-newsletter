@@ -27,6 +27,13 @@ const SEO_BY_PATH: Record<string, SeoData> = {
     canonicalPath: "/pricing",
     robots: "index,follow",
   },
+  "/faq": {
+    title: "FAQ - The Event Newsletter",
+    description:
+      "Read frequently asked questions about how The Event Newsletter works, how event recommendations are selected, and how to get started.",
+    canonicalPath: "/faq",
+    robots: "index,follow",
+  },
   "/terms": {
     title: "Terms - The Event Newsletter",
     description:

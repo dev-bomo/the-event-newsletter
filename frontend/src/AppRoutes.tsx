@@ -14,6 +14,7 @@ import Privacy from "./pages/Privacy";
 import MyHates from "./pages/MyHates";
 import LandingPage from "./pages/LandingPage";
 import Pricing from "./pages/Pricing";
+import Faq from "./pages/Faq";
 import Subscribe from "./pages/Subscribe";
 import TestLoading from "./pages/TestLoading";
 import Testing from "./pages/Testing";
@@ -82,6 +83,7 @@ export default function AppRoutes() {
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/faq" element={<Faq />} />
       <Route path="/test-loading" element={<TestLoading />} />
       <Route
         path="/testing"

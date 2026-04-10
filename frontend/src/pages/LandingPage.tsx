@@ -81,6 +81,12 @@ export default function LandingPage() {
                 >
                   {t("landing.pricingLink")}
                 </Link>
+                <Link
+                  to="/faq"
+                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+                >
+                  FAQ
+                </Link>
               </div>
             </div>
 
@@ -523,6 +529,13 @@ export default function LandingPage() {
                 {t("landing.getStarted")}
               </Link>
               <div className="text-xs text-black">
+                <Link
+                  to="/faq"
+                  className="text-[#000080] hover:underline font-bold"
+                >
+                  FAQ
+                </Link>
+                {" · "}
                 <Link
                   to="/terms"
                   className="text-[#000080] hover:underline font-bold"
