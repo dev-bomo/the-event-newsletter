@@ -81,12 +81,6 @@ export default function LandingPage() {
                 >
                   {t("landing.pricingLink")}
                 </Link>
-                <Link
-                  to="/faq"
-                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
-                >
-                  FAQ
-                </Link>
               </div>
             </div>
 
@@ -522,12 +516,20 @@ export default function LandingPage() {
 
             {/* Section 6: Footer CTA */}
             <div className="text-center space-y-3">
-              <Link
-                to="/register"
-                className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
-              >
-                {t("landing.getStarted")}
-              </Link>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Link
+                  to="/register"
+                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+                >
+                  {t("landing.getStarted")}
+                </Link>
+                <Link
+                  to="/faq"
+                  className="win98-button font-bold inline-flex items-center justify-center h-8 pt-1 pb-0.5 px-2"
+                >
+                  FAQ
+                </Link>
+              </div>
               <div className="text-xs text-black">
                 <Link
                   to="/faq"
