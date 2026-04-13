@@ -6,6 +6,7 @@ import mySolutionDeMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-
 import mySolutionEnMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/en.md?raw";
 import mySolutionFrMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/fr.md?raw";
 import mySolutionRoMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/ro.md?raw";
+import mySolutionBlog2 from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/blog2.png";
 
 export type BlogLang = "en" | "fr" | "de" | "ro";
 
@@ -13,6 +14,8 @@ export type BlogLocalizedContent = {
   title: string;
   excerpt: string;
   markdown: string;
+  heroImageSrc?: string;
+  heroImageAlt?: string;
 };
 
 export type BlogPost = {
@@ -84,6 +87,19 @@ export const blogPosts: BlogPost[] = [
     },
   },
 ];
+
+blogPosts[0].translations.en.heroImageSrc = mySolutionBlog2;
+blogPosts[0].translations.en.heroImageAlt =
+  "Local events planning notes and calendar";
+blogPosts[0].translations.fr.heroImageSrc = mySolutionBlog2;
+blogPosts[0].translations.fr.heroImageAlt =
+  "Notes de planification d evenements locaux et calendrier";
+blogPosts[0].translations.de.heroImageSrc = mySolutionBlog2;
+blogPosts[0].translations.de.heroImageAlt =
+  "Notizen zur Planung lokaler Events und Kalender";
+blogPosts[0].translations.ro.heroImageSrc = mySolutionBlog2;
+blogPosts[0].translations.ro.heroImageAlt =
+  "Notite pentru planificarea evenimentelor locale si calendar";
 
 export function getBlogPostBySlug(slug: string): BlogPost | undefined {
   return blogPosts.find((post) => post.slug === slug);

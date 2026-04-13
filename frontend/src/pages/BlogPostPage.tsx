@@ -40,6 +40,15 @@ export default function BlogPostPage() {
               <p className="text-sm text-[#404040]">{content.excerpt}</p>
             </header>
 
+            {content.heroImageSrc ? (
+              <img
+                src={content.heroImageSrc}
+                alt={content.heroImageAlt ?? content.title}
+                className="w-full max-w-2xl mx-auto border border-[#c0c0c0] bg-white p-1"
+                loading="lazy"
+              />
+            ) : null}
+
             <nav
               aria-label="Language versions"
               className="text-xs text-black flex flex-wrap gap-2"
