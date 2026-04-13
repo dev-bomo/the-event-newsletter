@@ -2,6 +2,10 @@ import deMarkdown from "./blog/keep-up-with-local-events-without-social-media/de
 import enMarkdown from "./blog/keep-up-with-local-events-without-social-media/en.md?raw";
 import frMarkdown from "./blog/keep-up-with-local-events-without-social-media/fr.md?raw";
 import roMarkdown from "./blog/keep-up-with-local-events-without-social-media/ro.md?raw";
+import mySolutionDeMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/de.md?raw";
+import mySolutionEnMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/en.md?raw";
+import mySolutionFrMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/fr.md?raw";
+import mySolutionRoMarkdown from "./blog/my-solution-to-keeping-up-to-date-with-events-in-my-area/ro.md?raw";
 
 export type BlogLang = "en" | "fr" | "de" | "ro";
 
@@ -55,6 +59,18 @@ function parseMarkdownPost(raw: string): BlogLocalizedContent {
 }
 
 export const blogPosts: BlogPost[] = [
+  {
+    slug: "my-solution-to-keeping-up-to-date-with-events-in-my-area",
+    publishedAt: "2026-04-10",
+    updatedAt: "2026-04-10",
+    tags: ["local events", "event discovery", "personal workflow"],
+    translations: {
+      en: parseMarkdownPost(mySolutionEnMarkdown),
+      fr: parseMarkdownPost(mySolutionFrMarkdown),
+      de: parseMarkdownPost(mySolutionDeMarkdown),
+      ro: parseMarkdownPost(mySolutionRoMarkdown),
+    },
+  },
   {
     slug: "keep-up-with-local-events-without-social-media",
     publishedAt: "2026-04-10",
